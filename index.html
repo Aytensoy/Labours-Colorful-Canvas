@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Coloring Adventure</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Magical Coloring Game</h1>
+        <div class="coloring-area">
+            <div class="toolbar">
+                <button id="homeBtn" class="btn" aria-label="Home">🏠 Home</button>
+                <button id="undoBtn" class="btn" aria-label="Undo">↩️ Undo</button>
+                <button id="saveBtn" class="btn" aria-label="Save">💾 Save</button>
+                <button id="downloadBtn" class="btn" aria-label="Download">⬇️ Download</button>
+                <button id="uploadBtn" class="btn" aria-label="Upload Image">📁 Upload Image</button>
+                <button id="pencilBtn" class="btn tool-btn" onclick="setTool('pencil')">✏️ Pencil</button>
+<button id="brushBtn" class="btn tool-btn" onclick="setTool('brush')">🖌️ Brush</button>
+<button id="sprayBtn" class="btn tool-btn" onclick="setTool('spray')">🎨 Spray</button>
+
+                <button id="fillBtn" class="btn tool-btn" aria-label="Fill">🪣 Fill</button>
+                <button id="newPageBtn" class="btn" aria-label="New Page">📄 Drawing Page</button>
+            </div>
+            <div id="sizeControl" style="display: none;">
+                <input type="range" id="toolSize" min="1" max="50" value="10">
+                <span id="sizeValue">10</span>
+            </div>
+            <div class="canvas-and-palette">
+                <canvas id="coloringCanvas" width="800" height="600"></canvas>
+                <div id="colorPalette" class="color-palette" aria-label="Color Palette"></div>
+            </div>
+            <div class="game-introduction">
+                <h2>Welcome to Magical Coloring Page!</h2>
+                <p>Unleash your creativity and bring your imagination to life with our enchanting coloring experience!</p>
+                
+                <h3>🌟 Magical Features:</h3>
+                <ul>
+                    <li>🎨 Vibrant color palette to make your artwork pop!</li>
+                    <li>🖌️ Multiple drawing tools: Pencil, Brush, and Spray for diverse effects</li>
+                    <li>🪄 Magic Fill tool to color large areas instantly</li>
+                    <li>⬆️ Upload your own images to color or trace</li>
+                    <li>💾 Save and download your masterpieces</li>
+                    <li>↩️ Undo/Redo options for worry-free creation</li>
+                </ul>
+                
+                <p>Whether you're a budding artist or just looking for a fun way to relax, Magical Coloring Page is perfect for all ages and skill levels. Start your colorful journey today!</p>
+                
+                <h3>Ready to dive in?</h3>
+                <p>Grab your virtual paintbrush and let your imagination soar. Happy coloring! 🌈✨</p>
+            </div>
+            <!-- Sosyal medya ve iletişim butonları -->
+<div class="social-buttons">
+    <a href="https://www.facebook.com/labourthings" target="_blank" class="social-button facebook">
+      <i class="fab fa-facebook-f"></i>
+    </a>
+    <a href="https://www.instagram.com/labour_things" target="_blank" class="social-button instagram">
+      <i class="fab fa-instagram"></i>
+    </a>
+    <a href="mailto:labourthings2@gmail.com" class="social-button email">
+      <i class="fas fa-envelope"></i>
+    </a>
+  </div>
+  
+            
+            
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
