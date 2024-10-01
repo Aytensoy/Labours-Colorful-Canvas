@@ -275,6 +275,15 @@ h1 {
     width: 30px;
     text-align: right;
 }
+#eraseBtn {
+    background-color: #4CAF50;;
+    color: white;
+}
+
+#eraseBtn:hover {
+    background-color: #45a049;
+}
+
 .social-buttons {
     position: fixed;
     bottom: 20px;

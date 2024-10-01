@@ -495,22 +495,6 @@ function startDrawing(e) {
   updateUndoButtonState();
 }
 
-function draw(e) {
-  if (!isDrawing) return;
-  
-  switch(currentTool) {
-    case 'pencil':
-      drawPencil(e);
-      break;
-    case 'brush':
-      drawBrush(e);
-      break;
-    case 'spray':
-      drawSpray(e);
-      break;
-    // 'fill' case'i buradan kaldırıldı
-  }
-}
 
 function stopDrawing() {
   if (isDrawing) {
@@ -556,6 +540,8 @@ canvas.addEventListener('touchend', (e) => {
 });
 let currentTool = 'fill';
 
+// ... (previous code remains unchanged)
+
 function setTool(tool) {
   console.log('setTool called with:', tool);
   currentTool = tool;
@@ -565,24 +551,51 @@ function setTool(tool) {
   const sizeControl = document.getElementById('sizeControl');
   const toolSize = document.getElementById('toolSize');
   const sizeValue = document.getElementById('sizeValue');
-  
-  if (tool === 'pencil' || tool === 'brush' || tool === 'spray') {
-      sizeControl.style.display = 'block';
-      let size = tool === 'pencil' ? pencilSize : (tool === 'brush' ? brushSize : spraySize);
-      toolSize.value = size;
-      sizeValue.textContent = size;
+
+  if (tool === 'pencil' || tool === 'brush' || tool === 'spray' || tool === 'erase') {
+    sizeControl.style.display = 'block';
+    let size;
+    switch (tool) {
+      case 'pencil':
+        size = pencilSize;
+        break;
+      case 'brush':
+        size = brushSize;
+        break;
+      case 'spray':
+        size = spraySize;
+        break;
+      case 'erase':
+        size = brushSize;
+        break;
+    }
+    toolSize.value = size;
+    sizeValue.textContent = size;
+    console.log(`${tool} size set to:`, size);
+
+    // Fırça aracının boyutunu burada ayarlamaya gerek yok
+    // if (tool === 'brush') {
+    
+    // }
+
   } else {
     console.log('Hiding size control for:', tool);
-      sizeControl.style.display = 'none';
+    sizeControl.style.display = 'none';
   }
 
   // Canvas cursor'ını güncelle
   if (tool === 'fill') {
-      canvas.style.cursor = 'crosshair';
+    canvas.style.cursor = 'crosshair';
   } else {
-      canvas.style.cursor = 'default';
+    canvas.style.cursor = 'default';
   }
+
+
+  // globalCompositeOperation ayarını kaldırdık
 }
+
+// ... (rest of the code remains unchanged)
+
 
 
 document.getElementById('pencilBtn').addEventListener('click', () => setTool('pencil'));
@@ -594,28 +607,36 @@ document.getElementById('toolSize').addEventListener('input', (e) => {
   document.getElementById('sizeValue').textContent = size;
   if (currentTool === 'pencil') {
       pencilSize = size;
+      console.log('Pencil size changed to:', pencilSize);
   } else if (currentTool === 'brush') {
       brushSize = size;
-  } else if (currentTool === 'spray') {
+      console.log('Brush size changed to:', brushSize);
+    } else if (currentTool === 'spray') {
       spraySize = size;
   }
+  ctx.lineWidth = size; // Bu satırı ekleyin
 });
+
+
+
 
 function draw(e) {
   if (!isDrawing) return;
-  
-  switch(currentTool) {
+
+  switch (currentTool) {
     case 'pencil':
       drawPencil(e);
       break;
     case 'brush':
+      // Fırça boyutunu sadece fırça aracı seçili olduğunda ayarlayın:
+      ctx.lineWidth = parseInt(document.getElementById('toolSize').value);
       drawBrush(e);
       break;
     case 'spray':
       drawSpray(e);
       break;
-    case 'fill':
-      // Dolgu işlevi sadece tıklama ile çalışsın
+    case 'erase':
+      drawErase(e);
       break;
   }
 }
@@ -631,15 +652,36 @@ function drawPencil(e) {
 }
 
 function drawBrush(e) {
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.strokeStyle = currentColor;
-  ctx.lineWidth = brushSize;
-    ctx.shadowBlur = brushSize / 2;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  [lastX, lastY] = [e.offsetX, e.offsetY];
+  const dx = e.offsetX - lastX;
+  const dy = e.offsetY - lastY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx);
+
+  for (let i = 0; i < distance; i += 1) {
+      const x = lastX + (Math.cos(angle) * i);
+      const y = lastY + (Math.sin(angle) * i);
+      
+      ctx.beginPath();
+      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+      ctx.fillStyle = currentColor;
+      ctx.fill();
+
+      for (let j = 0; j < 3; j++) {
+          ctx.beginPath();
+          ctx.arc(
+              x + (Math.random() - 0.5) * brushSize,
+              y + (Math.random() - 0.5) * brushSize,
+              brushSize / 4,
+              0,
+              Math.PI * 2
+          );
+          ctx.fillStyle = currentColor;
+          ctx.fill();
+      }
+  }
+
+  lastX = e.offsetX;
+  lastY = e.offsetY;
 }
 
 function drawSpray(e) {
@@ -656,28 +698,28 @@ function drawSpray(e) {
     ctx.fillRect(e.offsetX + xOffset, e.offsetY + yOffset, 1, 1);
   }
 }
+function drawErase(e) {
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.strokeStyle = 'white';  // veya canvas arka plan renginiz
+  ctx.lineWidth = brushSize * 2;  // Silgi boyutu
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
 function createNewPage() {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawingHistory = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
   currentStep = 0;
 }
-
 document.getElementById('newPageBtn').addEventListener('click', createNewPage);
-function drawBrush(e) {
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.strokeStyle = currentColor;
-  ctx.lineWidth = 10;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.shadowBlur = 5;
-  ctx.shadowColor = currentColor;
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-  [lastX, lastY] = [e.offsetX, e.offsetY];
-}
+
+// Fazla drawBrush fonksiyonu silindi
+
 function updateUndoButtonState() {
   const undoButton = document.getElementById('undoBtn');
   if (undoButton) {
@@ -686,7 +728,6 @@ function updateUndoButtonState() {
 }
 
 window.addEventListener('load', initApp);
-
 function handleUploadClick() {
   try {
     const input = document.createElement('input');
@@ -712,5 +753,3 @@ document.querySelectorAll('.social-button').forEach(button => {
 
     
     // Diğer butonlar için varsayılan davranış (yeni sekmede açma)
-
-

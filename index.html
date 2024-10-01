@@ -16,6 +16,7 @@
             <div class="toolbar">
                 <button id="homeBtn" class="btn" aria-label="Home">🏠 Home</button>
                 <button id="undoBtn" class="btn" aria-label="Undo">↩️ Undo</button>
+                <button id="eraseBtn" class="btn tool-btn" onclick="setTool('erase')">🧽 Erase</button>
                 <button id="saveBtn" class="btn" aria-label="Save">💾 Save</button>
                 <button id="downloadBtn" class="btn" aria-label="Download">⬇️ Download</button>
                 <button id="uploadBtn" class="btn" aria-label="Upload Image">📁 Upload Image</button>
@@ -25,6 +26,7 @@
 
                 <button id="fillBtn" class="btn tool-btn" aria-label="Fill">🪣 Fill</button>
                 <button id="newPageBtn" class="btn" aria-label="New Page">📄 Drawing Page</button>
+                
             </div>
             <div id="sizeControl" style="display: none;">
                 <input type="range" id="toolSize" min="1" max="50" value="10">
