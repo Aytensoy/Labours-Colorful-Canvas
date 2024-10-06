@@ -314,3 +314,28 @@ h1 {
   .instagram { background-color: #e4405f; }
   .email { background-color: #d44638; }
   
+  .coloring-page-options {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.page-thumbnails {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.page-thumbnail {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.page-thumbnail:hover {
+    transform: scale(1.05);
+}
