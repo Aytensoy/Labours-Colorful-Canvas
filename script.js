@@ -726,6 +726,23 @@ function updateUndoButtonState() {
       undoButton.disabled = currentStep <= 0;
   }
 }
+document.querySelectorAll('.page-thumbnail').forEach(thumbnail => {
+  thumbnail.addEventListener('click', function() {
+      const pageName = this.dataset.page;
+      loadColoringPage(pageName);
+  });
+});
+
+function loadColoringPage(pageName) {
+  const img = new Image();
+  img.onload = function() {
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  }
+  img.src = `coloring-pages/${pageName}.svg`;
+}
 
 window.addEventListener('load', initApp);
 function handleUploadClick() {
