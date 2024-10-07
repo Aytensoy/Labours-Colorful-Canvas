@@ -285,30 +285,28 @@ h1 {
 }
 
 .social-buttons {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     display: flex;
-    flex-direction: column;
-  }
-  
-  .social-button {
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.social-button {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #333;
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 10px;
+    margin: 0 10px;
     text-decoration: none;
     transition: background-color 0.3s ease;
-  }
-  
-  .social-button:hover {
-    background-color: #555;
-  }
+}
+
+.social-button:hover {
+    opacity: 0.8;
+}
+
   
   .facebook { background-color: #3b5998; }
   .instagram { background-color: #e4405f; }
@@ -341,7 +339,7 @@ h1 {
 }
 .copyright {
     text-align: center;
-    padding: 10px 0;
+    padding: 20px 0;
     background-color: #f0f0f0;
     font-size: 14px;
     color: #333;
