@@ -344,13 +344,23 @@ function setupEventListeners() {
   canvas.addEventListener('click', handleCanvasClick);
 
   // Touch events for mobile devices
-  canvas.removeEventListener('touchstart', handleTouchStart);
-  canvas.removeEventListener('touchmove', handleTouchMove);
-  canvas.removeEventListener('touchend', handleTouchEnd);
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    startDrawing(x, y);
+});
 
-  canvas.addEventListener('touchstart', handleTouchStart);
-  canvas.addEventListener('touchmove', handleTouchMove);
-  canvas.addEventListener('touchend', handleTouchEnd);
+canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    draw(x, y);
+});
 
   // Button event listeners
   const buttons = {
