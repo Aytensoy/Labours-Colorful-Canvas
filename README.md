@@ -8,7 +8,7 @@ Labour's Colorful Canvas offers a unique coloring experience with AI-generated p
 
 ## Features
 
-- AI-generated coloring pages for unlimited variety (available on our Etsy store)
+- AI-generated coloring pages for unlimited variety 
 - Blank canvas for free-form drawing and coloring
 - Various drawing tools: pencil, brush, spray, and fill bucket
 - User-friendly interface suitable for all ages
@@ -24,5 +24,4 @@ Labour's Colorful Canvas offers a unique coloring experience with AI-generated p
 5. Color the page or create your own masterpiece from scratch
 6. Save your artwork or start a new one!
 
-Note: The game includes a sample coloring page on the main screen. For a wider variety of unique, AI-generated coloring pages, visit our Etsy store; 
-labourthings.etsy.com
+
