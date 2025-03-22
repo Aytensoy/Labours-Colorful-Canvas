@@ -92,7 +92,8 @@ h1 {
     border-radius: 15px;
     cursor: pointer;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    background-color: rgb(142, 231, 132);
+    background-color: #FFFFFF;
+    /* Beyaz renk */
 }
 
 .color-palette {
