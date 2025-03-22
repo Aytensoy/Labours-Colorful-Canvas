@@ -379,28 +379,28 @@ h1 {
 }
 
 .page-thumbnail {
-    width: 100%;
-    height: auto;
+    width: 150px;
+    /* Tam boyut */
+    height: 100px;
+    /* Tam boyut */
     border-radius: 8px;
     transition: transform 0.3s ease;
     cursor: pointer;
     object-fit: contain;
-    /* Resmi orantılı tutarken kırpmayı önler */
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    /* Modern tarayıcılar için */
+    -ms-interpolation-mode: nearest-neighbor;
     background-color: #f9f9f9;
-    /* Resim arkaplanı */
     border: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .page-thumbnail:hover {
     transform: scale(1.05);
-}
-
-
-.page-thumbnail:hover {
-    transform: scale(1.05);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .copyright {
