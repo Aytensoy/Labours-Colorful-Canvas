@@ -655,23 +655,37 @@ function createProtectionAreas() {
 }
 let saveTimeout = null;
 
+// Improved saveDrawingState function to prevent duplicate states
 function saveDrawingState() {
-  if (saveTimeout) {
-    clearTimeout(saveTimeout);
+  const canvas = document.getElementById('coloringCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  if (!canvas || !ctx) {
+    console.error("Canvas or context not available");
+    return;
   }
-  saveTimeout = setTimeout(() => {
+
+  try {
+    // Capture the current state
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    if (currentStep === drawingHistory.length - 1 &&
-      drawingHistory.length > 0 &&
-      imageDataEqual(drawingHistory[currentStep], imageData)) {
-      return; // Değişiklik yoksa kaydetme
+
+    // If we're in the middle of the history and making a new change,
+    // remove all future states
+    if (currentStep < drawingHistory.length - 1) {
+      drawingHistory = drawingHistory.slice(0, currentStep + 1);
     }
+
+    // Add the new state to history
     currentStep++;
-    drawingHistory = drawingHistory.slice(0, currentStep);
     drawingHistory.push(imageData);
+
     console.log('Saving state:', currentStep, 'History length:', drawingHistory.length);
-    updateUndoButtonState(); // Bu satırın eklendiğinden emin olun
-  }, 300); // 300 ms bekle
+
+    // Update undo button state
+    updateUndoButtonState();
+  } catch (error) {
+    console.error("Error saving drawing state:", error);
+  }
 }
 
 function imageDataEqual(data1, data2) {
@@ -1426,21 +1440,31 @@ document.querySelectorAll('.page-thumbnail').forEach(thumbnail => {
   });
 });
 
-// Bu kodu script_magical.js dosyasında bulun ve aşağıdaki gibi değiştirin
 function loadColoringPage(pageName) {
-  console.log(`Yüklenen sayfa: ${pageName}`);
+  console.log(`Loading page: ${pageName}`);
 
   const img = new Image();
-  img.crossOrigin = "anonymous"; // Bu çok önemli!
+  img.crossOrigin = "anonymous";
 
   img.onload = function () {
-    console.log(`${pageName}.png başarıyla yüklendi!`);
+    console.log(`${pageName}.png successfully loaded!`);
 
-    // Canvas'ı temizle
+    // Get the canvas and context
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Make sure canvas has the correct dimensions
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Completely clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Fill with white background
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Resmi canvas'a çiz
+    // Calculate scaling to fit the image properly
     const scale = Math.min(
       canvas.width / img.width,
       canvas.height / img.height
@@ -1449,43 +1473,86 @@ function loadColoringPage(pageName) {
     const x = (canvas.width - img.width * scale) / 2;
     const y = (canvas.height - img.height * scale) / 2;
 
+    // Draw the new image
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-    console.log("Resim canvas'a çizildi");
+    console.log("Image drawn to canvas");
+
+    // Reset the drawing history
+    drawingHistory = [];
+    currentStep = -1;
+
+    // Save this initial state as the first history item
     saveDrawingState();
+
+    // Reset all drawing parameters to defaults
+    resetDrawingParameters();
   };
 
   img.onerror = function () {
-    console.error(`PNG yüklenemedi: ${pageName}`);
-    alert(`Boyama sayfası yüklenemedi: ${pageName}`);
+    console.error(`Could not load PNG: ${pageName}`);
+    alert(`Could not load coloring page: ${pageName}`);
   };
 
-  // PNG dosyasını yükle
+  // Load the PNG file
   img.src = `coloring-pages-png/${pageName}.png`;
-  console.log(`Yüklemeye çalışılan: ${img.src}`);
+  console.log(`Attempting to load: ${img.src}`);
 }
+// Helper function to reset drawing parameters
+function resetDrawingParameters() {
+  // Reset tool to default
+  currentTool = 'pencil';
+
+  // Remove active class from all tool buttons
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  // Add active class to pencil button
+  const pencilBtn = document.getElementById('pencilBtn');
+  if (pencilBtn) {
+    pencilBtn.classList.add('active');
+  }
+
+  // Reset global alpha and composite operation
+  const ctx = document.getElementById('coloringCanvas').getContext('2d');
+  ctx.globalAlpha = 1.0;
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Reset line properties
+  ctx.lineWidth = pencilSize;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+// When the page is fully loaded, make sure the thumbnails work correctly
 document.addEventListener('DOMContentLoaded', function () {
-  console.log("DOM yüklendi, thumbnail'lar ayarlanıyor");
+  console.log("DOM loaded, setting up thumbnails...");
 
+  // Set up the category tabs
+  setupCategoryButtons();
+
+  // Find all thumbnails
   const thumbnails = document.querySelectorAll('.page-thumbnail');
-  console.log(`${thumbnails.length} thumbnail bulundu`);
+  console.log(`Found ${thumbnails.length} thumbnails`);
 
+  // Add click event to each thumbnail
   thumbnails.forEach(thumbnail => {
-    // Mevcut event listener'ları temizle (birden çok eklenmemesi için)
-    const clone = thumbnail.cloneNode(true);
-    thumbnail.parentNode.replaceChild(clone, thumbnail);
+    // Remove any existing event listeners
+    const newThumb = thumbnail.cloneNode(true);
+    thumbnail.parentNode.replaceChild(newThumb, thumbnail);
 
-    // Yeni event listener ekle
-    clone.addEventListener('click', function () {
+    // Add new click event listener
+    newThumb.addEventListener('click', function () {
       const pageName = this.getAttribute('data-page');
-      console.log(`Tıklanan: ${pageName}`);
-
+      console.log(`Clicked: ${pageName}`);
       if (pageName) {
         loadColoringPage(pageName);
       } else {
-        console.error("data-page özelliği bulunamadı!");
+        console.error("No data-page attribute found on thumbnail!");
       }
     });
   });
+
+  console.log("Thumbnail setup complete!");
 });
 
 // Dosya yollarını kontrol etmek için test fonksiyonu
@@ -2244,54 +2311,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Elle test etmek için
 console.log("Thumbnail düzeltme kodu eklendi. Elle test etmek için konsolda loadColoringPage('unicorn') çalıştırabilirsiniz.");
-// Bu kodu script_magical.js dosyanızın EN SONUNA ekleyin
-// Sayfa yüklendikten sonra thumbnail'ları düzeltmek için
+// Also add a load event handler as a backup to ensure thumbnails work
 window.addEventListener('load', function () {
-  // Bir süre bekle (diğer scriptlerin yüklenmesi için)
   setTimeout(function () {
-    console.log("Thumbnail olayları yeniden ayarlanıyor...");
+    console.log("Rechecking thumbnail events...");
 
-    // Tüm thumbnail'ları seç
-    document.querySelectorAll('.page-thumbnail').forEach(thumb => {
-      // Yeni tıklama olayı ekle
-      thumb.onclick = function () {
+    // Get all thumbnails again
+    const thumbnails = document.querySelectorAll('.page-thumbnail');
+
+    // Make sure they all have working click handlers
+    thumbnails.forEach(function (thumb) {
+      // Clear old events
+      const newThumb = thumb.cloneNode(true);
+      if (thumb.parentNode) {
+        thumb.parentNode.replaceChild(newThumb, thumb);
+      }
+
+      // Add new event
+      newThumb.addEventListener('click', function () {
         const pageName = this.getAttribute('data-page');
-        console.log(`Tıklanan: ${pageName}`);
+        console.log(`Clicked thumbnail: ${pageName}`);
 
-        // Doğrudan resmi yükle
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-
-        img.onload = function () {
-          const c = document.getElementById('coloringCanvas');
-          const cx = c.getContext('2d');
-
-          cx.fillStyle = 'white';
-          cx.fillRect(0, 0, c.width, c.height);
-
-          // Resmi orantılı olarak yerleştir
-          const scale = Math.min(c.width / img.width, c.height / img.height) * 0.9;
-          const x = (c.width - img.width * scale) / 2;
-          const y = (c.height - img.height * scale) / 2;
-
-          cx.drawImage(img, x, y, img.width * scale, img.height * scale);
-          console.log("Resim başarıyla çizildi!");
-
-          // Çizim durumunu kaydet (varsa)
-          if (typeof saveDrawingState === 'function') {
-            saveDrawingState();
-          }
-        };
-
-        img.onerror = function () {
-          console.error(`Resim yüklenemedi: ${pageName}`);
-          alert(`Boyama sayfası yüklenemedi: ${pageName}`);
-        };
-
-        img.src = `coloring-pages-png/${pageName}.png`;
-      };
+        if (pageName) {
+          loadColoringPage(pageName);
+        }
+      });
     });
 
-    console.log("Thumbnail olayları başarıyla yeniden ayarlandı!");
-  }, 1000); // 1 saniye bekle
+    console.log("Thumbnail events updated!");
+  }, 1000); // Wait 1 second after load
 });
