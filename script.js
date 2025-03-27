@@ -2340,4 +2340,4 @@ window.addEventListener('load', function () {
 
     console.log("Thumbnail events updated!");
   }, 1000); // Wait 1 second after load
-});
+}); 
