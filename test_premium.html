@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Test</title>
+    <style>
+        .page-thumbnail {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .page-thumbnail.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-thumbnails {
+            display: none;
+        }
+        
+        .page-thumbnails.active {
+            display: block;
+        }
+        
+        .magical.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Premium Test</h1>
+    
+    <div class="page-thumbnails magical active">
+        <div class="page-thumbnail" data-page="unicorn" style="position: relative;">Unicorn</div>
+        <div class="page-thumbnail" data-page="dragon" style="position: relative;">Dragon</div>
+        <div class="page-thumbnail" data-page="fairy" style="position: relative;">Fairy</div>
+        <div class="page-thumbnail" data-page="wizard" style="position: relative;">Wizard</div>
+    </div>
+    
+    <div class="page-thumbnails flowers">
+        <div class="page-thumbnail" data-page="rose" style="position: relative;">Rose</div>
+        <div class="page-thumbnail" data-page="tulip" style="position: relative;">Tulip</div>
+        <div class="page-thumbnail" data-page="daisy" style="position: relative;">Daisy</div>
+    </div>
+
+    <script>
+        // Premium durumu
+        let isPremiumUser = false;
+
+        // Premium modal göster
+        function showPremiumModal() {
+            alert('Premium modal açılacak!');
+        }
+
+        // Premium içerikleri kilitle/aç - Her kategoride 2'şer sayfa ücretsiz
+        function updateContentLocks() {
+            console.log('updateContentLocks çalışıyor...');
+            console.log('isPremiumUser:', isPremiumUser);
+            
+            // Kategori bazında ücretsiz sayfa sayısı
+            const categories = {
+                'magical': 2,
+                'flowers': 2
+            };
+
+            // Her kategori için thumbnail'ları kontrol et
+            Object.keys(categories).forEach(category => {
+                const categoryThumbnails = document.querySelectorAll(`.page-thumbnails.${category} .page-thumbnail`);
+                console.log(`${category} kategorisinde ${categoryThumbnails.length} thumbnail bulundu`);
+                
+                categoryThumbnails.forEach((thumb, index) => {
+                    console.log(`${category} - ${index}. thumbnail işleniyor`);
+                    
+                    // Her kategoride ilk 2 sayfa ücretsiz
+                    if (index >= categories[category] && !isPremiumUser) {
+                        console.log(`${category} - ${index}. thumbnail KİLİTLENİYOR`);
+                        
+                        // Kilitli görünüm
+                        thumb.classList.add('locked');
+
+                        // Kilit ikonu ekle
+                        if (!thumb.querySelector('.lock-overlay')) {
+                            const lockOverlay = document.createElement('div');
+                            lockOverlay.className = 'lock-overlay';
+                            lockOverlay.innerHTML = '🔒';
+                            thumb.appendChild(lockOverlay);
+                        }
+
+                        // Tıklama olayını değiştir
+                        thumb.onclick = function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Kilitli sayfa tıklandı, premium modal açılıyor');
+                            showPremiumModal();
+                        };
+                    } else {
+                        console.log(`${category} - ${index}. thumbnail SERBEST`);
+                        
+                        // Kilidi kaldır
+                        thumb.classList.remove('locked');
+                        const lock = thumb.querySelector('.lock-overlay');
+                        if (lock) lock.remove();
+                        
+                        // Normal tıklama
+                        thumb.onclick = function (e) {
+                            console.log('Ücretsiz sayfa tıklandı:', thumb.dataset.page);
+                        };
+                    }
+                });
+            });
+            
+            console.log('updateContentLocks tamamlandı');
+        }
+
+        // DOM hazır olduğunda çalıştır
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM ready');
+            updateContentLocks();
+        });
+    </script>
+</body>
+</html>

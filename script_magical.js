@@ -656,43 +656,76 @@ function createProtectionAreas() {
 let saveTimeout = null;
 
 // Improved saveDrawingState function to prevent duplicate states
+// This version works even with the "FINAL DRAWING ENGINE OVERRIDE"
 function saveDrawingState() {
+  // --- YENİ: Her çağrıda güncel canvas ve context'i al ---
   const canvas = document.getElementById('coloringCanvas');
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-  if (!canvas || !ctx) {
-    console.error("Canvas or context not available");
+  if (!canvas) {
+    console.error("saveDrawingState: Canvas element not found!");
     return;
   }
+  // willReadFrequently önemli olabilir, özellikle sık sık getImageData çağırıyorsanız
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) {
+    console.error("saveDrawingState: Canvas context not available");
+    return;
+  }
+  // --- YENİ SONU ---
 
   try {
-    // Capture the current state
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    // Mevcut durumu yakala
+    const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // If we're in the middle of the history and making a new change,
-    // remove all future states
+    // Son kaydedilen durumu al (geçmiş varsa)
+    const lastImageData = drawingHistory.length > 0 && currentStep >= 0 && currentStep < drawingHistory.length
+      ? drawingHistory[currentStep]
+      : null;
+
+    // --- YENİ KONTROL: Durum aynı mı? ---
+    if (lastImageData && imageDataEqual(currentImageData, lastImageData)) {
+      console.log('State unchanged, not saving duplicate.');
+      updateUndoButtonState(); // Buton durumunu yine de güncellemek iyi olabilir
+      return; // Aynıysa kaydetme ve çık
+    }
+    // --- KONTROL SONU ---
+
+    // Geçmişin ortasındaysak ve yeni bir değişiklik yapıyorsak,
+    // gelecekteki adımları sil
     if (currentStep < drawingHistory.length - 1) {
+      console.log(`Slicing history from step ${currentStep + 1}`);
       drawingHistory = drawingHistory.slice(0, currentStep + 1);
     }
 
-    // Add the new state to history
+    // Yeni durumu geçmişe ekle
     currentStep++;
-    drawingHistory.push(imageData);
+    drawingHistory.push(currentImageData); // Yakalanan güncel durumu ekle
 
     console.log('Saving state:', currentStep, 'History length:', drawingHistory.length);
 
-    // Update undo button state
+    // Bellek taşmasını önlemek için geçmiş limiti (opsiyonel ama önerilir)
+    const HISTORY_LIMIT = 50; // Örneğin 50 adım
+    if (drawingHistory.length > HISTORY_LIMIT) {
+      drawingHistory.shift(); // En eski adımı sil
+      currentStep--; // Adımı bir geri al
+      console.warn("History limit reached, oldest state removed.");
+    }
+
+    // Undo butonunun durumunu güncelle
     updateUndoButtonState();
+
   } catch (error) {
+    // Hata, özellikle getImageData ile ilgili olabilir (örn: Tainted Canvas)
     console.error("Error saving drawing state:", error);
+    // Kullanıcıya bilgi vermek veya durumu sıfırlamak düşünülebilir
   }
 }
-
 function imageDataEqual(data1, data2) {
+  if (!data1 || !data2) return false; // Güvenlik kontrolü
   if (data1.width !== data2.width || data1.height !== data2.height) {
     return false;
   }
-  for (let i = 0; i < data1.data.length; i++) {
+  // Tüm pikselleri karşılaştır
+  for (let i = 0; i < data1.data.length; i++) { // Tüm byte'ları kontrol etmek en güvenlisi
     if (data1.data[i] !== data2.data[i]) {
       return false;
     }
@@ -840,6 +873,36 @@ function handleSaveClick() {
         </body>
       </html>
     `);
+}
+function printCanvas() {
+  const canvas = document.querySelector('canvas');
+  if (!canvas) {
+    alert("Yazdırılacak bir çizim bulunamadı!");
+    return;
+  }
+
+  const dataUrl = canvas.toDataURL();
+
+  const windowContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Yazdır</title>
+      <style>
+        body { margin: 0; text-align: center; }
+        img { width: 100%; }
+      </style>
+    </head>
+    <body>
+      <img src="${dataUrl}" onload="window.print();window.close()" />
+    </body>
+    </html>
+  `;
+
+  const printWin = window.open('', '', 'width=800,height=600');
+  printWin.document.open();
+  printWin.document.write(windowContent);
+  printWin.document.close();
 }
 
 
@@ -2217,7 +2280,7 @@ window.addEventListener('load', function () {
 
   }, 500); // Half-second delay to ensure everything is loaded
 });
-// Bu kodu script_magical.js dosyanıza eklemelisiniz
+// Bu kodu script.js dosyanıza eklemelisiniz
 document.addEventListener('DOMContentLoaded', function () {
   // Tüm thumbnail'lara tıklama olayı ekle
   document.querySelectorAll('.page-thumbnail').forEach(thumbnail => {
@@ -2340,4 +2403,4 @@ window.addEventListener('load', function () {
 
     console.log("Thumbnail events updated!");
   }, 1000); // Wait 1 second after load
-});
+});  
