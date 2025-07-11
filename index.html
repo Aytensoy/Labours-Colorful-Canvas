@@ -15,12 +15,19 @@
     <link rel="preload" href="icons/splash-logo.png" as="image" type="image/png">
     <!-- EmailJS Library - Eski stabil versiyon -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script>// EmailJS'nin yüklendiğini kontrol et
+    <script>
+        // EmailJS'nin yüklendiğini kontrol et
         if (typeof emailjs !== 'undefined') {
             console.log('✅ EmailJS loaded successfully');
+
+            // Public Key'inizi buraya yazın
+            emailjs.init("8fTA3BZ9D30BF27Ce"); // <-- SİZİN KEY'İNİZ
+
+            console.log('✅ EmailJS initialized');
         } else {
             console.error('❌ EmailJS failed to load');
         }
+    </script>
     </script>
     <!-- Service Worker kaydı buraya -->
     <script>
@@ -427,7 +434,6 @@
                     <p>&copy; 2024 Labour Things. All rights reserved. | Magical Coloring Game</p>
                 </footer>
             </div>
-            <script src="quick-fix.js"></script>
             <script src="script.js"></script>
             <script>
                 // Son çare - doğrudan HTML'e gömülü çözüm
@@ -816,10 +822,11 @@
                     <h2>🎨 Special Offers & Updates!</h2>
                     <p>Get exclusive discounts, free coloring pages & early access to premium tools!</p>
 
-                    <form id="newsletterForm" onsubmit="submitNewsletter(event)" novalidate>
+                    <form id="newsletterForm" onsubmit="return false;" novalidate>
                         <input type="text" id="userName" placeholder="Your Name (Optional)" />
                         <input type="email" id="userEmail" placeholder="Your Email" />
-                        <button type="submit" id="subscribeBtn">✨ Subscribe</button>
+                        <button type="submit" id="subscribeBtn" onclick="handleNewsletterSubmit(event)">✨
+                            Subscribe</button>
                     </form>
 
                     <p class="newsletter-note">We'll only send you the good stuff! 🌟</p>
@@ -827,7 +834,7 @@
             </div>
 
             <!-- Newsletter Button -->
-            <button id="newsletterTrigger" class="newsletter-trigger" onclick="showNewsletterModal()">
+            <button id="newsletterTrigger" class="newsletter-trigger">
                 📧 Get Updates
             </button>
 

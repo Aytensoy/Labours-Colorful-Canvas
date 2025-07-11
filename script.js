@@ -1,4 +1,154 @@
+var submitNewsletter; // Global tanımlama
+// ==========================================
+// ACİL DÜZELTME - BU KODU script.js'in EN BAŞINA EKLEYİN
+// ==========================================
 
+// TÜM ESKİ FONKSİYONLARI TEMİZLE VE YENİDEN TANIMLA
+(function () {
+  console.log('🚨 Acil düzeltme başlatılıyor...');
+
+  // 1. PREMIUM MODAL DÜZELTMESİ
+  window.showPremiumModal = function () {
+    console.log('Premium modal açılıyor...');
+
+    // Önce eski modalı temizle
+    var oldModal = document.getElementById('premiumModal');
+    if (oldModal) {
+      oldModal.remove();
+    }
+
+    // Yeni modal HTML'i
+    var modalHTML = '<div id="premiumModal" class="premium-modal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999;">' +
+      '<div class="premium-content" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 20px; padding: 30px; margin: auto; max-width: 450px; position: relative;">' +
+      '<button onclick="closePremiumModal()" style="position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 20px;">×</button>' +
+      '<h2 style="color: #FFD700;">🌟 Unlock Premium Features 🌟</h2>' +
+      '<div class="premium-features">' +
+      '<p>📱 Download & Play Offline</p>' +
+      '<p>📁 Upload Your Own Images</p>' +
+      '<p>🎨 All 50+ Coloring Pages</p>' +
+      '<p>💾 Unlimited HD Saves</p>' +
+      '<p>✨ Premium Magic Brushes</p>' +
+      '</div>' +
+      '<div style="text-align: center; margin: 20px 0;">' +
+      '<p style="text-decoration: line-through; color: #999;">Regular Price: $19.99</p>' +
+      '<p style="font-size: 2em; color: #FFD700;">🚀 Launch Price: $14.99</p>' +
+      '<p style="color: #FF6B6B;">Save $5 • Limited Time!</p>' +
+      '</div>' +
+      '<button onclick="buyPremium()" style="background: linear-gradient(45deg, #FFD700, #FFA500); color: #2c3e50; border: none; padding: 15px 40px; font-size: 1.2em; border-radius: 30px; cursor: pointer; width: 100%;">🎨 Get Premium Now</button>' +
+      '</div></div>';
+
+    // Modal'ı body'e ekle
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+  };
+
+  // Modal kapatma fonksiyonu
+  window.closePremiumModal = function () {
+    console.log('Premium modal kapatılıyor...');
+    var modal = document.getElementById('premiumModal');
+    if (modal) {
+      modal.remove();
+    }
+  };
+
+  // 2. NEWSLETTER DÜZELTMESİ
+  window.showNewsletterModal = function () {
+    console.log('Newsletter modal açılıyor...');
+    var modal = document.getElementById('newsletterModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+  };
+
+  window.closeNewsletterModal = function () {
+    console.log('Newsletter modal kapatılıyor...');
+    var modal = document.getElementById('newsletterModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+  // Sayfa yüklendiğinde
+  window.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM yüklendi, düzeltmeler uygulanıyor...');
+
+    // 3. PREMIUM BUTONLARI GİZLE
+    var isPremium = localStorage.getItem('isPremium') === 'true';
+    var premiumTools = document.getElementById('premiumTools');
+
+    if (premiumTools) {
+      premiumTools.style.display = isPremium ? 'flex' : 'none';
+    }
+
+    // Premium butonları tek tek kontrol et
+    ['glitterBtn', 'rainbowBtn', 'glowBtn'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (btn && !isPremium) {
+        btn.style.display = 'none';
+      }
+    });
+
+    // 4. NEWSLETTER BUTONU BAĞLA
+    var newsletterBtn = document.getElementById('newsletterTrigger');
+    if (newsletterBtn) {
+      newsletterBtn.onclick = function (e) {
+        e.preventDefault();
+        showNewsletterModal();
+        return false;
+      };
+    }
+
+    // 5. BUTON SIRALAMA DÜZELTMESİ
+    var style = document.createElement('style');
+    style.textContent = `
+          /* Buton sıralama resetleme */
+          .toolbar > * {
+              order: initial !important;
+          }
+          
+          /* Premium tools gizleme */
+          #premiumTools {
+              display: ${isPremium ? 'flex' : 'none'} !important;
+          }
+          
+          /* Premium butonları gizle */
+          ${isPremium ? '' : '#glitterBtn, #rainbowBtn, #glowBtn { display: none !important; }'}
+          
+          /* Modal z-index düzeltmesi */
+          #premiumModal, #newsletterModal {
+              z-index: 99999 !important;
+          }
+      `;
+    document.head.appendChild(style);
+
+    console.log('✅ Tüm düzeltmeler uygulandı!');
+  });
+
+  // Hata yakalayıcı
+  window.onerror = function (msg, url, line) {
+    if (msg.includes('closePremiumModal') || msg.includes('showNewsletterModal')) {
+      console.log('Hata yakalandı ve yok sayıldı:', msg);
+      return true;
+    }
+  };
+
+})();
+
+// TEST FONKSİYONLARI
+function testPremiumModal() {
+  console.log('Premium modal test ediliyor...');
+  showPremiumModal();
+}
+
+function testNewsletter() {
+  console.log('Newsletter test ediliyor...');
+  showNewsletterModal();
+}
+
+console.log('📌 Test için kullanabilirsiniz:');
+console.log('- testPremiumModal()');
+console.log('- testNewsletter()');
+console.log('- closePremiumModal()');
+console.log('- closeNewsletterModal()');
 // PREMIUM SİSTEM - script.js dosyanızın EN BAŞINA ekleyin
 
 // Premium durumu
@@ -102,7 +252,7 @@ function showPremiumModal() {
 // Premium satın alma
 function buyPremium() {
   // Gumroad sayfasına yönlendir
-  window.open('https://labourthings.gumroad.com/l/magical-coloring-pro', '_blank');
+  window.open('https://magicalcoloringgame.gumroad.com/l/skdwom', '_blank');
 
   // Aktivasyon formunu göster
   closePremiumModal();
@@ -3368,4 +3518,844 @@ window.addEventListener('load', function () {
 
     console.log("Thumbnail events updated!");
   }, 1000); // Wait 1 second after load
-});  
+});
+// SCRIPT.JS'İN EN SONUNA EKLEYİN - TÜM SORUNLARIN ÇÖZÜMLERİ
+
+// ==========================================
+// 1. UNDO BUTONU KONUMU DÜZELTMESİ
+// ==========================================
+window.addEventListener('load', function () {
+  setTimeout(() => {
+    console.log('🔄 Undo butonu konumunu düzeltiliyor...');
+
+    const undoBtn = document.getElementById('undoBtn');
+    const eraseBtn = document.getElementById('eraseBtn');
+    const toolbar = document.querySelector('.toolbar');
+
+    if (undoBtn && eraseBtn && toolbar) {
+      // Undo'yu erase'den hemen ÖNCE yerleştir
+      eraseBtn.parentNode.insertBefore(undoBtn, eraseBtn);
+      console.log('✅ Undo butonu erase\'den önce yerleştirildi');
+    }
+  }, 1000);
+});
+
+// ==========================================
+// 2. PREMIUM BUTONLAR GİZLEME
+// ==========================================
+window.addEventListener('load', function () {
+  setTimeout(() => {
+    console.log('🔒 Premium butonları kontrol ediliyor...');
+
+    const isPremiumUser = localStorage.getItem('isPremium') === 'true';
+    const premiumTools = document.getElementById('premiumTools');
+
+    if (premiumTools) {
+      if (isPremiumUser) {
+        premiumTools.style.display = 'flex';
+        console.log('✅ Premium kullanıcı - araçlar gösteriliyor');
+      } else {
+        premiumTools.style.display = 'none';
+        console.log('🔒 Ücretsiz kullanıcı - premium araçlar gizlendi');
+      }
+    }
+
+    // Bireysel premium butonları da gizle
+    ['glitterBtn', 'rainbowBtn', 'glowBtn'].forEach(btnId => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.style.display = isPremiumUser ? 'inline-block' : 'none';
+      }
+    });
+
+  }, 1200);
+});
+
+// ==========================================
+// 3. NEWSLETTER SİSTEMİ - ÇALIŞAN VERSİYON
+// ==========================================
+window.addEventListener('load', function () {
+  setTimeout(() => {
+    console.log('📧 Newsletter sistemi kuruluyor...');
+  }, 1000); // Added missing closing parenthesis and a timeout duration
+  // Newsletter modal gösterme fonksiyonu
+  window.showNewsletterModal = function () {
+    console.log('📧 Newsletter modal açılıyor...');
+
+    const modal = document.getElementById('newsletterModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    } else {
+      console.error('Newsletter modal bulunamadı!');
+    }
+  };
+
+  // Newsletter modal kapatma fonksiyonu
+  window.closeNewsletterModal = function () {
+    console.log('📧 Newsletter modal kapatılıyor...');
+    const modal = document.getElementById('newsletterModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+  // NEWSLETTER EMAILJS ÇALIŞAN KOD
+  // script.js'de submitNewsletter fonksiyonunu bu kodla değiştirin
+
+  submitNewsletter = function (event) {  // window. olmadan
+    if (event) event.preventDefault();
+
+    console.log('Newsletter gönderimi başladı...');
+
+    const emailInput = document.getElementById('userEmail');
+    const nameInput = document.getElementById('userName');
+    const submitBtn = document.getElementById('subscribeBtn');
+
+    // Email kontrolü
+    if (!emailInput || !emailInput.value || !emailInput.value.includes('@')) {
+      alert('Please enter a valid email address!');
+      return false;
+    }
+
+    // EmailJS kontrolü
+    if (typeof emailjs === 'undefined') {
+      console.error('EmailJS yüklenmemiş!');
+      alert('Email service is temporarily unavailable.');
+      return false;
+    }
+
+    // Buton durumu
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+    }
+
+    // Email parametreleri - Template'inizdeki değişken isimlerine göre düzenleyin
+    const templateParams = {
+      to_name: 'Magical Coloring Game Admin',  // Sizin isminiz
+      from_name: nameInput && nameInput.value ? nameInput.value : 'Newsletter Subscriber',
+      user_email: emailInput.value,
+      message: `New newsletter subscription from: ${emailInput.value}`,
+      reply_to: emailInput.value
+    };
+
+    console.log('Gönderilen parametreler:', templateParams);
+
+    // EmailJS ile gönder - SERVICE_ID ve TEMPLATE_ID'yi değiştirin!
+    emailjs.send('service_74njv1i', 'template_kane7si', templateParams)
+      .then(function (response) {
+        console.log('✅ Email başarıyla gönderildi!', response);
+
+        // Başarı mesajı göster
+        showSuccessMessage('🎉 Successfully Subscribed! <br> Thank you for joining our newsletter!');
+
+        // Modal'ı kapat
+        closeNewsletterModal();
+
+        // Formu temizle
+        if (emailInput) emailInput.value = '';
+        if (nameInput) nameInput.value = '';
+
+        // Butonu sıfırla
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✨ Subscribe';
+        }
+      })
+      .catch(function (error) {
+        console.error('❌ Email gönderilemedi:', error);
+
+        // Detaylı hata mesajı
+        let errorMsg = 'Failed to subscribe. ';
+        if (error.text) {
+          errorMsg += error.text;
+        }
+        alert(errorMsg);
+
+        // Butonu sıfırla
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✨ Subscribe';
+        }
+      });
+
+    return false;
+  };
+
+  // Test fonksiyonu
+  window.testNewsletter = function () {
+    console.log('Newsletter test başlatılıyor...');
+
+    // Test parametreleri
+    const testParams = {
+      to_name: 'Test Admin',
+      from_name: 'Test User',
+      user_email: 'test@test.com',
+      message: 'Test newsletter subscription',
+      reply_to: 'test@test.com'
+    };
+
+    // YOUR_SERVICE_ID ve YOUR_TEMPLATE_ID'yi gerçek değerlerle değiştirin!
+    emailjs.send('service_74njv1i', 'template_kane7si', testParams)
+      .then(function (response) {
+        console.log('✅ Test başarılı!', response);
+        alert('Test email sent successfully!');
+      })
+      .catch(function (error) {
+        console.error('❌ Test başarısız:', error);
+        alert('Test failed: ' + (error.text || 'Unknown error'));
+      });
+  };
+
+  console.log('📧 Newsletter EmailJS kodu hazır!');
+  console.log('⚠️ DİKKAT: YOUR_SERVICE_ID ve YOUR_TEMPLATE_ID değerlerini değiştirmeyi unutmayın!');
+  console.log('Test için: testNewsletter()');
+
+  // ==========================================
+  // 4. PREMIUM MODAL SİSTEMİ - HATASIZ
+  // ==========================================
+  window.addEventListener('load', function () {
+    setTimeout(() => {
+      console.log('💎 Premium modal sistemi kuruluyor...');
+
+      // Premium modal gösterme
+      window.showPremiumModal = function () {
+        console.log('💎 Premium modal açılıyor...');
+
+        // Eski modal varsa kaldır
+        const existingModal = document.getElementById('premiumModal');
+        if (existingModal) {
+          existingModal.remove();
+        }
+
+        // Yeni modal oluştur
+        const modal = document.createElement('div');
+        modal.id = 'premiumModal';
+        modal.className = 'premium-modal';
+        modal.style.cssText = `
+              position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+              background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center;
+              align-items: center; z-index: 10000;
+          `;
+
+        modal.innerHTML = `
+              <div class="premium-content" style="
+                  background: linear-gradient(135deg, #2c3e50, #34495e);
+                  color: white; border-radius: 20px; border: 3px solid #FFD700;
+                  width: 90%; max-width: 450px; max-height: 85vh; overflow-y: auto;
+                  padding: 20px; position: relative; box-sizing: border-box;
+              ">
+                  <span class="close-modal" style="
+                      position: absolute; top: 10px; right: 15px; font-size: 28px;
+                      cursor: pointer; color: #fff; z-index: 10001; width: 35px; height: 35px;
+                      display: flex; align-items: center; justify-content: center;
+                      background: rgba(0, 0, 0, 0.6); border-radius: 50%;
+                  ">&times;</span>
+                  
+                  <h2 style="color: #FFD700; margin-bottom: 20px; font-size: 2em; text-align: center;">
+                      🌟 Unlock Premium Features 🌟
+                  </h2>
+                  
+                  <div class="premium-features" style="text-align: left; margin: 20px auto; max-width: 300px;">
+                      <div style="margin: 10px 0; font-size: 1.1em; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 5px;">
+                          📱 <strong>Download & Play Offline</strong><br>
+                          <small>Perfect for road trips & travel with kids!</small>
+                      </div>
+                      <div style="margin: 10px 0; font-size: 1.1em; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 5px;">
+                          📁 <strong>Upload Your Own Images</strong><br>
+                          <small>Upload any coloring page to color</small>
+                      </div>
+                      <div style="margin: 10px 0; font-size: 1.1em; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 5px;">
+                          🎨 <strong>All 50+ Coloring Pages</strong><br>
+                          <small>Magical, animals, flowers & more</small>
+                      </div>
+                      <div style="margin: 10px 0; font-size: 1.1em; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 5px;">
+                          💾 <strong>Unlimited HD Saves</strong><br>
+                          <small>No daily limits, save all masterpieces</small>
+                      </div>
+                      <div style="margin: 10px 0; font-size: 1.1em; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 5px;">
+                          ✨ <strong>Premium Magic Brushes</strong><br>
+                          <small>Glitter, Rainbow & Glow effects</small>
+                      </div>
+                  </div>
+                  
+                  <div style="text-align: center; margin: 20px 0;">
+                      <div style="margin-bottom: 10px;">
+                          <span style="text-decoration: line-through; color: #999; font-size: 1.1em;">Regular Price: $19.99</span>
+                      </div>
+                      <div style="font-size: 2.2em; color: #FFD700; font-weight: bold; margin: 10px 0;">
+                          🚀 Launch Price: $14.99
+                      </div>
+                      <div style="color: #FF6B6B; font-size: 1.1em; font-weight: bold;">
+                          Save $5 • Limited Time!
+                      </div>
+                  </div>
+                  
+                  <button class="buy-premium-btn" style="
+                      background: linear-gradient(45deg, #FFD700, #FFA500); color: #2c3e50;
+                      border: none; padding: 18px 45px; font-size: 1.3em; border-radius: 50px;
+                      cursor: pointer; font-weight: bold; transition: all 0.3s ease;
+                      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); display: block;
+                      margin: 20px auto; width: 80%;
+                  ">🎨 Get Premium Now</button>
+                  
+                  <p style="text-align: center; font-size: 0.9em; opacity: 0.8; margin-top: 15px;">
+                      Instant activation • Perfect for families
+                  </p>
+              </div>
+          `;
+
+        document.body.appendChild(modal);
+
+        // Close butonu event listener
+        const closeBtn = modal.querySelector('.close-modal');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closePremiumModal();
+          });
+        }
+
+        // Buy butonu event listener
+        const buyBtn = modal.querySelector('.buy-premium-btn');
+        if (buyBtn) {
+          buyBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            buyPremium();
+          });
+        }
+
+        // Modal dışına tıklama ile kapatma
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            closePremiumModal();
+          }
+        });
+      };
+
+      // Premium modal kapatma - HATASIZ
+      window.closePremiumModal = function () {
+        console.log('💎 Premium modal kapatılıyor...');
+        const modal = document.getElementById('premiumModal');
+        if (modal) {
+          try {
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+              if (modal && modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+              }
+            }, 300);
+          } catch (error) {
+            console.error('Modal kapatma hatası:', error);
+            // Hata olursa direkt kaldır
+            if (modal && modal.parentNode) {
+              modal.parentNode.removeChild(modal);
+            }
+          }
+        }
+      };
+
+      // Premium satın alma
+      window.buyPremium = function () {
+        console.log('💎 Premium satın alma işlemi...');
+
+        try {
+          // Gumroad sayfasını aç
+          window.open('https://magicalcoloringgame.gumroad.com/l/skdwom', '_blank');
+
+          // Modal'ı kapat
+          closePremiumModal();
+
+          // Test için basit aktivasyon
+          setTimeout(() => {
+            const license = prompt('Enter license key for testing (minimum 5 characters):');
+            if (license && license.length >= 5) {
+              localStorage.setItem('isPremium', 'true');
+              localStorage.setItem('licenseKey', license);
+              showSuccessMessage('🎉 Premium Activated Successfully!');
+              setTimeout(() => location.reload(), 2000);
+            }
+          }, 1000);
+
+        } catch (error) {
+          console.error('Premium satın alma hatası:', error);
+          showSuccessMessage('Premium purchase page will open shortly!');
+        }
+      };
+
+      console.log('✅ Premium modal sistemi hazır');
+    }, 2000);
+  });
+
+  // ==========================================
+  // 5. BAŞARI MESAJI FONKSİYONU
+  // ==========================================
+  window.showSuccessMessage = function (message) {
+    console.log('🎉 Başarı mesajı gösteriliyor:', message);
+
+    // Eski mesajları temizle
+    document.querySelectorAll('.temp-success-msg').forEach(msg => {
+      try {
+        msg.remove();
+      } catch (e) {
+        console.log('Eski mesaj temizleme hatası:', e);
+      }
+    });
+
+    const success = document.createElement('div');
+    success.className = 'temp-success-msg';
+    success.style.cssText = `
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #4CAF50; color: white; padding: 20px 40px; border-radius: 15px;
+      font-size: 1.2em; box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+      z-index: 10002; text-align: center; max-width: 80%; word-wrap: break-word;
+  `;
+    success.textContent = message;
+
+    document.body.appendChild(success);
+
+    // 3 saniye sonra kaldır
+    setTimeout(() => {
+      try {
+        if (success && success.parentNode) {
+          success.parentNode.removeChild(success);
+        }
+      } catch (e) {
+        console.log('Başarı mesajı kaldırma hatası:', e);
+      }
+    }, 3000);
+  };
+
+  // ==========================================
+  // 6. PREMIUM ARAÇ TıKLAMA KONTROL
+  // ==========================================
+  window.addEventListener('load', function () {
+    setTimeout(() => {
+      console.log('🔒 Premium araç kontrolü ekleniyor...');
+
+      const premiumTools = ['glitterBtn', 'rainbowBtn', 'glowBtn'];
+
+      premiumTools.forEach(toolId => {
+        const btn = document.getElementById(toolId);
+        if (btn) {
+          // Eski event listener'ları temizle
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+
+          // Yeni event listener ekle
+          newBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const isPremiumUser = localStorage.getItem('isPremium') === 'true';
+
+            if (!isPremiumUser) {
+              console.log('🔒 Premium araç engellendi:', toolId);
+              if (typeof showPremiumModal === 'function') {
+                showPremiumModal();
+              } else {
+                alert('This feature is only available for Premium users!');
+              }
+              return false;
+            }
+
+            // Premium kullanıcı ise normal işlemi yap
+            const toolName = toolId.replace('Btn', '');
+            if (typeof setTool === 'function') {
+              setTool(toolName);
+            }
+          });
+        }
+      });
+
+      console.log('✅ Premium araç kontrolü eklendi');
+    }, 2500);
+  });
+
+  // ==========================================
+  // 7. HATA YAKALAMA VE LOG SİSTEMİ
+  // ==========================================
+  window.addEventListener('error', function (e) {
+    if (e.message && e.message.includes('showNewsletterModal')) {
+      console.log('Newsletter modal hatası yakalandı, düzeltiliyor...');
+      // Newsletter modal fonksiyonunu tekrar tanımla
+      if (typeof showNewsletterModal === 'undefined') {
+        window.showNewsletterModal = function () {
+          const modal = document.getElementById('newsletterModal');
+          if (modal) {
+            modal.style.display = 'flex';
+          }
+        };
+      }
+    }
+
+    if (e.message && e.message.includes('showPremiumModal')) {
+      console.log('Premium modal hatası yakalandı, düzeltiliyor...');
+      // Premium modal fonksiyonunu tekrar tanımla
+      if (typeof showPremiumModal === 'undefined') {
+        window.showPremiumModal = function () {
+          alert('Premium features are available with subscription!');
+        };
+      }
+    }
+  });
+
+  // ==========================================
+  // 8. SİSTEM DURUMU KONTROLÜ
+  // ==========================================
+  window.addEventListener('load', function () {
+    setTimeout(() => {
+      console.log('📊 Sistem Durumu Kontrolü:');
+
+      const checks = {
+        'Canvas': !!document.getElementById('coloringCanvas'),
+        'Undo Button': !!document.getElementById('undoBtn'),
+        'Newsletter Modal': !!document.getElementById('newsletterModal'),
+        'Newsletter Function': typeof showNewsletterModal === 'function',
+        'Premium Function': typeof showPremiumModal === 'function',
+        'Premium Tools': !!document.getElementById('premiumTools')
+      };
+
+      Object.entries(checks).forEach(([name, status]) => {
+        console.log(`- ${name}: ${status ? '✅' : '❌'}`);
+      });
+
+      console.log('🔧 Test Komutları:');
+      console.log('- showNewsletterModal() : Newsletter testi');
+      console.log('- showPremiumModal() : Premium modal testi');
+
+    }, 3000);
+
+    console.log('🎨 Script.js düzeltmeleri yüklendi - Tüm sorunlar çözülmeli!');
+  })
+})
+// Newsletter form - TEMİZ VERSİYON
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('newsletterForm');
+  if (form) {
+    form.onsubmit = function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById('userEmail').value;
+      const name = document.getElementById('userName').value;
+
+      if (!email || !email.includes('@')) {
+        alert('Please enter valid email!');
+        return false;
+      }
+
+      console.log('📧 Email gönderiliyor...');
+
+      // EmailJS gönderimi
+      emailjs.send('service_74njv1i', 'template_kane7si', {
+        user_email: email,
+        from_name: name || 'Subscriber',
+        message: 'New newsletter subscription from Magical Coloring Game',
+        to_name: 'Admin',
+        reply_to: email
+      })
+        .then(function (response) {
+          console.log('✅ Email gönderildi!', response);
+          alert('Successfully subscribed!');
+          closeNewsletterModal();
+          form.reset();
+        })
+        .catch(function (error) {
+          console.error('❌ Email hatası:', error);
+          alert('Error: ' + JSON.stringify(error));
+        });
+
+      return false;
+    };
+  }
+});
+// Newsletter submit fonksiyonu
+function handleNewsletterSubmit(event) {
+  if (event) event.preventDefault();
+
+  const email = document.getElementById('userEmail');
+  const name = document.getElementById('userName');
+
+  if (!email || !email.value || !email.value.includes('@')) {
+    alert('Please enter a valid email address!');
+    return false;
+  }
+
+  console.log('📧 Sending newsletter subscription...');
+
+  // EmailJS gönderimi
+  emailjs.send('service_74njv1i', 'template_kane7si', {
+    email: email.value,
+    name: name && name.value ? name.value : 'Subscriber'
+  })
+    .then(function (response) {
+      console.log('✅ SUCCESS!', response);
+      alert('🎉 Successfully subscribed to newsletter!');
+      closeNewsletterModal();
+      document.getElementById('newsletterForm').reset();
+    })
+    .catch(function (error) {
+      console.error('❌ FAILED...', error);
+      alert('Failed to subscribe. Please try again.');
+    });
+
+  return false;
+}
+
+// Global scope'a ekle
+window.handleNewsletterSubmit = handleNewsletterSubmit;
+
+// MOBİL DOKUNMATİK DÜZELTMESİ
+// Bu kodu script.js'in EN SONUNA ekleyin
+
+(function () {
+  console.log('📱 Mobil dokunmatik desteği ekleniyor...');
+
+  // Canvas'ı bul - var kullanarak çakışmayı önle
+  var mobileCanvas = document.getElementById('coloringCanvas');
+  if (!mobileCanvas) {
+    console.error('Canvas bulunamadı!');
+    return;
+  }
+
+  // Touch olaylarından koordinat alma fonksiyonu
+  function getTouchCoordinates(e) {
+    const rect = mobileCanvas.getBoundingClientRect();
+    const touch = e.touches[0] || e.changedTouches[0];
+    return {
+      x: (touch.clientX - rect.left) * (mobileCanvas.width / rect.width),
+      y: (touch.clientY - rect.top) * (mobileCanvas.height / rect.height)
+    };
+  }
+
+  // Touch başlangıç
+  mobileCanvas.addEventListener('touchstart', function (e) {
+    e.preventDefault(); // Sayfa kaydırmayı engelle
+
+    const coords = getTouchCoordinates(e);
+
+    // Mouse down olayını simüle et
+    const mouseEvent = new MouseEvent('mousedown', {
+      clientX: e.touches[0].clientX,
+      clientY: e.touches[0].clientY,
+      bubbles: true
+    });
+    mobileCanvas.dispatchEvent(mouseEvent);
+
+    // Mevcut araç için başlangıç
+    if (typeof handlePointerDown === 'function') {
+      handlePointerDown({
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+        preventDefault: () => { }
+      });
+    }
+  }, { passive: false });
+
+  // Touch hareket
+  mobileCanvas.addEventListener('touchmove', function (e) {
+    e.preventDefault(); // Sayfa kaydırmayı engelle
+
+    if (!e.touches || e.touches.length === 0) return;
+
+    const coords = getTouchCoordinates(e);
+
+    // Mouse move olayını simüle et
+    const mouseEvent = new MouseEvent('mousemove', {
+      clientX: e.touches[0].clientX,
+      clientY: e.touches[0].clientY,
+      bubbles: true
+    });
+    mobileCanvas.dispatchEvent(mouseEvent);
+
+    // Mevcut araç için hareket
+    if (typeof handlePointerMove === 'function') {
+      handlePointerMove({
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY,
+        preventDefault: () => { }
+      });
+    }
+  }, { passive: false });
+
+  // Touch bitiş
+  mobileCanvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+
+    // Mouse up olayını simüle et
+    const mouseEvent = new MouseEvent('mouseup', {
+      bubbles: true
+    });
+    mobileCanvas.dispatchEvent(mouseEvent);
+
+    // Mevcut araç için bitiş
+    if (typeof handlePointerUp === 'function') {
+      handlePointerUp({
+        preventDefault: () => { }
+      });
+    }
+  }, { passive: false });
+
+  // CSS ile mobil deneyimi iyileştir
+  const mobileStyle = document.createElement('style');
+  mobileStyle.textContent = `
+  /* Mobil için canvas optimizasyonu */
+  #coloringCanvas {
+      touch-action: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  /* Mobilde zoom'u engelle */
+  @media (max-width: 768px) {
+      body {
+          touch-action: pan-x pan-y;
+          -webkit-overflow-scrolling: touch;
+      }
+      
+      .coloring-area {
+          overflow: hidden;
+          position: relative;
+      }
+      
+      /* Araç butonlarını mobilde daha büyük yap */
+      .btn, .tool-btn {
+          min-width: 44px;
+          min-height: 44px;
+          font-size: 14px !important;
+      }
+      
+      /* Renk paletini mobilde optimize et */
+      .color-swatch {
+          width: 40px;
+          height: 40px;
+          margin: 3px;
+      }
+  }
+`;
+  document.head.appendChild(mobileStyle);
+
+  // Viewport meta tag kontrolü (zoom'u engelle)
+  let viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (!viewportMeta) {
+    viewportMeta = document.createElement('meta');
+    viewportMeta.name = 'viewport';
+    document.head.appendChild(viewportMeta);
+  }
+  viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+
+  console.log('✅ Mobil dokunmatik desteği eklendi!');
+
+  // Test fonksiyonu
+  window.testMobileTouch = function () {
+    console.log('Touch desteği:', 'ontouchstart' in window);
+    console.log('Canvas touch-action:', getComputedStyle(mobileCanvas).touchAction);
+    console.log('Mobil cihaz:', /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  };
+})(); // Fonksiyonu hemen çalıştır
+// UNDO BUTONU DÜZELTMESİ
+// Bu kodu script.js'in EN SONUNA ekleyin
+
+(function () {
+  console.log('🔧 Undo butonu düzeltiliyor...');
+
+  // Undo butonunu bul
+  const undoBtn = document.getElementById('undoBtn');
+  if (!undoBtn) {
+    console.error('Undo butonu bulunamadı!');
+    return;
+  }
+
+  // Eski event listener'ları temizle
+  const newUndoBtn = undoBtn.cloneNode(true);
+  undoBtn.parentNode.replaceChild(newUndoBtn, undoBtn);
+
+  // Yeni, TEK event listener ekle
+  newUndoBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log('Undo tıklandı - Mevcut adım:', currentStep, 'Toplam:', drawingHistory.length);
+
+    // Basit undo işlemi
+    if (currentStep > 0) {
+      currentStep--;
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
+
+      if (drawingHistory[currentStep]) {
+        ctx.putImageData(drawingHistory[currentStep], 0, 0);
+        console.log('Adım', currentStep, 'yüklendi');
+      }
+    } else {
+      console.log('Geri alınacak adım yok');
+      // İlk duruma dön
+      if (typeof loadDrawing === 'function') {
+        loadDrawing();
+      }
+    }
+
+    // Buton durumunu güncelle
+    updateUndoButtonState();
+  });
+
+  // Buton durumu güncelleme
+  window.updateUndoButtonState = function () {
+    if (newUndoBtn) {
+      newUndoBtn.disabled = currentStep <= 0;
+      newUndoBtn.style.opacity = currentStep <= 0 ? '0.5' : '1';
+    }
+  };
+
+  // Çizim durumu kaydetmeyi optimize et
+  let saveTimeout = null;
+  const originalSaveDrawingState = window.saveDrawingState;
+
+  window.saveDrawingState = function () {
+    // Çoklu kaydetmeyi önle
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    saveTimeout = setTimeout(() => {
+      if (originalSaveDrawingState) {
+        originalSaveDrawingState();
+      } else {
+        // Manuel kaydetme
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+
+        if (currentStep < drawingHistory.length - 1) {
+          drawingHistory = drawingHistory.slice(0, currentStep + 1);
+        }
+
+        currentStep++;
+        drawingHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+
+        // Maksimum 30 adım tut (bellek için)
+        if (drawingHistory.length > 30) {
+          drawingHistory.shift();
+          currentStep--;
+        }
+
+        updateUndoButtonState();
+      }
+    }, 100); // 100ms gecikme ile kaydet
+  };
+
+  console.log('✅ Undo butonu düzeltildi!');
+})();
+
+// Debug fonksiyonu
+window.debugUndo = function () {
+  console.log('=== UNDO DEBUG ===');
+  console.log('Current Step:', window.currentStep);
+  console.log('History Length:', window.drawingHistory ? window.drawingHistory.length : 0);
+  console.log('Undo Button:', document.getElementById('undoBtn'));
+  console.log('Button Disabled:', document.getElementById('undoBtn')?.disabled);
+};

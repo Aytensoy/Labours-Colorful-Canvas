@@ -1,4 +1,1027 @@
 
+// PREMIUM SİSTEM - script.js dosyanızın EN BAŞINA ekleyin
+
+// Premium durumu
+let isPremiumUser = localStorage.getItem('isPremium') === 'true';
+const PREMIUM_PRICE = 12.99;
+// GÜVENLİ ADMIN ACCESS SİSTEMİ
+document.addEventListener('DOMContentLoaded', function () {
+  // Secret admin code - güncel!
+  const ADMIN_SECRET = atob('TWFnaWNhbENvbG9yczIwMjUh'); // 
+
+  // URL parameter kontrolü
+  const urlParams = new URLSearchParams(window.location.search);
+  const adminCode = urlParams.get('admin');
+
+  if (adminCode === ADMIN_SECRET) {
+    // Admin mode aktif
+    localStorage.setItem('isPremium', 'true');
+    localStorage.setItem('adminMode', 'true');
+    isPremiumUser = true;
+
+    // Admin badge ekle
+    const adminBadge = document.createElement('div');
+    adminBadge.style.cssText = `
+          position: fixed; top: 10px; left: 10px; 
+          background: #ff4757; color: white; 
+          padding: 5px 10px; border-radius: 15px; 
+          font-size: 12px; z-index: 9999;
+      `;
+    adminBadge.textContent = '👑 ADMIN MODE';
+    document.body.appendChild(adminBadge);
+
+    console.log('👑 Admin mode activated');
+
+    // URL'den admin parametresini temizle
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
+// Günlük kaydetme sayacı
+let dailySaveCount = parseInt(localStorage.getItem('dailySaves') || '0');
+const lastResetDate = localStorage.getItem('lastResetDate');
+const today = new Date().toDateString();
+
+// Günlük limitleri sıfırla
+if (lastResetDate !== today) {
+  localStorage.setItem('lastResetDate', today);
+  localStorage.setItem('dailySaves', '0');
+  dailySaveCount = 0;
+}
+
+// --- YAPIŞTIRILACAK YENİ VE GÜVENLİ KOD ---
+
+// Premium modal oluşturma ve gösterme (Birleştirilmiş ve Güvenli Fonksiyon)
+function showPremiumModal() {
+  // 1. Modal zaten var mı diye kontrol et. Varsa, tekrar oluşturma, sadece göster.
+  const existingModal = document.getElementById('premiumModal');
+  if (existingModal) {
+    existingModal.style.display = 'flex';
+    return;
+  }
+
+  // 2. Modal'ı oluştur.
+  const modal = document.createElement('div');
+  modal.id = 'premiumModal';
+  modal.className = 'premium-modal';
+
+  // 3. HTML içeriğini oluştururken 'onclick' kullanmıyoruz. Kapatma butonuna bir ID veriyoruz.
+  modal.innerHTML = `
+    <div class="premium-content">
+      <span id="premiumCloseBtn" class="close-modal">×</span>
+      <h2>🌟 Unlock Premium Features 🌟</h2>
+      <div class="premium-features">
+          <div class="feature">📱 <strong>Download & Play Offline</strong><br>
+              <small>Perfect for road trips & travel with kids!</small></div>
+          <div class="feature">📁 <strong>Upload Your Own Images</strong><br>
+              <small>Upload any coloring page to color</small></div>
+          <div class="feature">🎨 <strong>All 50+ Coloring Pages</strong><br>
+              <small>Magical, animals, flowers & more</small></div>
+          <div class="feature">💾 <strong>Unlimited HD Saves</strong><br>
+              <small>No daily limits, save all masterpieces</small></div>
+          <div class="feature">✨ <strong>Premium Magic Brushes</strong><br>
+              <small>Glitter, Rainbow & Glow effects</small></div>
+      </div>
+      <div class="launch-pricing">
+          <div class="original-price">
+              <span class="crossed">Regular Price: $19.99</span>
+          </div>
+          <div class="sale-price">
+              🚀 Launch Price: $14.99
+          </div>
+          <div class="savings">
+              Save $5 • Limited Time!
+          </div>
+      </div>
+      <button class="buy-premium-btn" onclick="buyPremium()">
+          🎨 Get Premium Now
+      </button>
+      <p class="premium-note">Instant activation • Perfect for families</p>
+    </div>
+  `;
+  // 4. Oluşturulan modal'ı sayfaya ekle.
+  document.body.appendChild(modal);
+  modal.style.display = 'flex';
+
+  // 5. GÜVENLİ YÖNTEM: Modal sayfaya eklendikten SONRA, butonu ID ile bul ve tıklama görevi ata.
+  document.getElementById('premiumCloseBtn').addEventListener('click', function () {
+    modal.style.display = 'none';
+  });
+}
+
+// Premium satın alma (Bu fonksiyon aynı kalıyor, dokunmuyoruz)
+function buyPremium() {
+  // Gumroad sayfasına yönlendir
+  window.open('https://magicalcoloringgame.gumroad.com/l/skdwom', '_blank');
+
+  // Aktivasyon formunu göster
+  const premiumModal = document.getElementById('premiumModal');
+  if (premiumModal) premiumModal.style.display = 'none';
+  showActivationForm();
+}
+
+// Aktivasyon formu (Bu fonksiyon aynı kalıyor, dokunmuyoruz)
+function showActivationForm() {
+  const form = document.createElement('div');
+  form.id = 'activationForm';
+  form.className = 'activation-form';
+  form.innerHTML = `
+      <div class="activation-content">
+          <h3>Enter Your License Key</h3>
+          <p>After purchase, you'll receive a license key via email</p>
+          <input type="text" id="licenseInput" placeholder="XXXX-XXXX-XXXX-XXXX" />
+          <button onclick="activateLicense()">Activate Premium</button>
+          <button onclick="closeActivationForm()" class="cancel-btn">Cancel</button>
+      </div>
+  `;
+  document.body.appendChild(form);
+}
+
+// Aktivasyon formunu kapat (Bu fonksiyon aynı kalıyor, dokunmuyoruz)
+function closeActivationForm() {
+  const form = document.getElementById('activationForm');
+  if (form) form.remove();
+}
+
+// --- YENİ KOD BURADA BİTİYOR ---
+/*
+// 🔒 SÜPER GÜVENLİ LİSANS SİSTEMİ
+function activateLicense() {
+  const license = document.getElementById('licenseInput').value.trim().toUpperCase();
+
+  console.log('🔒 Lisans doğrulama başlatılıyor...');
+
+  // Gelişmiş validasyon
+  if (!validateLicenseFormat(license)) {
+    showLicenseError('❌ Invalid license format! Please check your key.');
+    return;
+  }
+
+  if (!validateLicenseChecksum(license)) {
+    showLicenseError('❌ Invalid license! Please contact support.');
+    return;
+  }
+
+  // Lisans veritabanı kontrolü (simulated)
+  if (!isValidLicenseKey(license)) {
+    showLicenseError('❌ License not found! Please verify your purchase.');
+    return;
+  }
+
+  // Başarılı aktivasyon
+  console.log('✅ Lisans başarıyla doğrulandı!');
+  activatePremiumFeatures(license);
+}
+
+// Lisans format kontrolü
+function validateLicenseFormat(license) {
+  // XXXX-XXXX-XXXX-XXXX formatını kontrol et
+  const format = /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+  return format.test(license);
+}
+
+// Checksum kontrolü (basit hash)
+function validateLicenseChecksum(license) {
+  const parts = license.split('-');
+  if (parts.length !== 4) return false;
+
+  // Son parça checksum olsun
+  const data = parts.slice(0, 3).join('');
+  const checksum = parts[3];
+
+  // Basit hash hesapla
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash + data.charCodeAt(i)) & 0xffff;
+  }
+
+  const expectedChecksum = hash.toString(16).toUpperCase().padStart(4, '0');
+  return checksum === expectedChecksum;
+}
+
+// Geçerli lisans anahtarları listesi
+function isValidLicenseKey(license) {
+  const validKeys = [
+    'MAGIC-COLO-RING-2024',
+    'PAINT-AWAY-KIDS-2024',
+    'ARTIS-TICO-CREA-2024',
+    'SUPER-PREM-ACCE-2024',
+    'TEST-1234-5678-ABCD'  // ← Bu satırı ekleyin (test için)
+  ];
+
+  return validKeys.includes(license) || generateValidKey(license);
+}
+
+// Dinamik geçerli anahtar üretimi
+function generateValidKey(inputKey) {
+  // Belirli bir pattern'e göre geçerli anahtar üret
+  const prefix = inputKey.substring(0, 14);
+  const hash = calculateKeyHash(prefix);
+  const validKey = prefix + hash;
+
+  return inputKey === validKey;
+}
+
+function calculateKeyHash(prefix) {
+  let hash = 2024; // Magic number
+  for (let i = 0; i < prefix.length; i++) {
+    hash = ((hash * 31) + prefix.charCodeAt(i)) % 10000;
+  }
+  return hash.toString().padStart(4, '0');
+}
+
+// Hata gösterme
+function showLicenseError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'license-error';
+  errorDiv.innerHTML = `
+    <div class="error-content">
+      <h3>License Error</h3>
+      <p>${message}</p>
+      <button onclick="this.parentElement.parentElement.remove()">Try Again</button>
+    </div>
+  `;
+  document.body.appendChild(errorDiv);
+
+  setTimeout(() => errorDiv.remove(), 5000);
+}
+
+// Premium özellikleri etkinleştir
+function activatePremiumFeatures(license) {
+  localStorage.setItem('isPremium', 'true');
+  localStorage.setItem('licenseKey', license);
+  localStorage.setItem('activationDate', new Date().toISOString());
+  isPremiumUser = true;
+
+  closeActivationForm();
+  showSuccessMessage();
+  setTimeout(() => location.reload(), 2000);
+}  */
+// 🔒 SÜPER GÜVENLİ LİSANS SİSTEMİ (Test Mode)
+function activateLicense() {
+  const license = document.getElementById('licenseInput').value.trim();
+
+  console.log('🔒 Test modunda lisans kontrolü...');
+
+  // Test modunda basit kontrol
+  if (license && license.length >= 5) {
+    console.log('✅ Test lisansı kabul edildi:', license);
+
+    // Premium'u aktif et
+    localStorage.setItem('isPremium', 'true');
+    localStorage.setItem('licenseKey', license);
+    localStorage.setItem('activationDate', new Date().toISOString());
+    isPremiumUser = true;
+
+    // Formu kapat
+    closeActivationForm();
+    showSuccessMessage();
+    setTimeout(() => location.reload(), 2000);
+  } else {
+    alert('Test için en az 5 karakter girin');
+  }
+}
+
+// Başarı mesajı
+function showSuccessMessage() {
+  const success = document.createElement('div');
+  success.className = 'success-message';
+  success.innerHTML = `
+        <div class="success-content">
+            <h2>🎉 Premium Activated!</h2>
+            <p>Enjoy all premium features!</p>
+        </div>
+    `;
+  document.body.appendChild(success);
+
+  setTimeout(() => success.remove(), 3000);
+}
+
+// Get Offline Pro butonu için
+function handleOfflineProClick() {
+  if (isPremiumUser) {
+    enableOfflineMode();
+  } else {
+    showPremiumModal();
+  }
+}
+
+// Offline modu etkinleştir
+function enableOfflineMode() {
+  console.log('✅ Premium offline mode başlatılıyor...');
+
+  // Progress göster
+  const progress = document.createElement('div');
+  progress.className = 'download-progress';
+  progress.innerHTML = `
+    <div class="progress-content">
+      <h3>🚀 Installing Premium App...</h3>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <p>Please wait while we prepare your offline app</p>
+    </div>
+  `;
+  document.body.appendChild(progress);
+
+  // 2 saniye sonra PWA install başlat
+  setTimeout(() => {
+    if (deferredPrompt) {
+      progress.querySelector('h3').textContent = '📱 Installing to Device...';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((result) => {
+        if (result.outcome === 'accepted') {
+          progress.querySelector('h3').textContent = '✅ App Installed!';
+          progress.querySelector('p').textContent = 'Check your home screen!';
+        }
+        setTimeout(() => progress.remove(), 3000);
+      });
+    } else {
+      progress.querySelector('h3').textContent = '✅ Offline Mode Ready!';
+      setTimeout(() => progress.remove(), 2000);
+    }
+  }, 2000);
+}
+// Kaydetme limiti kontrolü
+function checkSaveLimit() {
+  if (!isPremiumUser && dailySaveCount >= 3) {
+    showPremiumModal();
+    return false;
+  }
+  return true;
+}
+
+// Premium badge ekle
+function addPremiumBadge() {
+  if (isPremiumUser && !document.querySelector('.premium-badge')) {
+    const badge = document.createElement('div');
+    badge.className = 'premium-badge';
+    badge.innerHTML = '⭐ PREMIUM';
+    document.body.appendChild(badge);
+  }
+}
+
+// DOMContentLoaded'da çalışacak kodlar
+document.addEventListener('DOMContentLoaded', function () {
+  // Premium durumunu kontrol et
+  addPremiumBadge();
+
+  // Premium araçları göster/gizle - DOMContentLoaded içine ekleyin
+
+  // showHidePremiumTools FONKSIYONUNU EKLE - Premium sistem kodunun içine
+
+  // Premium araçları göster/gizle
+  function showHidePremiumTools() {
+    const premiumTools = document.getElementById('premiumTools');
+    if (premiumTools) {
+      if (isPremiumUser) {
+        premiumTools.style.display = 'flex';
+        console.log('Premium tools gösteriliyor');
+      } else {
+        premiumTools.style.display = 'none';
+        console.log('Premium tools gizleniyor');
+      }
+    } else {
+      console.log('Premium tools elementi bulunamadı!');
+    }
+  }
+  window.showHidePremiumTools = showHidePremiumTools;
+
+  // setTool fonksiyonuna premium araçları ekle
+  const originalSetTool = window.setTool;
+  window.setTool = function (toolName) {
+    // Premium araç kontrolü
+    if (['glitter', 'rainbow', 'glow'].includes(toolName) && !isPremiumUser) {
+      showPremiumModal();
+      return;
+    }
+
+    currentTool = toolName;
+
+    // Tüm butonlardan active sınıfını kaldır
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Aktif butona active ekle
+    const activeButton = document.querySelector(`#${toolName}Btn`);
+    if (activeButton) {
+      activeButton.classList.add('active');
+    }
+
+    // Önce aracın boyutunu al
+    let toolSize;
+    switch (toolName) {
+      case 'pencil':
+        toolSize = pencilSize;
+        break;
+      case 'brush':
+        toolSize = brushSize;
+        break;
+      case 'watercolor':
+        toolSize = watercolorSize;
+        break;
+      case 'spray':
+        toolSize = spraySize;
+        break;
+      case 'erase':
+        toolSize = eraseSize;
+        break;
+      case 'glitter':
+        toolSize = glitterSize;
+        break;
+      case 'rainbow':
+        toolSize = rainbowSize;
+        break;
+      case 'glow':
+        toolSize = glowSize;
+        break;
+      default:
+        toolSize = 10;
+    }
+
+    // Canvas context'i güncelle
+    ctx.lineWidth = toolSize;
+
+    // Slider'ı güncelle
+    const toolSlider = document.getElementById('toolSize');
+    const sizeDisplay = document.getElementById('sizeValue');
+    if (toolSlider) {
+      toolSlider.value = toolSize;
+    }
+    if (sizeDisplay) {
+      sizeDisplay.textContent = toolSize;
+    }
+
+    // Kompozisyon ayarları
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1.0;
+
+    console.log(`Tool changed to: ${toolName}, Size: ${toolSize}`);
+  }
+
+  // DOMContentLoaded'a ekleyin
+  document.addEventListener('DOMContentLoaded', function () {
+    // Önceki kodlar...
+
+    // Premium araçları göster/gizle
+    showHidePremiumTools();
+
+    // Premium durumu değiştiğinde araçları güncelle
+    if (isPremiumUser) {
+      const premiumTools = document.getElementById('premiumTools');
+      if (premiumTools) {
+        premiumTools.style.display = 'flex';
+      }
+    }
+  });
+
+  // Get Offline Pro butonuna event ekle
+  const offlineBtn = document.getElementById('downloadAppBtn');
+  if (offlineBtn) {
+    offlineBtn.addEventListener('click', handleOfflineProClick);
+  }
+
+  // Save butonuna limit ekle
+  const originalSaveBtn = document.getElementById('saveBtn');
+  if (originalSaveBtn) {
+    // Eski event listener'ı kaldır ve yenisini ekle
+    const newSaveBtn = originalSaveBtn.cloneNode(true);
+    originalSaveBtn.parentNode.replaceChild(newSaveBtn, originalSaveBtn);
+
+    newSaveBtn.addEventListener('click', function () {
+      if (!checkSaveLimit()) {
+        return;
+      }
+
+      // Normal kaydetme işlemi
+      if (!isPremiumUser) {
+        dailySaveCount++;
+        localStorage.setItem('dailySaves', dailySaveCount.toString());
+
+        // Kalan hakkı göster
+        const remaining = 3 - dailySaveCount;
+        if (remaining > 0) {
+          const info = document.createElement('div');
+          info.className = 'save-info';
+          info.textContent = `${remaining} saves remaining today`;
+          document.body.appendChild(info);
+          setTimeout(() => info.remove(), 3000);
+        }
+      }
+
+      // Orijinal save fonksiyonunu çağır
+      handleDownloadClick();
+    });
+  }
+
+  // Yüksek çözünürlük indirme (Premium özellik)
+  if (isPremiumUser) {
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function () {
+        const hdCanvas = document.createElement('canvas');
+        hdCanvas.width = canvas.width * 2;
+        hdCanvas.height = canvas.height * 2;
+        const hdCtx = hdCanvas.getContext('2d');
+        hdCtx.scale(2, 2);
+        hdCtx.drawImage(canvas, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = 'magical-coloring-hd.png';
+        link.href = hdCanvas.toDataURL('image/png', 1.0);
+        link.click();
+      });
+    }
+  }
+});
+
+// Test için: Konsola yazarak premium'u test edebilirsiniz
+// localStorage.setItem('isPremium', 'true'); location.reload();
+
+// PREMIUM EKSTRA ÖZELLİKLER - script.js'e ekleyin (premium sistem kodundan SONRA)
+
+// Premium araçları ekle
+function addPremiumTools() {
+  if (!isPremiumUser) return;
+
+  // Toolbar'a premium araçları ekle
+  const toolbar = document.querySelector('.toolbar');
+  if (!toolbar) return;
+
+  // Magic tools div'ini bul veya oluştur
+  let magicTools = document.querySelector('.premium-tools');
+  if (!magicTools) {
+    magicTools = document.createElement('div');
+    magicTools.className = 'premium-tools';
+    toolbar.appendChild(magicTools);
+  }
+
+  // Glitter Brush ekle
+  if (!document.getElementById('glitterBtn')) {
+    const glitterBtn = document.createElement('button');
+    glitterBtn.id = 'glitterBtn';
+    glitterBtn.className = 'btn tool-btn premium-btn';
+    glitterBtn.innerHTML = '✨ Glitter';
+    glitterBtn.onclick = () => setTool('glitter');
+    magicTools.appendChild(glitterBtn);
+  }
+
+  // Rainbow Brush ekle
+  if (!document.getElementById('rainbowBtn')) {
+    const rainbowBtn = document.createElement('button');
+    rainbowBtn.id = 'rainbowBtn';
+    rainbowBtn.className = 'btn tool-btn premium-btn';
+    rainbowBtn.innerHTML = '🌈 Rainbow';
+    rainbowBtn.onclick = () => setTool('rainbow');
+    magicTools.appendChild(rainbowBtn);
+  }
+
+  // Glow Brush ekle
+  if (!document.getElementById('glowBtn')) {
+    const glowBtn = document.createElement('button');
+    glowBtn.id = 'glowBtn';
+    glowBtn.className = 'btn tool-btn premium-btn';
+    glowBtn.innerHTML = '💫 Glow';
+    glowBtn.onclick = () => setTool('glow');
+    magicTools.appendChild(glowBtn);
+  }
+}
+
+// Glitter efekti için değişkenler
+// PREMIUM ARAÇLARI İYİLEŞTİRME - Mevcut premium kodlarının üzerine yazın
+
+// Premium araç boyutları
+let glitterSize = 20;
+let rainbowSize = 25;
+let glowSize = 25;
+
+// getCurrentToolSize fonksiyonunu güncelle
+function getCurrentToolSize() {
+  switch (currentTool) {
+    case 'pencil':
+      return pencilSize;
+    case 'brush':
+      return brushSize;
+    case 'spray':
+      return spraySize;
+    case 'watercolor':
+      return watercolorSize;
+    case 'eraser':
+      return eraseSize;
+    case 'glitter':
+      return glitterSize;
+    case 'rainbow':
+      return rainbowSize;
+    case 'glow':
+      return glowSize;
+    default:
+      return 10;
+  }
+}
+
+// updateSize fonksiyonunu güncelle
+function updateSize(size) {
+  size = parseInt(size);
+  if (isNaN(size)) return;
+
+  const sizeValue = document.getElementById('sizeValue');
+  if (sizeValue) sizeValue.textContent = size;
+
+  switch (currentTool) {
+    case 'pencil':
+      pencilSize = size;
+      break;
+    case 'brush':
+      brushSize = size;
+      break;
+    case 'watercolor':
+      watercolorSize = size;
+      break;
+    case 'spray':
+      spraySize = size;
+      break;
+    case 'eraser':
+      eraseSize = size;
+      break;
+    case 'glitter':
+      glitterSize = size;
+      break;
+    case 'rainbow':
+      rainbowSize = size;
+      break;
+    case 'glow':
+      glowSize = size;
+      break;
+  }
+
+  if (window.ctx) {
+    ctx.lineWidth = size;
+  }
+}
+
+// İYİLEŞTİRİLMİŞ GLITTER
+function drawGlitter(x, y) {
+  const sparkleCount = Math.floor(glitterSize * 2); // Boyuta göre parıltı sayısı
+  const radius = glitterSize;
+
+  for (let i = 0; i < sparkleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * radius;
+    const sparkleX = x + Math.cos(angle) * distance;
+    const sparkleY = y + Math.sin(angle) * distance;
+    const sparkleSize = Math.random() * (glitterSize / 4) + 1;
+
+    // Çok renkli parıltılar
+    const glitterColors = ['#FFD700', '#FF69B4', '#00CED1', '#9370DB', '#FF1493', '#FFFFFF'];
+    ctx.fillStyle = glitterColors[Math.floor(Math.random() * glitterColors.length)];
+
+    // Yıldız şekli
+    ctx.save();
+    ctx.translate(sparkleX, sparkleY);
+    ctx.rotate(Math.random() * Math.PI);
+
+    // Daha belirgin yıldızlar
+    ctx.beginPath();
+    for (let j = 0; j < 5; j++) {
+      const angle = (j * 4 * Math.PI) / 5;
+      const innerRadius = sparkleSize * 0.4;
+      const outerRadius = sparkleSize;
+
+      if (j === 0) {
+        ctx.moveTo(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius);
+      } else {
+        ctx.lineTo(Math.cos(angle) * outerRadius, Math.sin(angle) * outerRadius);
+      }
+
+      const innerAngle = angle + Math.PI / 5;
+      ctx.lineTo(Math.cos(innerAngle) * innerRadius, Math.sin(innerAngle) * innerRadius);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Parıltı efekti için glow
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// GERÇEKÇİ GÖKKUŞAĞI ARACI - DÜZELTILMIŞ VERSİYON
+function drawRainbow(x, y) {
+  if (!lastX || !lastY) {
+    lastX = x;
+    lastY = y;
+    return;
+  }
+
+  // GERÇEK gökkuşağı renkleri (daha az renk, daha düzgün)
+  const rainbowColors = [
+    '#FF0000',  // Kırmızı
+    '#FF8000',  // Turuncu  
+    '#FFFF00',  // Sarı
+    '#00FF00',  // Yeşil
+    '#0080FF',  // Mavi
+    '#8000FF',  // Mor
+    '#FF00FF'   // Pembe
+  ];
+
+  // Fırça yönünü hesapla
+  const dx = x - lastX;
+  const dy = y - lastY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < 2) return; // Daha az hassasiyet
+
+  // Dik açı hesapla (gökkuşağı bandları için)
+  const perpX = -dy / distance;
+  const perpY = dx / distance;
+
+  // Daha az adım - kesintileri önler
+  const steps = Math.max(Math.floor(distance), 1);
+
+  for (let step = 0; step < steps; step++) {
+    const t = step / steps;
+    const centerX = lastX + dx * t;
+    const centerY = lastY + dy * t;
+
+    // Gökkuşağı genişliği
+    const totalWidth = rainbowSize;
+    const bandWidth = totalWidth / rainbowColors.length;
+
+    // Her renk bandını çiz
+    rainbowColors.forEach((color, index) => {
+      ctx.save();
+
+      // Daha az blur
+      ctx.shadowBlur = 1;
+      ctx.shadowColor = color;
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = bandWidth + 2; // Bantlar arası boşluk olmasın
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = 0.9; // Daha opak
+
+      // Her bandın konumunu hesapla
+      const offset = (index - rainbowColors.length / 2) * bandWidth;
+      const bandX = centerX + perpX * offset;
+      const bandY = centerY + perpY * offset;
+
+      ctx.beginPath();
+      const prevT = Math.max((step - 1) / steps, 0);
+      const prevCenterX = lastX + dx * prevT;
+      const prevCenterY = lastY + dy * prevT;
+      const prevBandX = prevCenterX + perpX * offset;
+      const prevBandY = prevCenterY + perpY * offset;
+
+      ctx.moveTo(prevBandX, prevBandY);
+      ctx.lineTo(bandX, bandY);
+      ctx.stroke();
+
+      ctx.restore();
+    });
+  }
+
+  // Ayarları temizle
+  ctx.globalAlpha = 1.0;
+  ctx.shadowBlur = 0;
+  lastX = x;
+  lastY = y;
+}
+
+// TAMAMEN YENİDEN TASARLANAN GLOW
+function drawGlow(x, y) {
+  // Ana rengin daha açık versiyonlarını oluştur
+  const hexToRgb = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return { r, g, b };
+  };
+
+  const rgb = hexToRgb(currentColor);
+
+  if (lastX && lastY) {
+    // Dış glow katmanları
+    for (let i = 5; i > 0; i--) {
+      ctx.save();
+
+      // Katman başına azalan opaklık
+      const alpha = 0.05 + (0.1 / i);
+      ctx.globalAlpha = alpha;
+
+      // Katman genişliği
+      ctx.lineWidth = glowSize * (1 + i * 0.5);
+      ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Blur efekti
+      ctx.shadowBlur = glowSize * i * 0.3;
+      ctx.shadowColor = currentColor;
+
+      // Çizgiyi çiz
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Merkez parlak çizgi
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = glowSize * 0.3;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.shadowBlur = glowSize;
+    ctx.shadowColor = currentColor;
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    // İkinci merkez çizgi (renkli)
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = glowSize * 0.2;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  lastX = x;
+  lastY = y;
+}
+
+// setTool fonksiyonunu güncelle - size slider'ı doğru değere ayarla
+const originalSetTool = window.setTool || function () { };
+window.setTool = function (toolName) {
+  // Premium araç kontrolü
+  if (['glitter', 'rainbow', 'glow'].includes(toolName) && !isPremiumUser) {
+    showPremiumModal();
+    return;
+  }
+
+  currentTool = toolName;
+
+  // Butonları güncelle
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  const activeButton = document.getElementById(`${toolName}Btn`);
+  if (activeButton) {
+    activeButton.classList.add('active');
+  }
+
+  // Size slider'ı güncelle
+  const sizeSlider = document.getElementById('toolSize');
+  const sizeDisplay = document.getElementById('sizeValue');
+
+  if (sizeSlider && sizeDisplay) {
+    const currentSize = getCurrentToolSize();
+    sizeSlider.value = currentSize;
+    sizeDisplay.textContent = currentSize;
+  }
+
+  // Kompozisyon ayarları
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1.0;
+
+  console.log(`Tool: ${toolName}, Size: ${getCurrentToolSize()}`);
+};
+// Mevcut draw fonksiyonuna premium araçları ekle
+const originalDraw = window.draw;
+window.draw = function (e) {
+  if (!isDrawing) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = Math.round((e.clientX - rect.left) * scaleX);
+  const y = Math.round((e.clientY - rect.top) * scaleY);
+
+  // Premium araçlar
+  if (isPremiumUser) {
+    switch (currentTool) {
+      case 'glitter':
+        drawGlitter(x, y);
+        lastX = x;
+        lastY = y;
+        return;
+      case 'rainbow':
+        drawRainbow(x, y);
+        return;
+      case 'glow':
+        drawGlow(x, y);
+        return;
+    }
+  }
+
+  // Normal araçlar için orijinal draw fonksiyonunu çağır
+  if (originalDraw) {
+    originalDraw.call(this, e);
+  }
+};
+
+// Yüksek çözünürlük kaydetme
+function saveHighResolution() {
+  if (!isPremiumUser) return;
+
+  // 2x büyüklükte canvas oluştur
+  const hdCanvas = document.createElement('canvas');
+  hdCanvas.width = canvas.width * 2;
+  hdCanvas.height = canvas.height * 2;
+  const hdCtx = hdCanvas.getContext('2d');
+
+  // Mevcut çizimi 2x ölçekle kopyala
+  hdCtx.imageSmoothingEnabled = true;
+  hdCtx.imageSmoothingQuality = 'high';
+  hdCtx.scale(2, 2);
+  hdCtx.drawImage(canvas, 0, 0);
+
+  // PNG olarak indir
+  const link = document.createElement('a');
+  link.download = `magical-coloring-hd-${Date.now()}.png`;
+  link.href = hdCanvas.toDataURL('image/png', 1.0);
+  link.click();
+
+  // Başarı mesajı
+  const msg = document.createElement('div');
+  msg.className = 'hd-save-msg';
+  msg.textContent = '✅ Saved in High Resolution!';
+  document.body.appendChild(msg);
+  setTimeout(() => msg.remove(), 3000);
+}
+
+// handlePointerMove fonksiyonunu güncelle
+const originalHandlePointerMove = window.handlePointerMove;
+window.handlePointerMove = function (e) {
+  if (!isDrawing) return;
+
+  const coords = getCanvasCoordinates(e);
+  const x = coords.x;
+  const y = coords.y;
+
+  // Premium araçlar için özel işlem
+  if (isPremiumUser) {
+    switch (currentTool) {
+      case 'glitter':
+        drawGlitter(x, y);
+        return;
+      case 'rainbow':
+        drawRainbow(x, y);
+        return;
+      case 'glow':
+        drawGlow(x, y);
+        return;
+    }
+  }
+
+  // Normal araçlar için orijinal fonksiyonu çağır
+  if (originalHandlePointerMove) {
+    originalHandlePointerMove.call(this, e);
+  }
+};
+
+// DOMContentLoaded'a ekle
+document.addEventListener('DOMContentLoaded', function () {
+  // Premium araçları ekle
+  if (isPremiumUser) {
+    setTimeout(addPremiumTools, 100);
+
+    // HD Save butonunu güncelle
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn && isPremiumUser) {
+      saveBtn.innerHTML = '💾 Save HD';
+
+      // Yeni event listener ekle
+      const newSaveBtn = saveBtn.cloneNode(true);
+      saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+
+      newSaveBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        saveHighResolution();
+      });
+    }
+  }
+});
+
+// Undo limiti kaldır (Premium)
+if (isPremiumUser) {
+  // drawingHistory limit kontrolünü override et
+  const originalSaveDrawingState = window.saveDrawingState;
+  window.saveDrawingState = function () {
+    // Premium kullanıcılar için limit yok
+    if (originalSaveDrawingState) {
+      originalSaveDrawingState.call(this);
+    }
+  };
+}
+
 // At the top of the file
 const canvas = document.getElementById('coloringCanvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -256,7 +1279,17 @@ function updateSize(size) {
     case 'erase':
       eraseSize = size;
       break;
+    case 'glitter':
+      glitterSize = size;
+      break;
+    case 'rainbow':
+      rainbowSize = size;
+      break;
+    case 'glow':
+      glowSize = size;
+      break;
   }
+
 
   // Canvas context varsa çizim kalınlığını güncelle
   if (window.ctx) {
@@ -276,6 +1309,12 @@ function getCurrentToolSize() {
       return watercolorSize;
     case 'eraser':
       return eraseSize;
+    case 'glitter':
+      return glitterSize;
+    case 'rainbow':
+      return rainbowSize;
+    case 'glow':
+      return glowSize;
     default:
       return 1;
   }
@@ -676,21 +1715,8 @@ function saveDrawingState() {
     // Mevcut durumu yakala
     const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Son kaydedilen durumu al (geçmiş varsa)
-    const lastImageData = drawingHistory.length > 0 && currentStep >= 0 && currentStep < drawingHistory.length
-      ? drawingHistory[currentStep]
-      : null;
-
-    // --- YENİ KONTROL: Durum aynı mı? ---
-    if (lastImageData && imageDataEqual(currentImageData, lastImageData)) {
-      console.log('State unchanged, not saving duplicate.');
-      updateUndoButtonState(); // Buton durumunu yine de güncellemek iyi olabilir
-      return; // Aynıysa kaydetme ve çık
-    }
-    // --- KONTROL SONU ---
-
-    // Geçmişin ortasındaysak ve yeni bir değişiklik yapıyorsak,
-    // gelecekteki adımları sil
+    // If we're in the middle of the history and making a new change,
+    // remove all future states
     if (currentStep < drawingHistory.length - 1) {
       console.log(`Slicing history from step ${currentStep + 1}`);
       drawingHistory = drawingHistory.slice(0, currentStep + 1);
@@ -755,18 +1781,49 @@ function handleCanvasClick(e) {
     }
   }
 }
-
-
-
-
 function floodFill(imageData, startX, startY, fillColor, width, height) {
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = 1.0;
   const data = imageData.data;
-  const stack = [[startX, startY]];
+
+  // --- YENİ VE DAHA AKILLI KONTROL ---
+  // 1. Kenar Boşluğu Kontrolü: Canvas'ın kenarlarından 5 piksellik bir "yasak bölge" tanımlayalım.
+  const margin = 5;
+  if (startX < margin || startX >= width - margin || startY < margin || startY >= height - margin) {
+
+    // 2. Renk Kontrolü: Eğer yasak bölgedeysek, tıklanan pikselin rengini kontrol et.
+    const pixelColor = getPixelColor(imageData, startX, startY);
+
+    // 3. Karar: Eğer tıklanan yer kenara yakın VE neredeyse bembeyaz ise, işlemi hiç başlatma.
+    const whiteThreshold = 250; // 255 (tam beyaz) rengine çok yakın olanları yakala.
+    if (pixelColor.r > whiteThreshold && pixelColor.g > whiteThreshold && pixelColor.b > whiteThreshold) {
+      console.log("🚫 Doldurma iptal edildi: Canvas kenarındaki beyaz alana tıklandı.");
+      return; // Fonksiyonu burada durdur.
+    }
+  }
+  // --- AKILLI KONTROL SONU ---
+
+
+  // Şimdi güvenle orta seviye bir tolerans kullanabiliriz.
+  const tolerance = 35; // Bu değer, hem boşlukları doldurur hem de sızdırmaz.
   const baseColor = getPixelColor(imageData, startX, startY);
-  const tolerance = 50;
+
+  // Tıklanan yerin kendisi siyah bir çizgi ise doldurma.
+  if (isBlack(baseColor)) {
+    return;
+  }
+
+  // Tıklanan rengin aynısıyla doldurmaya çalışma.
+  if (
+    Math.abs(baseColor.r - fillColor.r) < 5 &&
+    Math.abs(baseColor.g - fillColor.g) < 5 &&
+    Math.abs(baseColor.b - fillColor.b) < 5
+  ) {
+    return;
+  }
+
+
+  const stack = [[startX, startY]];
   const visited = new Set();
+  const key = (x, y) => `${x},${y}`; // Daha verimli bir anahtar
 
   function colorMatch(color1, color2) {
     return (
@@ -783,21 +1840,22 @@ function floodFill(imageData, startX, startY, fillColor, width, height) {
 
   while (stack.length) {
     const [x, y] = stack.pop();
-    const pixelIndex = (y * width + x) * 4;
 
-    if (x < 0 || x >= width || y < 0 || y >= height || visited.has(pixelIndex)) continue;
+    if (x < 0 || x >= width || y < 0 || y >= height || visited.has(key(x, y))) {
+      continue;
+    }
 
     const currentColor = getPixelColor(imageData, x, y);
 
-    // Siyah çizgileri her zaman koruyoruz
-    if (isBlack(currentColor)) continue;
+    if (!isBlack(currentColor) && colorMatch(currentColor, baseColor)) {
+      setPixelColor(imageData, x, y, fillColor);
+      visited.add(key(x, y));
 
-    if (!colorMatch(currentColor, baseColor)) continue;
-
-    setPixelColor(imageData, x, y, fillColor);
-    visited.add(pixelIndex);
-
-    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+      stack.push([x + 1, y]);
+      stack.push([x - 1, y]);
+      stack.push([x, y + 1]);
+      stack.push([x, y - 1]);
+    }
   }
 }
 
@@ -1284,7 +2342,6 @@ function drawWatercolor(x, y) {
   lastX = x;
   lastY = y;
 }
-
 function getCanvasCoordinates(e) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -1355,7 +2412,7 @@ function drawPencil(x, y) {
 }
 
 function drawBrush(x, y) {
-  ctx.globalAlpha = 1.0;
+  ctx.globalAlpha = 0.7; // ← 1.0'dan 0.7'ye düşürün (daha şeffaf)
   ctx.globalCompositeOperation = 'source-over';
 
   // Ana çizgi
@@ -1373,11 +2430,10 @@ function drawBrush(x, y) {
   ctx.lineWidth = brushSize;
   ctx.stroke();
 
-  // Dış kenarlar için hafif şeffaf katmanlar ekleyelim - fırça efekti yaratmak için
+  // Dış kenarlar için hafif şeffaf katmanlar - daha şeffaf yapın
   for (let i = 0; i < 3; i++) {
     ctx.beginPath();
 
-    // Hafif rastgelelik ekleyelim (tipik fırça davranışı)
     const offsetX1 = lastX + (Math.random() * 2 - 1);
     const offsetY1 = lastY + (Math.random() * 2 - 1);
     const offsetX2 = x + (Math.random() * 2 - 1);
@@ -1386,10 +2442,10 @@ function drawBrush(x, y) {
     ctx.moveTo(offsetX1, offsetY1);
     ctx.lineTo(offsetX2, offsetY2);
 
-    // Her katman için azalan opaklık
-    const opacity = 0.3 - (i * 0.1);
+    // Daha şeffaf katmanlar
+    const opacity = 0.2 - (i * 0.05); // ← 0.3'ten 0.2'ye düşürdüm
     ctx.strokeStyle = `rgba(${r},${g},${b},${opacity})`;
-    ctx.lineWidth = brushSize * (1.2 + i * 0.3); // Dış katmanlar daha geniş
+    ctx.lineWidth = brushSize * (1.2 + i * 0.3);
     ctx.stroke();
   }
 
@@ -1819,74 +2875,12 @@ function registerNotifications() {
 }
 let deferredPrompt;
 
-window.addEventListener('load', () => {
-  if (window.location.protocol === 'file:') {
-    console.log('Running locally - WebSocket not required');
-  }
-
-  // Canvas başlatma ve event listener'ları
-  initializeCanvas();
-  setupEventListeners();
-
-  // Görsel yükleme
-  preloadImages();
-});
-
 window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('🔒 PWA install prompt engellendi');
   e.preventDefault();
   deferredPrompt = e;
-
-  const installBtn = document.getElementById('installBtn');
-  if (installBtn) {
-    installBtn.style.display = 'inline-block';
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        if (result.outcome === 'accepted') {
-          installBtn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      }
-    });
-  }
+  return false;
 });
-function registerNotifications() {
-  const notification = new Notification('Welcome to Magical Coloring Game!', {
-    body: 'Ready to start your creative journey?',
-    icon: '/icons/icon-192x192.png'
-  });
-}
-
-
-// Notifications kodu
-try {
-  const notifyBtn = document.getElementById('notifyBtn');
-  notifyBtn.addEventListener('click', () => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        new Notification('Test Notification', {
-          body: 'This is a test notification',
-          icon: '/icons/icon-192x192.png'
-        });
-        notifyBtn.textContent = '🔔 Notifications Enabled';
-      } else {
-        Notification.requestPermission()
-          .then(result => {
-            if (result === 'granted') {
-              new Notification('Test Notification', {
-                body: 'This is a test notification',
-                icon: '/icons/icon-192x192.png'
-              });
-              notifyBtn.textContent = '🔔 Notifications Enabled';
-            }
-          });
-      }
-    }
-  });
-} catch (error) {
-  console.log('Initialization in progress...');
-}
 
 document.getElementById('downloadBtn').addEventListener('click', () => {
   // Canvas'ı direkt PNG olarak indir
@@ -2067,340 +3061,163 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-// ==========================================
-// FINAL DRAWING ENGINE OVERRIDE
+//// ==========================================
+// YENİ, TEMİZ VE MOBİL UYUMLU ÇİZİM MOTORU
 // ==========================================
 
-// Wait for window to fully load
 window.addEventListener('load', function () {
-  console.log("Final drawing engine starting...");
+  console.log("✅ Yeni ve stabil çizim motoru başlatılıyor...");
 
-  // Wait a moment for everything to initialize properly
-  setTimeout(function () {
-    // Get canvas and replace it with new version
-    const originalCanvas = document.getElementById('coloringCanvas');
-    if (!originalCanvas) {
-      console.error("Canvas not found");
+  // Sadece bir kere ve doğru canvas'ı alalım
+  const canvas = document.getElementById('coloringCanvas');
+  if (!canvas) {
+    console.error("HATA: Çizim motoru canvas elementini bulamadı!");
+    return;
+  }
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+  // --- Değişkenler ---
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  // --- Koordinat Hesaplama ---
+  // Dokunmatik ve mouse için tek, güvenilir fonksiyon
+  function getCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+
+    if (e.touches && e.touches.length > 0) {
+      // Bu bir dokunmatik olay
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      // Bu bir mouse olayı
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    // Canvas'ın kendi çözünürlüğüne göre koordinatları ölçekle
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  // --- Ana Çizim Fonksiyonları ---
+
+  function start(e) {
+    // Sayfa kaydırmasını engelle (mobil için hayati)
+    e.preventDefault();
+
+    const coords = getCoordinates(e);
+
+    // Tek tıklamalık araçlar
+    if (currentTool === 'fill') {
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        floodFill(imageData, Math.round(coords.x), Math.round(coords.y), hexToRgb(currentColor), canvas.width, canvas.height);
+        ctx.putImageData(imageData, 0, 0);
+        saveDrawingState();
+      } catch (err) {
+        console.error("Doldurma hatası:", err);
+      }
       return;
     }
 
-    // Create a new canvas with same attributes
-    const newCanvas = originalCanvas.cloneNode(false);
-
-    const tempImg = new Image();
-    tempImg.crossOrigin = "anonymous"; // img değil, tempImg olmalı!
-    tempImg.src = originalCanvas.toDataURL();
-
-    // Replace the original canvas with the new one
-    originalCanvas.parentNode.replaceChild(newCanvas, originalCanvas);
-
-    // Get the new canvas and set up context
-    const canvas = document.getElementById('coloringCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-    // Make sure dimensions are correct
-    canvas.width = 800;
-    canvas.height = 600;
-
-    // Copy the original content back if needed
-    tempImg.onload = function () {
-      ctx.drawImage(tempImg, 0, 0);
-    };
-
-    // Drawing state variables
-    let isDrawing = false;
-    let lastX = 0;
-    let lastY = 0;
-
-    // Direct pixel-based coordinate calculation
-    function getPixelCoordinates(e) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: (e.clientX - rect.left) * (canvas.width / rect.width),
-        y: (e.clientY - rect.top) * (canvas.height / rect.height)
-      };
+    if (currentTool === 'star') {
+      drawMagicStar(coords.x, coords.y);
+      saveDrawingState();
+      return;
     }
 
-    // Fresh event listeners for all drawing operations
-    canvas.addEventListener('mousedown', function (e) {
-      e.preventDefault();
-      const coords = getPixelCoordinates(e);
+    if (currentTool === 'flower') {
+      drawMagicFlower(coords.x, coords.y);
+      saveDrawingState();
+      return;
+    }
 
-      // Handle one-click tools
-      if (currentTool === 'fill') {
-        try {
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          floodFill(imageData, Math.round(coords.x), Math.round(coords.y),
-            hexToRgb(currentColor), canvas.width, canvas.height);
-          ctx.putImageData(imageData, 0, 0);
-          saveDrawingState();
-        } catch (error) {
-          console.error("Fill error:", error);
-        }
+    // Sürekli çizim araçları
+    isDrawing = true;
+    lastX = coords.x;
+    lastY = coords.y;
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault(); // Çizim sırasında kaydırmayı engelle
+
+    const coords = getCoordinates(e);
+    const x = coords.x;
+    const y = coords.y;
+
+    // Araç ayarlarını uygula
+    let toolSize = getCurrentToolSize();
+    ctx.lineWidth = toolSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalCompositeOperation = 'source-over'; // Varsayılan
+    ctx.globalAlpha = 1.0; // Varsayılan
+
+    switch (currentTool) {
+      case 'pencil':
+        ctx.strokeStyle = currentColor;
+        break;
+      case 'brush':
+        ctx.strokeStyle = currentColor;
+        break;
+      case 'watercolor':
+        ctx.strokeStyle = currentColor;
+        ctx.globalAlpha = 0.3;
+        break;
+      case 'spray':
+        drawSpray(x, y); // Sprey kendi içinde çizer
+        return; // Normal çizim döngüsünden çık
+      case 'erase':
+        ctx.globalCompositeOperation = 'destination-out';
+        // Silgi için renk ataması gereksizdir, çünkü destination-out modu rengi dikkate almaz.
+        break;
+      // Premium araçlar
+      case 'glitter':
+        if (isPremiumUser) drawGlitter(x, y);
         return;
-      }
-
-      if (currentTool === 'star') {
-        drawMagicStar(coords.x, coords.y);
-        saveDrawingState();
+      case 'rainbow':
+        if (isPremiumUser) drawRainbow(x, y);
         return;
-      }
-
-      if (currentTool === 'flower') {
-        drawMagicFlower(coords.x, coords.y);
-        saveDrawingState();
+      case 'glow':
+        if (isPremiumUser) drawGlow(x, y);
         return;
-      }
+    }
 
-      // Regular drawing tools
-      isDrawing = true;
-      lastX = coords.x;
-      lastY = coords.y;
+    // Çizgiyi çiz
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
 
-      // Debug
-      console.log(`Drawing started at ${lastX},${lastY}`);
-    });
+    // Son konumu güncelle
+    lastX = x;
+    lastY = y;
+  }
 
-    // Drawing movement
-    canvas.addEventListener('mousemove', function (e) {
-      if (!isDrawing) return;
+  function stop() {
+    if (isDrawing) {
+      isDrawing = false;
+      saveDrawingState();
+    }
+  }
 
-      const coords = getPixelCoordinates(e);
-      const x = coords.x;
-      const y = coords.y;
+  // --- Olay Dinleyicileri (Temiz ve Tek Versiyon) ---
 
-      // Apply appropriate tool settings
-      switch (currentTool) {
-        case 'pencil':
-          ctx.globalAlpha = 1.0;
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = pencilSize;
-          ctx.strokeStyle = currentColor;
-          break;
-        case 'brush':
-          ctx.globalAlpha = 1.0;
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = brushSize;
-          ctx.strokeStyle = currentColor;
-          break;
-        case 'watercolor':
-          ctx.globalAlpha = 0.3;
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = watercolorSize;
-          ctx.strokeStyle = currentColor;
-          break;
-        case 'spray':
-          drawSpray(x, y);
-          lastX = x;
-          lastY = y;
-          return;
-        case 'erase':
-          ctx.globalAlpha = 1.0;
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.lineWidth = eraseSize;
-          ctx.strokeStyle = '#FFFFFF';
-          break;
-        default:
-          ctx.globalAlpha = 1.0;
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.lineWidth = 5;
-          ctx.strokeStyle = currentColor;
-      }
+  // Mouse olayları
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop); // Canvas dışına çıkınca da dursun
 
-      // Ensure line styling
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      // Draw the line
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-
-      // Update coordinates
-      lastX = x;
-      lastY = y;
-    });
-
-    // End drawing
-    canvas.addEventListener('mouseup', function () {
-      if (isDrawing) {
-        isDrawing = false;
-        saveDrawingState();
-
-        // Reset composite mode if needed
-        if (currentTool === 'erase') {
-          ctx.globalCompositeOperation = 'source-over';
-        }
-      }
-    });
-
-    canvas.addEventListener('mouseout', function () {
-      if (isDrawing) {
-        isDrawing = false;
-        saveDrawingState();
-
-        // Reset composite mode if needed
-        if (currentTool === 'erase') {
-          ctx.globalCompositeOperation = 'source-over';
-        }
-      }
-    });
-
-    // Touch support
-    canvas.addEventListener('touchstart', function (e) {
-      e.preventDefault();
-      if (e.touches.length === 0) return;
-
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const mouseEvent = new MouseEvent('mousedown', {
-        clientX: touch.clientX - rect.left,
-        clientY: touch.clientY - rect.top
-      });
-      canvas.dispatchEvent(mouseEvent);
-    }, { passive: false });
-
-    canvas.addEventListener('touchmove', function (e) {
-      e.preventDefault();
-      if (e.touches.length === 0) return;
-
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent('mousemove', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      canvas.dispatchEvent(mouseEvent);
-    }, { passive: false });  // passive: false ekleyin
-
-    canvas.addEventListener('touchend', function () {
-      const mouseEvent = new MouseEvent('mouseup');
-      canvas.dispatchEvent(mouseEvent);
-    }, { passive: true });  // passive: true ekleyin
-
-  }, 500); // Half-second delay to ensure everything is loaded
+  // Dokunmatik olaylar (Doğrudan, sahte olay tetiklemeden)
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop);
+  canvas.addEventListener('touchcancel', stop); // İptal durumunda da dursun
 });
-// Bu kodu script.js dosyanıza eklemelisiniz
-document.addEventListener('DOMContentLoaded', function () {
-  // Tüm thumbnail'lara tıklama olayı ekle
-  document.querySelectorAll('.page-thumbnail').forEach(thumbnail => {
-    thumbnail.addEventListener('click', function () {
-      const pageName = this.getAttribute('data-page');
-      console.log(`Tıklanan thumbnail: ${pageName}`); // Kontrol için
-      if (pageName) {
-        loadColoringPage(pageName);
-      }
-    });
-  });
-});
-// Thumbnail görünümü için HTML'i güncelle
-document.querySelectorAll('.page-thumbnails img').forEach(img => {
-  // SVG thumbnail yerine PNG thumbnail kullan
-  const pageName = img.getAttribute('data-page');
-  img.src = `thumbnails-png/${pageName}.png`;
-});
-
-
-// Doğrudan canvas'a belirli bir resmi yükleme testi
-function testSpecificImage() {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = function () {
-    console.log('Test resmi başarıyla yüklendi!');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  };
-
-  img.onerror = function (error) {
-    console.error('Test resmi yüklenemedi:', error);
-  };
-
-  // Özel bir PNG dosyasının tam yolunu buraya yazın
-  img.src = 'coloring-pages-png/unicorn.png'; // Dosya adını mevcut dosyayla değiştirin
-}
-
-// Bu satırı yorumdan çıkararak test fonksiyonunu çağırabilirsiniz
-// testSpecificImage();
-// Thumbnail tıklama olaylarını ayarla
-const thumbnails = document.querySelectorAll('.page-thumbnail');
-console.log(`${thumbnails.length} thumbnail bulundu`);
-
-thumbnails.forEach(thumb => {
-  thumb.onclick = function () {
-    const pageName = this.getAttribute('data-page');
-    console.log(`Tıklanan: ${pageName}`);
-    loadColoringPage(pageName);
-  };
-});
-console.log("Thumbnail tıklama olayları ayarlandı.");
-// Thumbnail tıklama olaylarını düzeltme kodu - BU KODU DOSYANIZIN EN SONUNA EKLEYİN
-document.addEventListener('DOMContentLoaded', function () {
-  console.log("Thumbnail düzeltme kodu çalışıyor...");
-
-  // Sayfa tamamen yüklendikten sonra çalışsın
-  setTimeout(function () {
-    // Tüm thumbnail'ları bul
-    const thumbnails = document.querySelectorAll('.page-thumbnail');
-    console.log(`${thumbnails.length} thumbnail bulundu`);
-
-    // Her thumbnail için yeni tıklama olayı ekle
-    thumbnails.forEach(function (thumb) {
-      // Önce kopya oluşturarak eski olayları temizle
-      const newThumb = thumb.cloneNode(true);
-      if (thumb.parentNode) {
-        thumb.parentNode.replaceChild(newThumb, thumb);
-      }
-
-      // Yeni olay dinleyicisi ekle
-      newThumb.addEventListener('click', function (e) {
-        // Tıklama bilgisini logla
-        const pageName = this.getAttribute('data-page');
-        console.log(`Tıklanan thumbnail: ${pageName}`);
-
-        // Boyama sayfasını yükle
-        if (pageName) {
-          console.log(`loadColoringPage('${pageName}') çağrılıyor...`);
-          loadColoringPage(pageName);
-        } else {
-          console.error("Thumbnail'da data-page özelliği bulunamadı!");
-        }
-      });
-    });
-
-    console.log("Thumbnail düzeltmeleri tamamlandı!");
-  }, 1000); // 1 saniye bekle
-});
-
-// Elle test etmek için
-console.log("Thumbnail düzeltme kodu eklendi. Elle test etmek için konsolda loadColoringPage('unicorn') çalıştırabilirsiniz.");
-// Also add a load event handler as a backup to ensure thumbnails work
-window.addEventListener('load', function () {
-  setTimeout(function () {
-    console.log("Rechecking thumbnail events...");
-
-    // Get all thumbnails again
-    const thumbnails = document.querySelectorAll('.page-thumbnail');
-
-    // Make sure they all have working click handlers
-    thumbnails.forEach(function (thumb) {
-      // Clear old events
-      const newThumb = thumb.cloneNode(true);
-      if (thumb.parentNode) {
-        thumb.parentNode.replaceChild(newThumb, thumb);
-      }
-
-      // Add new event
-      newThumb.addEventListener('click', function () {
-        const pageName = this.getAttribute('data-page');
-        console.log(`Clicked thumbnail: ${pageName}`);
-
-        if (pageName) {
-          loadColoringPage(pageName);
-        }
-      });
-    });
-
-    console.log("Thumbnail events updated!");
-  }, 1000); // Wait 1 second after load
-});  

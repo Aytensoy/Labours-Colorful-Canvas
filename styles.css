@@ -1560,3 +1560,121 @@ link[rel="apple-touch-icon"] {
         justify-content: center !important;
     }
 }
+
+/* UNDO BUTONU CSS DÜZELTMESİ - styles.css dosyasına ekleyin */
+
+/* Undo butonunu toolbar'da normal buton gibi göster */
+#undoBtn {
+    margin: 5px !important;
+    padding: 10px 15px !important;
+    font-size: 16px !important;
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+    order: 0 !important;
+    /* Toolbar'da sıralamayı düzenle */
+}
+
+#undoBtn:hover {
+    background-color: #45a049 !important;
+}
+
+#undoBtn:disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed !important;
+}
+
+/* Toolbar'ı flex yapıp butonları düzenle */
+.toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    margin-bottom: 10px !important;
+}
+
+/* Butonların sıralanması */
+#homeBtn {
+    order: 1;
+}
+
+#downloadAppBtn {
+    order: 2;
+}
+
+#notifyBtn {
+    order: 3;
+}
+
+#uploadBtn {
+    order: 4;
+}
+
+#newPageBtn {
+    order: 5;
+}
+
+#fillBtn {
+    order: 6;
+}
+
+#undoBtn {
+    order: 7;
+}
+
+/* Undo butonunu Fill'den sonra koy */
+#pencilBtn {
+    order: 8;
+}
+
+#brushBtn {
+    order: 9;
+}
+
+#watercolorBtn {
+    order: 10;
+}
+
+#sprayBtn {
+    order: 11;
+}
+
+#eraseBtn {
+    order: 12;
+}
+
+/* Magic tools */
+.magic-tools {
+    order: 13;
+    display: flex !important;
+    gap: 5px !important;
+}
+
+/* Premium tools */
+.premium-tools {
+    order: 14;
+    display: flex !important;
+    gap: 5px !important;
+}
+
+/* Alttaki undo container'ı gizle (eğer varsa) */
+.bottom-buttons #undoBtn,
+.undo-container {
+    display: none !important;
+}
+
+/* Responsive ayarlar */
+@media (max-width: 768px) {
+    .toolbar {
+        gap: 3px !important;
+    }
+
+    #undoBtn {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
+}

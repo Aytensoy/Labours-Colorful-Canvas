@@ -8,12 +8,20 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
+    <!-- <link rel="manifest" href="manifest.json"> -->
     <link rel="icon" type="image/x-icon" href="icons/icon-192x192.png">
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="preload" href="icons/splash-logo.png" as="image" type="image/png">
-
+    <!-- EmailJS Library - Eski stabil versiyon -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>// EmailJS'nin yüklendiğini kontrol et
+        if (typeof emailjs !== 'undefined') {
+            console.log('✅ EmailJS loaded successfully');
+        } else {
+            console.error('❌ EmailJS failed to load');
+        }
+    </script>
     <!-- Service Worker kaydı buraya -->
     <script>
         if ('serviceWorker' in navigator) {
@@ -59,7 +67,31 @@
                 "cat_and_dog", "flapping_bird", "iconic_birds", "smiling_fish",
                 "sun_mandala", "modern_mandala", "tree_of_life", "oriental_mandala",
                 "boho_style", "boat", "k-pop", "cute_cat", "shapes",
+
+                // YENİ SAYFALAR
+                // Magical
+                "magic_wand", "fantasy_castle", "fantasy_unicorn", "fairytale_castle",
+                "fairy_flying", "magical_book", "wizards_reading", "cute_bunny_fairy", "ornate_owl",
+
+                // Flowers
+                "floral_frame", "doodle_flowers", "heart_flowers", "detailed_flowers",
+                "big_flower", "simple_flower", "lotus_flowers",
+
+                // Animals
+                "cute_elephant", "birds_on_branch", "happy_kangaroo", "bear_in_forest",
+                "funny_monkey", "cute_bunny", "kitten_in_garden", "happy_whale",
+                "squirrel_with_acorn", "butterflies", "bulldog_portrait", "frog_on_grass",
+                "cute_lamb", "kawaii_bunny_face", "cat_on_crocodile",
+
+                // Mandalas
+                "mandala_pattern", "mandala_horse", "mandala_bird", "panda_mandala",
+                "detailed_lotus_mandala", "mandala_flower", "circle_mandala",
+
+                // Various
+                "girl_on_swing", "beach_cleanup_boy", "boy_on_swing", "craft_girl",
+                "boy_with_glasses", "kawaii_twin_girls", "dancing_bean_character"
             ];
+
 
             pagesToPreload.forEach(page => {
                 const link = document.createElement('link');
@@ -88,9 +120,40 @@
                 <div class="toolbar">
                     <!-- İlk Sıra -->
                     <button id="homeBtn" class="btn" aria-label="Home">🏠 Home</button>
-                    <button id="downloadAppBtn" class="btn premium-btn" aria-label="Go Offline Pro">⬇️ Go Offline
-                        Pro</button>
-                    <button id="notifyBtn" class="btn">🔔 Enable Notifications</button>
+                    <div class="tooltip-container">
+                        <button id="downloadAppBtn" class="btn premium-btn" aria-label="Download & Play Offline Pro">
+                            📱 Download & Play Offline Pro
+                        </button>
+                        <span class="tooltip">Install once, play anytime - no internet needed!</span>
+                    </div>
+                    <button id="notifyBtn" class="btn" aria-label="Enable App Alerts">
+                        🔔 Enable App Alerts
+                    </button>
+                    <!-- Enable App Alerts butonundan HEMEN SONRA bu kodu ekleyin -->
+                    <script>
+                        // Bildirim butonu için direkt script
+                        document.addEventListener('DOMContentLoaded', function () {
+                            setTimeout(function () {
+                                const notifyBtn = document.getElementById('notifyBtn');
+                                if (notifyBtn) {
+                                    notifyBtn.onclick = function () {
+                                        if ('Notification' in window) {
+                                            Notification.requestPermission().then(permission => {
+                                                if (permission === 'granted') {
+                                                    new Notification('🎨 Magical Coloring Game', {
+                                                        body: 'Bildirimler etkinleştirildi!',
+                                                        icon: './icons/icon-192x192.png'
+                                                    });
+                                                    this.innerHTML = '🔔 Alerts Enabled';
+                                                    this.classList.add('active');
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            }, 3000);
+                        });
+                    </script>
                     <button id="uploadBtn" class="btn" aria-label="Upload Image">📁 Upload Image</button>
 
                     <!-- İkinci Sıra -->
@@ -111,6 +174,21 @@
                         <button class="btn magic-btn" id="animateBtn">✨ Animate!</button>
                     </div>
                 </div>
+                <!-- Bu kodu index.html'de magic-tools div'inden SONRA ekleyin -->
+
+                <!-- Premium Tools (Sadece premium kullanıcılar görecek) -->
+                <div class="premium-tools" id="premiumTools" style="display: none;">
+                    <button class="btn tool-btn premium-btn" id="glitterBtn" onclick="setTool('glitter')">
+                        ✨ Glitter
+                    </button>
+                    <button class="btn tool-btn premium-btn" id="rainbowBtn" onclick="setTool('rainbow')">
+                        🌈 Rainbow
+                    </button>
+                    <button class="btn tool-btn premium-btn" id="glowBtn" onclick="setTool('glow')">
+                        💫 Glow
+                    </button>
+                </div>
+
 
                 <div class="tool-size-control">
                     <input type="range" id="toolSize" min="1" max="50" value="10" onchange="updateSize(this.value)"
@@ -151,6 +229,24 @@
                         <img src="thumbnails-png/dragon.png" alt="dragon" data-page="dragon" class="page-thumbnail">
                         <img src="thumbnails-png/fairy.png" alt="fairy" data-page="fairy" class="page-thumbnail">
                         <img src="thumbnails-png/wizard.png" alt="wizard" data-page="wizard" class="page-thumbnail">
+                        <img src="thumbnails-png/magic_wand.png" alt="Magic Wand" data-page="magic_wand"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fantasy_castle.png" alt="Fantasy Castle" data-page="fantasy_castle"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fantasy_unicorn.png" alt="Fantasy Unicorn" data-page="fantasy_unicorn"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fairytale_castle.png" alt="Fairytale Castle"
+                            data-page="fairytale_castle" class="page-thumbnail">
+                        <img src="thumbnails-png/fairy_flying.png" alt="Flying Fairy" data-page="fairy_flying"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/magical_book.png" alt="Magical Book" data-page="magical_book"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/wizards_reading.png" alt="Wizards Reading" data-page="wizards_reading"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_bunny_fairy.png" alt="Bunny Fairy" data-page="cute_bunny_fairy"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/ornate_owl.png" alt="Ornate Owl" data-page="ornate_owl"
+                            class="page-thumbnail">
                     </div>
 
                     <!-- Flowers Category -->
@@ -160,6 +256,20 @@
                         <img src="thumbnails-png/poppies.png" alt="poppies" data-page="poppies" class="page-thumbnail">
                         <img src="thumbnails-png/daisies.png" alt="daisies" data-page="daisies" class="page-thumbnail">
                         <img src="thumbnails-png/carnation.png" alt="carnation" data-page="carnation"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/floral_frame.png" alt="Floral Frame" data-page="floral_frame"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/doodle_flowers.png" alt="Doodle Flowers" data-page="doodle_flowers"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/heart_flowers.png" alt="Heart Flowers" data-page="heart_flowers"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/detailed_flowers.png" alt="Detailed Flowers"
+                            data-page="detailed_flowers" class="page-thumbnail">
+                        <img src="thumbnails-png/big_flower.png" alt="Big Flower" data-page="big_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/simple_flower.png" alt="Simple Flower" data-page="simple_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/lotus_flowers.png" alt="Lotus Flowers" data-page="lotus_flowers"
                             class="page-thumbnail">
                     </div>
 
@@ -173,6 +283,36 @@
                             class="page-thumbnail">
                         <img src="thumbnails-png/smiling_fish.png" alt="Smiling Fish" data-page="smiling_fish"
                             class="page-thumbnail">
+                        <img src="thumbnails-png/cute_elephant.png" alt="Cute Elephant" data-page="cute_elephant"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/birds_on_branch.png" alt="Birds on Branch" data-page="birds_on_branch"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/happy_kangaroo.png" alt="Happy Kangaroo" data-page="happy_kangaroo"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/bear_in_forest.png" alt="Bear in Forest" data-page="bear_in_forest"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/funny_monkey.png" alt="Funny Monkey" data-page="funny_monkey"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_bunny.png" alt="Cute Bunny" data-page="cute_bunny"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/kitten_in_garden.png" alt="Kitten in Garden"
+                            data-page="kitten_in_garden" class="page-thumbnail">
+                        <img src="thumbnails-png/happy_whale.png" alt="Happy Whale" data-page="happy_whale"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/squirrel_with_acorn.png" alt="Squirrel with Acorn"
+                            data-page="squirrel_with_acorn" class="page-thumbnail">
+                        <img src="thumbnails-png/butterflies.png" alt="Butterflies" data-page="butterflies"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/bulldog_portrait.png" alt="Bulldog Portrait"
+                            data-page="bulldog_portrait" class="page-thumbnail">
+                        <img src="thumbnails-png/frog_on_grass.png" alt="Frog on Grass" data-page="frog_on_grass"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_lamb.png" alt="Cute Lamb" data-page="cute_lamb"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/kawaii_bunny_face.png" alt="Kawaii Bunny" data-page="kawaii_bunny_face"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cat_on_crocodile.png" alt="Cat on Crocodile"
+                            data-page="cat_on_crocodile" class="page-thumbnail">
                     </div>
 
                     <!-- Mandalas Category -->
@@ -185,6 +325,20 @@
                             class="page-thumbnail">
                         <img src="thumbnails-png/oriental_mandala.png" alt="Oriental Mandala"
                             data-page="oriental_mandala" class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_pattern.png" alt="Mandala Pattern" data-page="mandala_pattern"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_horse.png" alt="Mandala Horse" data-page="mandala_horse"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_bird.png" alt="Mandala Bird" data-page="mandala_bird"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/panda_mandala.png" alt="Panda Mandala" data-page="panda_mandala"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/detailed_lotus_mandala.png" alt="Detailed Lotus Mandala"
+                            data-page="detailed_lotus_mandala" class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_flower.png" alt="Mandala Flower" data-page="mandala_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/circle_mandala.png" alt="Circle Mandala" data-page="circle_mandala"
+                            class="page-thumbnail">
                     </div>
                     <!-- Various Category -->
                     <div class="page-thumbnails various">
@@ -195,6 +349,20 @@
                         <img src="thumbnails-png/cute_cat.png" alt="Cute Cat" data-page="cute_cat"
                             class="page-thumbnail">
                         <img src="thumbnails-png/shapes.png" alt="Shapes" data-page="shapes" class="page-thumbnail">
+                        <img src="thumbnails-png/girl_on_swing.png" alt="Girl on Swing" data-page="girl_on_swing"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/beach_cleanup_boy.png" alt="Beach Cleanup Boy"
+                            data-page="beach_cleanup_boy" class="page-thumbnail">
+                        <img src="thumbnails-png/boy_on_swing.png" alt="Boy on Swing" data-page="boy_on_swing"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/craft_girl.png" alt="Craft Girl" data-page="craft_girl"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/boy_with_glasses.png" alt="Boy with Glasses"
+                            data-page="boy_with_glasses" class="page-thumbnail">
+                        <img src="thumbnails-png/kawaii_twin_girls.png" alt="Kawaii Twin Girls"
+                            data-page="kawaii_twin_girls" class="page-thumbnail">
+                        <img src="thumbnails-png/dancing_bean_character.png" alt="Dancing Bean"
+                            data-page="dancing_bean_character" class="page-thumbnail">
                     </div>
                 </div>
                 <div class="game-introduction">
@@ -204,19 +372,39 @@
 
                     <h3>🌟 Magical Features:</h3>
                     <ul>
-                        <li>🎨 Vibrant color palette to make your artwork pop!</li>
-                        <li>🖌️ Multiple drawing tools: Pencil, Brush, and Spray for diverse effects</li>
+                        <li>💾 Download & Play Offline Pro: Download the complete game for internet-free coloring
+                            anywhere!</li>
+                        <li>🎨 50+ coloring pages across 5 categories: Free users get 3 per category, Premium unlocks
+                            everything!</li>
+                        <li>🖌️ Professional drawing tools: Pencil, Brush, Watercolor, Spray + Premium Glitter, Rainbow
+                            & Glow effects!</li>
                         <li>✨ Star Wand to create magical stars</li>
                         <li>🌸 Flower Wand to draw enchanted flowers</li>
                         <li>🪄 Magic Fill tool to color large areas instantly</li>
-                        <li>⬆️ Upload your own images to color or trace</li>
-                        <li>💾 Save and download your masterpieces</li>
+                        <li>⬆️ Upload your own coloring pages: Premium feature for unlimited custom content!</li>
+                        <li>💾 Save unlimited masterpieces: Free users get 3 daily saves, Premium users get unlimited HD
+                            downloads!</li>
                         <li>↩️ Undo/Redo options for worry-free creation</li>
                         <li>✨ Click the "Animate!" button to animate your character</li>
+                        <li>🖨️ Print & color offline: Download high-quality pages for traditional coloring!</li>
+
                     </ul>
+                    <h3>🌟 Why Go Premium?</h3>
+                    <div class="premium-benefits">
+                        <h4>📱 Perfect for Travel & Offline Use:</h4>
+                        <p>Download the complete game and color anywhere - in the car, on planes, camping, or anywhere
+                            without internet! No more "are we there yet?" moments!</p>
 
+                        <h4>🎨 For Serious Coloring Enthusiasts:</h4>
+                        <p>Upload your AI-generated or purchased coloring pages and bring them to life with professional
+                            tools. Create your own digital coloring book collection!</p>
 
-                    <p>Whether you're a budding artist or just looking for a fun way to relax, Magical Coloring Page is
+                        <h4>👨‍👩‍👧‍👦 Family Value:</h4>
+                        <p>One premium purchase unlocks unlimited coloring for the whole family. No daily limits, no
+                            restrictions - just pure creative fun!</p>
+                    </div>
+
+                    <p>Whether you're a budding artist or just looking for a fun way to relax, Magical Coloring Game is
                         perfect for all ages and skill levels. Start your colorful journey today!</p>
 
                     <h3>Ready to dive in?</h3>
@@ -281,6 +469,364 @@
                     }, 3000); // 3 saniye bekle
                 };
             </script>
+
+            <script>
+                // PREMIUM KONTROL - TEMİZ VERSİYON
+                window.addEventListener('load', function () {
+                    console.log('Premium kontrol başlatılıyor...');
+
+                    // Premium durumunu kontrol et
+                    var isPremiumUser = localStorage.getItem('isPremium') === 'true';
+                    console.log('Premium kullanıcı:', isPremiumUser);
+
+                    // Eski premium etiketlerini temizle
+                    var existingElements = document.querySelectorAll('.premium-badge, .premium-tooltip, .premium-overlay, .lock-overlay, .single-pro-badge');
+                    existingElements.forEach(function (el) {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    });
+
+                    // Bulanıklığı kaldır
+                    var style = document.createElement('style');
+                    style.textContent = `
+        .page-thumbnail.locked {
+          filter: none !important;
+          opacity: 1 !important;
+        }
+        
+        /* Pro rozeti stili */
+        .pro-badge {
+          position: absolute;
+          bottom: 5px;
+          right: 5px;
+          background: linear-gradient(135deg, #FFB347, #FFCC33);
+          color: white;
+          font-size: 9px;
+          font-weight: bold;
+          padding: 1px 4px;
+          border-radius: 3px;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+          z-index: 1000;
+        }
+        
+    .pro-tooltip {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFD700, #FFA500); /* ← Premium sarı gradient */
+    color: #2c3e50; /* ← Siyah/koyu gri yazı */
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold; /* ← Kalın yazı ekleyin */
+    width: 180px;
+    text-align: center;
+    z-index: 10000;
+    display: none;
+    box-shadow: 0 3px 10px rgba(255, 215, 0, 0.4); /* ← Altın gölge */
+}
+        
+        .pro-tooltip:after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          margin-left: -5px;
+          border-width: 5px;
+          border-style: solid;
+          border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+        }
+        
+        .thumbnail-container {
+          position: relative;
+          display: inline-block;
+        }
+        
+        .thumbnail-container:hover .pro-tooltip {
+          display: block;
+        }
+      `;
+                    document.head.appendChild(style);
+
+                    // Premium modunda kontroller
+                    if (isPremiumUser) {
+                        // Premium araçlarını göster
+                        var premiumTools = document.getElementById('premiumTools');
+                        if (premiumTools) {
+                            premiumTools.style.display = 'flex';
+                        }
+                        return;
+                    }
+
+                    // Her kategori için işlem yap
+                    var categories = ['magical', 'flowers', 'animals', 'mandalas', 'various'];
+
+                    categories.forEach(function (category) {
+                        var container = document.querySelector('.page-thumbnails.' + category);
+                        if (!container) return;
+
+                        var thumbnails = container.querySelectorAll('img.page-thumbnail');
+
+                        // Her kategoride ilk 3 thumbnail dışındakilere Pro işareti ekle
+                        thumbnails.forEach(function (thumbnail, index) {
+                            if (index >= 3) {
+                                // Bulanıklığı kaldır
+                                thumbnail.style.filter = 'none';
+                                thumbnail.style.opacity = '1';
+
+                                // Container oluştur
+                                var container = document.createElement('div');
+                                container.className = 'thumbnail-container';
+                                container.style.position = 'relative';
+                                container.style.display = 'inline-block';
+
+                                // Thumbnail'i container'a taşı
+                                var parent = thumbnail.parentNode;
+                                parent.insertBefore(container, thumbnail);
+                                container.appendChild(thumbnail);
+
+                                // Pro rozeti ekle
+                                var badge = document.createElement('div');
+                                badge.className = 'pro-badge';
+                                badge.textContent = 'Pro';
+                                container.appendChild(badge);
+
+                                // Tooltip ekle
+                                var tooltip = document.createElement('div');
+                                tooltip.className = 'pro-tooltip';
+                                tooltip.textContent = 'For Premium users!';
+                                container.appendChild(tooltip);
+
+                                // Overlay ekle
+                                var overlay = document.createElement('div');
+                                overlay.style.position = 'absolute';
+                                overlay.style.top = '0';
+                                overlay.style.left = '0';
+                                overlay.style.width = '100%';
+                                overlay.style.height = '100%';
+                                overlay.style.cursor = 'pointer';
+                                overlay.style.zIndex = '1500';
+                                container.appendChild(overlay);
+
+                                // Tıklama olayı
+                                overlay.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    if (typeof showPremiumModal === 'function') {
+                                        showPremiumModal();
+                                    } else {
+                                        alert('This feature is only available for Premium users!');
+                                    }
+
+                                    return false;
+                                });
+
+                                // Thumbnail tıklama olayını devre dışı bırak
+                                thumbnail.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return false;
+                                }, true);
+                            }
+                        });
+                    });
+
+                    console.log('Premium kontrol tamamlandı');
+                });
+            </script>
+            <script>
+
+                // MOBİL CİHAZLAR İÇİN FILL ARACI DÜZELTME
+                (function () {
+                    // Mobil cihaz kontrolü
+                    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                    // Sayfa yüklendiğinde çalış
+                    window.addEventListener('load', function () {
+                        // Fill butonunu bul
+                        var fillButton = document.getElementById('fillBtn');
+                        if (!fillButton) return;
+
+                        // Orijinal işlevi koru
+                        var originalSetTool = window.setTool;
+
+                        // Fill için özel işlev
+                        fillButton.addEventListener('click', function () {
+                            // Canvas ve context'i bul
+                            var canvas = document.getElementById('coloringCanvas');
+                            var ctx = canvas.getContext('2d');
+
+                            // Canvas ayarlarını yenile
+                            ctx.globalAlpha = 1.0;
+                            ctx.globalCompositeOperation = 'source-over';
+
+                            console.log('Fill aracı seçildi, ayarlar sıfırlandı:',
+                                'Alpha:', ctx.globalAlpha,
+                                'Composite:', ctx.globalCompositeOperation);
+
+                            // Orijinal setTool'u çağır
+                            if (typeof originalSetTool === 'function') {
+                                originalSetTool('fill');
+                            } else {
+                                window.currentTool = 'fill';
+                            }
+                        });
+
+                        if (isMobile) {
+                            // enhanceMobileFill(); // Geçici kapalı
+                            console.log('Mobil cihaz - fill enhancement atlandı');
+                        }
+                    });
+
+                    // Mobil fill'i güçlendir
+                    function enhanceMobileFill() {
+                        console.log('Mobil fill güçlendirmesi etkinleştiriliyor...');
+
+                        // Orijinal floodFill fonksiyonunu yedekle
+                        var originalFloodFill = window.floodFill;
+
+                        // floodFill fonksiyonunu geçersiz kıl
+                        window.floodFill = function (imageData, startX, startY, fillColor, width, height) {
+                            console.log('Güçlendirilmiş mobil fill çalışıyor...');
+
+                            // Canvas'ı bul ve ayarlarını sıfırla
+                            var canvas = document.getElementById('coloringCanvas');
+                            var ctx = canvas.getContext('2d');
+
+                            // Tam opaklık ve standart kompozisyon zorunlu kıl
+                            ctx.globalAlpha = 1.0;
+                            ctx.globalCompositeOperation = 'source-over';
+
+                            // Düz bir arka plan hazırla - fill işlemi öncesi güvenlik önlemi
+                            var backupCanvas = document.createElement('canvas');
+                            backupCanvas.width = width;
+                            backupCanvas.height = height;
+                            var backupCtx = backupCanvas.getContext('2d');
+                            backupCtx.drawImage(canvas, 0, 0);
+
+                            // Orijinal fonksiyonu çağır
+                            if (typeof originalFloodFill === 'function') {
+                                originalFloodFill(imageData, startX, startY, fillColor, width, height);
+                            } else {
+                                // Fonksiyon yoksa basit bir doldurma yap
+                                simpleFill(imageData, startX, startY, fillColor, width, height);
+                            }
+
+                            // Son temizlik - her ihtimale karşı
+                            ctx.globalAlpha = 1.0;
+                            ctx.globalCompositeOperation = 'source-over';
+
+                            // Sonucu canvas'a çiz
+                            ctx.putImageData(imageData, 0, 0);
+
+                            console.log('Mobil fill tamamlandı');
+                        };
+
+                        // Basit fill algoritması
+                        function simpleFill(imageData, startX, startY, fillColor, width, height) {
+                            // Başlangıç rengini al
+                            var targetColor = getPixelColor(imageData, startX, startY);
+                            var stack = [[startX, startY]];
+                            var tolerance = 50;
+                            var visited = {};
+                            visited[startX + ',' + startY] = true;
+
+                            // Renk eşleşme fonksiyonu
+                            function colorMatch(color1, color2) {
+                                return (
+                                    Math.abs(color1.r - color2.r) < tolerance && Math.abs(color1.g - color2.g) < tolerance && Math.abs(color1.b
+                                        - color2.b) < tolerance);
+                            } // Siyah renk kontrolü function isBlack(color) { var blackThreshold=30;
+                            return color.r <= blackThreshold && color.g <= blackThreshold && color.b <= blackThreshold;
+                        } // Doldurma işlemi
+                        while (stack.length > 0) {
+                            var pos = stack.pop();
+                            var x = pos[0];
+                            var y = pos[1];
+
+                            // Canvas sınırları dışındaysa atla
+                            if (x < 0 || x >= width || y < 0 || y >= height) continue;
+
+                            // Pikselin rengini kontrol et
+                            var currentColor = getPixelColor(imageData, x, y);
+
+                            // Hedef renkle eşleşmiyor veya siyah ise atla
+                            if (!colorMatch(currentColor, targetColor) || isBlack(currentColor)) continue;
+
+                            // Pikseli doldur
+                            setPixelColor(imageData, x, y, fillColor);
+
+                            // Komşu pikselleri stack'e ekle
+                            var key = (x + 1) + ',' + y;
+                            if (!visited[key]) {
+                                visited[key] = true;
+                                stack.push([x + 1, y]);
+                            }
+
+                            key = (x - 1) + ',' + y;
+                            if (!visited[key]) {
+                                visited[key] = true;
+                                stack.push([x - 1, y]);
+                            }
+
+                            key = x + ',' + (y + 1);
+                            if (!visited[key]) {
+                                visited[key] = true;
+                                stack.push([x, y + 1]);
+                            }
+
+                            key = x + ',' + (y - 1);
+                            if (!visited[key]) {
+                                visited[key] = true;
+                                stack.push([x, y - 1]);
+                            }
+                        }
+                    }
+
+                    // Piksel rengi alma
+                    function getPixelColor(imageData, x, y) {
+                        var index = (y * imageData.width + x) * 4;
+                        return {
+                            r: imageData.data[index],
+                            g: imageData.data[index + 1],
+                            b: imageData.data[index + 2],
+                            a: imageData.data[index + 3]
+                        };
+                    }
+
+                    // Piksel rengi ayarlama
+                    function setPixelColor(imageData, x, y, color) {
+                        var index = (y * imageData.width + x) * 4;
+                        imageData.data[index] = color.r;
+                        imageData.data[index + 1] = color.g;
+                        imageData.data[index + 2] = color.b;
+                        imageData.data[index + 3] = 255; // Tam opaklık
+                    }
+                }
+                )();
+            </script>
+            <!-- Newsletter Popup -->
+            <div id="newsletterModal" class="newsletter-modal" style="display: none;">
+                <div class="newsletter-content">
+                    <span class="newsletter-close" onclick="closeNewsletterModal()">&times;</span>
+                    <h2>🎨 Special Offers & Updates!</h2>
+                    <p>Get exclusive discounts, free coloring pages & early access to premium tools!</p>
+
+                    <form id="newsletterForm" onsubmit="submitNewsletter(event)" novalidate>
+                        <input type="text" id="userName" placeholder="Your Name (Optional)" />
+                        <input type="email" id="userEmail" placeholder="Your Email" />
+                        <button type="submit" id="subscribeBtn">✨ Subscribe</button>
+                    </form>
+
+                    <p class="newsletter-note">We'll only send you the good stuff! 🌟</p>
+                </div>
+            </div>
+
+            <!-- Newsletter Button -->
+            <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
 </body>
 
 </html>
