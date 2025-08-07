@@ -388,6 +388,8 @@ h1 {
     transition: transform 0.3s ease;
     cursor: pointer;
     object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
     image-rendering: pixelated;
     /* Modern tarayıcılar için */
     -ms-interpolation-mode: nearest-neighbor;
@@ -399,8 +401,7 @@ h1 {
 .page-thumbnail:hover {
     transform: scale(1.05);
     image-rendering: -webkit-optimize-contrast;
-    image-rendering: pixelated;
-    ;
+    image-rendering: crisp-edges;
 }
 
 
@@ -623,12 +624,24 @@ link[rel="apple-touch-icon"] {
 /* PWA ikon stilleri */
 link[rel="icon"],
 link[rel="apple-touch-icon"] {
+    border-radius: 25%;
     -webkit-border-radius: 25%;
     -moz-border-radius: 25%;
-    border-radius: 25%;
     overflow: hidden;
 }
 
+.premium-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
 .modal-content {
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
@@ -680,6 +693,87 @@ link[rel="apple-touch-icon"] {
     transform: translateY(-2px);
 }
 
+/* PREMIUM SİSTEM STİLLERİ - styles.css dosyanızın sonuna ekleyin */
+
+/* Premium Modal */
+.premium-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.buy-premium-btn {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #2c3e50;
+    border: none;
+    padding: 18px 45px;
+    font-size: 1.3em;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    /* ← Sabit gölge */
+    /* pulse animasyonunu kaldırın */
+}
+
+.premium-content h2 {
+    color: #FFD700;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.premium-features {
+    text-align: left;
+    margin: 20px auto;
+    max-width: 300px;
+}
+
+.feature {
+    margin: 10px 0;
+    font-size: 1.1em;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.premium-price {
+    font-size: 2em;
+    color: #FFD700;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+.buy-premium-btn {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #2c3e50;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2em;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.3s;
+}
+
+.buy-premium-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+}
+
+.premium-note {
+    margin-top: 15px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
 
 /* Activation Form */
 .activation-form {
@@ -1221,6 +1315,55 @@ link[rel="apple-touch-icon"] {
     background-color: #1c4e1e !important;
 }
 
+/* Opera için uyumluluk düzeltmeleri */
+.premium-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Close button düzeltme */
+.close-modal {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    color: #fff !important;
+    z-index: 10001 !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 50% !important;
+    border: 2px solid #FFD700 !important;
+
+    /* Tıklanabilirlik garantisi */
+    pointer-events: auto !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.close-modal:hover {
+    color: #FFD700 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    transform: scale(1.1) !important;
+}
+
+.close-modal:active {
+    transform: scale(0.95) !important;
+}
 
 /* Tarayıcı uyumluluk düzeltmeleri */
 .newsletter-trigger,
@@ -1324,6 +1467,100 @@ link[rel="apple-touch-icon"] {
     /* Kenar boşluğu */
 }
 
+/* ===== MODAL TEMİZ VERSİYON ===== */
+.premium-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.premium-content {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: white;
+    border-radius: 20px;
+    border: 3px solid #FFD700;
+    width: 90%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px 15px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 26px;
+    cursor: pointer;
+    color: #fff;
+    z-index: 10001;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    pointer-events: auto;
+}
+
+.close-modal:hover {
+    background: rgba(255, 215, 0, 0.8) !important;
+    color: #000 !important;
+    transform: scale(1.1) !important;
+}
+
+@media (max-width: 768px) {
+    .premium-content {
+        width: 95%;
+        max-width: 350px;
+        padding: 15px;
+    }
+}
+
+/* KESIN ÇÖZÜM - Hem ortalanır hem kapanır */
+@media (max-width: 768px) {
+    .premium-modal {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0 !important;
+    }
+
+    .premium-content {
+        width: 90% !important;
+        max-width: 350px !important;
+        margin: 0 !important;
+        position: relative !important;
+        transform: none !important;
+    }
+
+    .close-modal {
+        position: absolute !important;
+        top: 8px !important;
+        right: 8px !important;
+        z-index: 99999 !important;
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        width: 28px !important;
+        height: 28px !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        border: 2px solid #FFD700 !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
 
 /* UNDO BUTONU CSS DÜZELTMESİ - styles.css dosyasına ekleyin */
 
@@ -1782,6 +2019,170 @@ canvas.text-mode {
     }
 }
 
+/* =======================================================
+   NİHAİ MAGIC PHOTOS CSS (GÖREV 31 ve 32 - TAM SÜRÜM)
+   ======================================================= */
+
+/* Modal Ana Konteynırı */
+.magic-photos-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* Modal İçerik Kutusu */
+.magic-photos-content {
+    background: linear-gradient(145deg, #4c568d, #2c3e50);
+    color: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 90vw;
+    max-height: 90vh;
+    /* Daha esnek boyutlandırma */
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Başlık ve Alt Başlık */
+.magic-photos-title {
+    color: #FFD700;
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+    flex-shrink: 0;
+}
+
+.magic-photos-subtitle {
+    margin: 0 0 20px 0;
+    font-size: 1em;
+    opacity: 0.9;
+    flex-shrink: 0;
+}
+
+/* Kapatma Butonu */
+.magic-photos-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    /* ...değişiklik yok... */
+}
+
+/* Stil Seçim Butonları (Colored/Outline) */
+.magic-photos-style-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 5px;
+    border-radius: 50px;
+    margin: 0 auto 20px auto;
+    flex-shrink: 0;
+}
+
+.mp-style-btn {
+    /* ...değişiklik yok... */
+}
+
+.mp-style-btn.active {
+    /* ...değişiklik yok... */
+}
+
+/* Template Kartları Grid'i */
+.magic-photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+    overflow-y: auto;
+    /* Konteyner taşarsa kaydırma çubuğu çıkar */
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Tek bir Template Kartı */
+.magic-template-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    overflow: hidden;
+}
+
+.magic-template-card:hover {
+    transform: scale(1.05);
+    border-color: #FFD700;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Kartın içindeki resim sarmalayıcısı (BU KISIM EN ÖNEMLİSİ) */
+.magic-template-image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    /* Kare bir alan oluşturur */
+    position: relative;
+    background-color: #333;
+    /* Resim yüklenemezse arka plan */
+}
+
+/* Thumbnail resmi */
+.magic-template-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Resmi, oranını koruyarak alanı dolduracak şekilde sığdırır */
+}
+
+/* Kartın ismi ve stil göstergesi */
+.magic-template-name {
+    padding: 8px 5px 0 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.magic-template-style-indicator {
+    font-size: 0.8em;
+    opacity: 0.7;
+    padding-bottom: 8px;
+}
+
+/* Mobil Cihazlar İçin Ayarlar */
+@media (max-width: 480px) {
+    .magic-photos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+HAYIR ! CSS'te hiçbir şey silmeyin!
+ ✅ SADECE EKLEYEN YAKLAŞIM: css
+
+/* MEVCUT CSS KODLARINIZ (SİLMEYİN) */
+.magic-photos-modal {
+    /* ... mevcut stiller ... */
+}
+
 /* YENİ KOD - DOSYANIN EN SONUNA EKLEYİN */
 @media (max-width: 768px) {
     .mp-editor-actions {
@@ -1813,8 +2214,8 @@ canvas.text-mode {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1823,21 +2224,15 @@ canvas.text-mode {
     box-sizing: border-box;
 }
 
-/* Modal İçerik Kutusu */
+/* Modal İçerik */
 .magic-photos-content {
     background: linear-gradient(145deg, #4c568d, #2c3e50);
     color: white;
-    padding: 20px 15px;
-    /* Mobil için padding ayarlandı */
+    padding: 25px;
     border-radius: 20px;
-    width: 95vw;
-    /* Mobil öncelikli genişlik */
-    max-width: 600px;
-    /* Maksimum genişlik */
-    height: 90vh;
-    /* Mobil öncelikli yükseklik */
-    max-height: 750px;
-    /* Maksimum yükseklik */
+    width: 100%;
+    max-width: 90vw;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     text-align: center;
@@ -1913,41 +2308,30 @@ canvas.text-mode {
     transform: scale(1.05);
 }
 
-/* Template Kartları Grid'i */
+/* Template Grid */
 .magic-photos-grid {
     display: grid;
-    /* grid-template-columns mobil için aşağıda ayarlanacak */
-    gap: 10px;
-    /* Mobil için boşluk ayarlandı */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    overflow-y: auto;
     padding: 10px;
     border: 1px solid rgba(0, 0, 0, 0.2);
     background: rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-
-    /* KAYDIRMA İÇİN EN ÖNEMLİ KISIM */
-    flex-grow: 1;
-    overflow-y: auto;
-    min-height: 0;
 }
 
-/* ==================================================
-   MAGIC PHOTOS KARTLARI İÇİN NİHAİ ESNEK YAPI
-   ================================================== */
-
-/* 1. KARTIN KENDİSİ: Artık sabit bir yüksekliği YOK. */
+/* Template Kartı */
 .magic-template-card {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     border: 2px solid transparent;
-    padding: 8px;
-
-    /* YENİ YAPISAL KURALLAR */
     display: flex;
     flex-direction: column;
-    /* İçerik alt alta dizilecek */
-    /* height: 130px; SATIRINI SİLDİK */
+    text-align: center;
+    overflow: hidden;
+    padding: 8px;
 }
 
 .magic-template-card:hover {
@@ -1957,16 +2341,14 @@ canvas.text-mode {
     box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
 }
 
-/* 2. RESİM KAPSAYICISI: Artık kare olmasını sağlıyoruz. */
+/* Template Resim Sarmalayıcısı */
 .magic-template-image-wrapper {
     width: 100%;
     aspect-ratio: 1 / 1;
-    /* <<< BU SATIRI GERİ GETİRDİK */
     position: relative;
     background-color: #333;
     border-radius: 8px;
     overflow: hidden;
-    /* flex-grow satırını kaldırdık, çünkü artık gerekli değil */
 }
 
 /* Template Thumbnail */
@@ -1976,32 +2358,15 @@ canvas.text-mode {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 /* Template İsmi */
 .magic-template-name {
-    /* Temel Stil Ayarları */
+    padding: 8px 5px 5px 5px;
     font-weight: bold;
-    font-size: 14px;
-    /* Boyutu biraz daha net belirleyelim */
+    font-size: 0.9em;
     color: #FFD700;
-    text-align: center;
-
-    /* GÖRÜNÜRLÜK İÇİN EN ÖNEMLİ KISIM */
-    height: 30px;
-    /* Yazı alanı için sabit bir yükseklik ayır */
-    line-height: 30px;
-    /* Yazıyı bu alanda dikey olarak ortala */
-    padding: 5px;
-    /* İç boşluk */
-    box-sizing: border-box;
-    /* Padding'in yüksekliği etkilememesini sağla */
-
-    /* Taşma Durumunda Yazının Gizlenmesini Önle */
-    overflow: visible;
-    white-space: nowrap;
-    /* Yazının alt satıra kaymasını engelle */
 }
 
 .magic-template-style-indicator {
@@ -2010,35 +2375,19 @@ canvas.text-mode {
     padding-bottom: 5px;
 }
 
-/* Mobil Cihazlar İçin Ayarlar */
-@media (min-width: 600px) {
-
-    /* 600px'den büyük ekranlar için ızgara sütun sayısını artır */
+/* Mobil Uyumluluk */
+@media (max-width: 480px) {
     .magic-photos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 15px;
-    }
-
-    .magic-photos-content {
-        padding: 25px;
-        /* Büyük ekranlarda padding'i artır */
-    }
-}
-
-@media (max-width: 599px) {
-
-    /* 599px'den küçük ekranlar için ızgara sütun sayısı */
-    .magic-photos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
     .magic-photos-title {
         font-size: 1.5em;
     }
 
-    .mp-style-btn {
-        padding: 8px 16px;
-        /* Butonları küçült */
+    .magic-photos-content {
+        padding: 20px 15px;
     }
 }
 
@@ -2217,267 +2566,20 @@ canvas.editing-mode:active {
 
 #smartBrushBtn.active,
 #smartWatercolorBtn.active {
-    background-color: #2F7D31;
-    color: white;
+    background-color: #2F7D31
+        /* Koyu yeşil renk */
+        color: white;
+    /* Yazı rengi beyaz */
     transform: scale(1.1);
+    /* Hafifçe büyüt */
     box-shadow: 0 0 10px rgba(46, 125, 50, 0.7);
+    /* Belirgin bir gölge */
     border: 1px solid white;
+    /* Beyaz bir çerçeve */
 }
 
+/* Aktifken üzerlerine gelindiğinde daha da koyulaşsınlar */
 #smartBrushBtn.active:hover,
 #smartWatercolorBtn.active:hover {
     background-color: #1c4e1e;
-}
-
-#redeemGiftBtn {
-    background: #ff69b4;
-}
-
-/* ==================================================
-   YAZDIRMA İÇİN ÖZEL STİLLER
-   ================================================== */
-
-@media print {
-
-    /* Yazdırma sırasında sayfanın kendisi için kurallar */
-    @page {
-        size: A4 landscape;
-        /* Sayfayı yatay olarak ayarla */
-        margin: 0;
-        /* Tüm kenar boşluklarını sıfırla */
-    }
-
-    /* Yazdırma sırasında sayfanın BODY'si için kurallar */
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Yazdırılacak resim dışındaki HER ŞEYİ GİZLE */
-    body>*:not(.print-image-container) {
-        display: none !important;
-    }
-
-    /* Resmi içeren geçici kapsayıcıyı görünür yap */
-    .print-image-container {
-        display: block !important;
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Resmin kendisini sayfaya tam olarak sığdır */
-    .print-image-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        /* Oranı koruyarak sığdır */
-    }
-}
-
-/* ==================================================
-   OYUN TANITIM METNİ (GAME INTRODUCTION) STİLLERİ
-   ================================================== */
-
-.game-introduction {
-    text-align: left;
-    /* Metni sola hizala, daha okunabilir olur */
-    max-width: 800px;
-    /* Metin genişliğini sınırla, okunabilirliği artırır */
-    margin: 20px auto;
-    /* Ortala */
-    padding: 15px;
-}
-
-.game-introduction h3 {
-    margin-top: 30px;
-    color: #333;
-}
-
-/* Ana liste için stil */
-.game-introduction>ul {
-    list-style: none;
-    /* Varsayılan madde imlerini kaldır */
-    padding-left: 0;
-}
-
-.game-introduction>ul>li {
-    padding-left: 2em;
-    /* İkonlar için solda boşluk bırak */
-    position: relative;
-    margin-bottom: 12px;
-}
-
-/* İkonları madde imi gibi kullanma */
-.game-introduction>ul>li::before {
-    content: attr(data-icon);
-    /* Her maddeye özel ikon (HTML'de ekleyeceğiz) */
-    position: absolute;
-    left: 0;
-    top: 2px;
-    font-size: 1.2em;
-}
-
-/* İç içe geçmiş liste için stil (EN ÖNEMLİ DÜZELTME) */
-.game-introduction ul ul {
-    list-style-type: '🎨';
-    /* Özel madde imi */
-    padding-left: 25px;
-    /* İçeriden boşluk ver */
-    margin-top: 8px;
-}
-
-.game-introduction ul ul li {
-    margin-bottom: 8px;
-    font-size: 0.95em;
-    /* Yazıyı biraz küçült */
-}
-
-/* --- DOWNLOAD PROGRESS MESSAGE STYLE --- */
-.download-progress-msg {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(45deg, #2c3e50, #4c568d);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 10px;
-    font-weight: bold;
-    z-index: 10001;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    transition: opacity 0.5s;
-}
-
-/* ==================================================
-   NİHAİ PREMIUM MODAL SİSTEMİ STİLLERİ
-   (Tüm eskileri silip bunu kullanın)
-   ================================================== */
-
-/* Modal'ın arkaplanı ve konumlandırması */
-.premium-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    box-sizing: border-box;
-    z-index: 100000;
-    /* Her zaman en üstte olmasını garantiler */
-}
-
-/* Modal'ın içerik kutusu */
-.premium-content {
-    background: linear-gradient(135deg, #2c3e50, #34495e);
-    color: white;
-    border-radius: 20px;
-    border: 3px solid #FFD700;
-    width: 100%;
-    max-width: 420px;
-    max-height: 90vh;
-    padding: 20px 25px 25px 25px;
-    box-sizing: border-box;
-    position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    overflow-y: auto;
-    /* İçerik sığmazsa kaydır */
-}
-
-/* Kapatma butonu */
-.close-modal {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    font-family: sans-serif;
-    line-height: 28px;
-    text-align: center;
-    cursor: pointer;
-    color: white;
-    background: rgba(255, 0, 0, 0.7);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-
-.close-modal:hover {
-    transform: scale(1.1) rotate(90deg);
-    background: rgba(255, 0, 0, 0.9);
-}
-
-/* Başlık */
-.premium-content h2 {
-    color: #FFD700;
-    margin: 0 0 20px 0;
-    font-size: 1.8em;
-}
-
-/* Özellikler listesi */
-.premium-features {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    margin: 0 0 20px 0;
-}
-
-.premium-features li {
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1em;
-}
-
-/* Fiyatlandırma bölümü */
-.launch-pricing {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.regular-price {
-    opacity: 0.7;
-    font-size: 0.9em;
-}
-
-.crossed {
-    text-decoration: line-through;
-}
-
-.sale-price {
-    font-size: 2em;
-    color: #FFD700;
-    font-weight: bold;
-    margin: 5px 0;
-}
-
-.savings {
-    color: #FF6B6B;
-    font-weight: bold;
-    font-size: 1em;
-}
-
-/* Satın alma butonu */
-.buy-premium-btn {
-    background: linear-gradient(45deg, #FFD700, #FFA500);
-    color: #2c3e50;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.2em;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s ease;
-    width: 100%;
-}
-
-.buy-premium-btn:hover {
-    transform: scale(1.05);
 }

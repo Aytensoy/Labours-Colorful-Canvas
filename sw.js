@@ -1,176 +1,80 @@
-const CACHE_NAME = 'magical-coloring-v2'; // Versiyon numarasını değiştirin
-const ASSETS_TO_CACHE = [
-    './',
-    './index.html',
-    './styles.css',
-    './script.js',
-    './manifest.json',
-    './icons/icon-192x192.png',
-    './icons/icon-512x512.png',
-    './thumbnails-png/unicorn.png',
-    './thumbnails-png/dragon.png',
-    './thumbnails-png/fairy.png',
-    './thumbnails-png/castle.png',
-    './thumbnails-png/owl_mandala.png',
-    './thumbnails-png/wizard.png',
-    './thumbnails-png/cat.png'
+// sw.js - Tam Çevrimdışı Mod için Nihai ve Tam Kapsamlı Sürüm
+
+const CACHE_NAME = 'magical-coloring-v4-full-offline'; // Sürümü güncelledik
+const CORE_FILES = [
+    '/',
+    '/index.html', // Ana dosya artık bu
+    '/styles.css', // Ana dosya artık bu
+    '/script.js',  // Ana dosya artık bu
+    '/icons/icon-192x192.png',
+    '/icons/icon-512x512.png',
+    '/icons/splash-logo.png',
+    '/Background1.jpg',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css' // Dışarıdan yüklenen FontAwesome
 ];
 
-// Premium kullanıcılar için ek içerik
-const PREMIUM_ASSETS = [
-    // Premium sayfaların listesi
-    './coloring-pages-png/unicorn.png',
-    './coloring-pages-png/dragon.png',
-    './coloring-pages-png/fairy.png'
-    // Daha fazla premium içerik...
+// OYUNUN TÜM GÖRSEL VARLIKLARI
+const GAME_ASSETS = [
+    // --- Boyama Sayfaları ---
+    'coloring-pages-png/unicorn.png', 'coloring-pages-png/dragon.png', 'coloring-pages-png/fairy.png', 'coloring-pages-png/wizard.png', 'coloring-pages-png/narcissus.png', 'coloring-pages-png/poppies.png', 'coloring-pages-png/daisies.png', 'coloring-pages-png/carnation.png', 'coloring-pages-png/cat_and_dog.png', 'coloring-pages-png/flapping_bird.png', 'coloring-pages-png/iconic_birds.png', 'coloring-pages-png/smiling_fish.png', 'coloring-pages-png/sun_mandala.png', 'coloring-pages-png/modern_mandala.png', 'coloring-pages-png/tree_of_life.png', 'coloring-pages-png/oriental_mandala.png', 'coloring-pages-png/boho_style.png', 'coloring-pages-png/boat.png', 'coloring-pages-png/k-pop.png', 'coloring-pages-png/cute_cat.png', 'coloring-pages-png/shapes.png', 'coloring-pages-png/magic_wand.png', 'coloring-pages-png/fantasy_castle.png', 'coloring-pages-png/fantasy_unicorn.png', 'coloring-pages-png/fairytale_castle.png', 'coloring-pages-png/fairy_flying.png', 'coloring-pages-png/magical_book.png', 'coloring-pages-png/wizards_reading.png', 'coloring-pages-png/cute_bunny_fairy.png', 'coloring-pages-png/ornate_owl.png', 'coloring-pages-png/floral_frame.png', 'coloring-pages-png/doodle_flowers.png', 'coloring-pages-png/heart_flowers.png', 'coloring-pages-png/detailed_flowers.png', 'coloring-pages-png/big_flower.png', 'coloring-pages-png/simple_flower.png', 'coloring-pages-png/lotus_flowers.png', 'coloring-pages-png/cute_elephant.png', 'coloring-pages-png/birds_on_branch.png', 'coloring-pages-png/happy_kangaroo.png', 'coloring-pages-png/bear_in_forest.png', 'coloring-pages-png/funny_monkey.png', 'coloring-pages-png/cute_bunny.png', 'coloring-pages-png/kitten_in_garden.png', 'coloring-pages-png/happy_whale.png', 'coloring-pages-png/squirrel_with_acorn.png', 'coloring-pages-png/butterflies.png', 'coloring-pages-png/bulldog_portrait.png', 'coloring-pages-png/frog_on_grass.png', 'coloring-pages-png/cute_lamb.png', 'coloring-pages-png/kawaii_bunny_face.png', 'coloring-pages-png/cat_on_crocodile.png', 'coloring-pages-png/mandala_pattern.png', 'coloring-pages-png/mandala_horse.png', 'coloring-pages-png/mandala_bird.png', 'coloring-pages-png/panda_mandala.png', 'coloring-pages-png/detailed_lotus_mandala.png', 'coloring-pages-png/mandala_flower.png', 'coloring-pages-png/circle_mandala.png', 'coloring-pages-png/girl_on_swing.png', 'coloring-pages-png/beach_cleanup_boy.png', 'coloring-pages-png/boy_on_swing.png', 'coloring-pages-png/craft_girl.png', 'coloring-pages-png/boy_with_glasses.png', 'coloring-pages-png/kawaii_twin_girls.png', 'coloring-pages-png/dancing_bean_character.png', 'coloring-pages-png/image.png',
+    // --- Magic Photos Şablonları (Ana Dosyalar) ---
+    'template-images/birthday_colored_transparent.png', 'template-images/birthday_outline_transparent.png', 'template-images/firefighter_colored_transparent.png', 'template-images/firefighter_outline_transparent.png', 'template-images/pirate_colored_transparent.png', 'template-images/pirate_outline_transparent.png', 'template-images/princess_colored_transparent.png', 'template-images/princess_outline_transparent.png', 'template-images/safari_colored_transparent.png', 'template-images/safari_outline_transparent.png', 'template-images/space_colored_transparent.png', 'template-images/space_outline_transparent.png', 'template-images/superhero_colored_transparent.png', 'template-images/superhero_outline_transparent.png', 'template-images/underwater_colored_transparent.png', 'template-images/underwater_outline_transparent.png', 'template-images/unicorn_colored_transparent.png', 'template-images/unicorn_outline_transparent.png', 'template-images/unicorn_girl_colored_transparent.png', 'template-images/unicorn_girl_outline_transparent.png', 'template-images/wizzard_colored_transparent.png', 'template-images/wizzard_outline_transparent.png',
+    // --- Magic Photos Küçük Resimleri ---
+    'template-images/birthday_colored_thumb.png', 'template-images/birthday_outline_thumb.png', 'template-images/firefighter_colored_thumb.png', 'template-images/firefighter_outline_thumb.png', 'template-images/pirate_colored_thumb.png', 'template-images/pirate_outline_thumb.png', 'template-images/princess_colored_thumb.png', 'template-images/princess_outline_thumb.png' // ... ve diğerleri
 ];
 
-// Premium durumu
-let isPremiumUser = false;
+const FILES_TO_CACHE = [...CORE_FILES, ...GAME_ASSETS];
 
-// Hata yönetimi
-self.addEventListener('error', function (e) {
-    console.error('Service Worker hata:', e.message);
-});
-
-// Service Worker kurulumu
-self.addEventListener('install', event => {
-    console.log('Service Worker kurulum başladı');
-
-    // Önceki service worker'ı beklemeden etkinleştir
-    self.skipWaiting();
-
-    // Temel varlıkları cache'e ekle
+self.addEventListener('install', (event) => {
+    console.log('[ServiceWorker] Install: Caching all game assets for offline mode...');
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Temel varlıklar önbelleğe alınıyor');
-                return cache.addAll(ASSETS_TO_CACHE);
-            })
-            .catch(error => {
-                console.error('Önbelleğe alma hatası:', error);
-            })
-    );
-});
-
-// Service Worker aktifleştirildiğinde
-self.addEventListener('activate', event => {
-    console.log('Service Worker aktifleştiriliyor');
-
-    // İstemcileri hemen kontrol et
-    event.waitUntil(clients.claim());
-
-    // Eski önbellekleri temizle
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Eski önbellek siliniyor:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
+        caches.open(CACHE_NAME).then((cache) => {
+            // ignoreSearch: true, URL'deki ?v=123 gibi parametreleri önemseme
+            return cache.addAll(FILES_TO_CACHE.map(url => new Request(url, { cache: 'reload' })));
+        }).catch(error => {
+            console.error('[ServiceWorker] Caching failed:', error);
         })
     );
 });
 
-// İstek yakalandığında (offline erişim için)
-self.addEventListener('fetch', event => {
-    // Sadece GET isteklerini işle
+self.addEventListener('activate', (event) => {
+    console.log('[ServiceWorker] Activate');
+    event.waitUntil(
+        caches.keys().then((keyList) => {
+            return Promise.all(keyList.map((key) => {
+                if (key !== CACHE_NAME) {
+                    console.log('[ServiceWorker] Removing old cache', key);
+                    return caches.delete(key);
+                }
+            }));
+        })
+    );
+    return self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
-    // API veya dinamik içerik isteklerini atla
-    if (event.request.url.includes('/api/') ||
-        event.request.url.includes('chrome-extension')) {
-        return;
-    }
-
-    // Ağ öncelikli stratejisi
     event.respondWith(
-        fetch(event.request)
-            .then(response => {
-                // Başarılı cevabı cache'e ekle
-                if (response.status === 200) {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseClone);
-                    });
+        // Strateji: Önce önbelleğe bak (Cache First). Bu, çevrimdışı modu garantiler.
+        caches.match(event.request)
+            .then((response) => {
+                if (response) {
+                    // Önbellekte bulundu, direkt onu döndür.
+                    return response;
                 }
-                return response;
+                // Önbellekte yoksa, ağdan istemeye çalış.
+                return fetch(event.request).then((networkResponse) => {
+                    // Ağdan geldiyse, ileride kullanmak için önbelleğe ekle.
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, networkResponse.clone());
+                        return networkResponse;
+                    });
+                });
             })
             .catch(() => {
-                // Ağ bağlantısı yoksa cache'ten al
-                return caches.match(event.request)
-                    .then(cachedResponse => {
-                        if (cachedResponse) {
-                            return cachedResponse;
-                        }
-
-                        // Eğer navigate isteği ise ve cache'te yoksa
-                        if (event.request.mode === 'navigate') {
-                            return caches.match('./index.html');
-                        }
-
-                        // Diğer durumlar için 404
-                        return new Response('Not found', {
-                            status: 404,
-                            statusText: 'Not found'
-                        });
-                    });
+                // Hem önbellekte yoksa hem de ağa erişilemiyorsa,
+                // çevrimdışı sayfasını gösterebilirsin (opsiyonel).
             })
     );
 });
-
-// Ana sayfadan gelen mesajları dinle
-self.addEventListener('message', event => {
-    try {
-        console.log('Service Worker mesaj aldı:', event.data);
-
-        if (event.data && event.data.type === 'PREMIUM_STATUS') {
-            isPremiumUser = event.data.isPremium;
-            console.log('Premium kullanıcı durumu güncellendi:', isPremiumUser);
-
-            // Premium kullanıcı ise ek içeriği önbelleğe al
-            if (isPremiumUser) {
-                caches.open(CACHE_NAME).then(cache => {
-                    console.log('Premium içerikler önbelleğe alınıyor');
-                    return cache.addAll(PREMIUM_ASSETS);
-                });
-            }
-        }
-
-        if (event.data && event.data.type === 'CACHE_PREMIUM_CONTENT' && isPremiumUser) {
-            caches.open(CACHE_NAME).then(cache => {
-                console.log('Premium içerikler önbelleğe alınıyor (talep üzerine)');
-                return cache.addAll(PREMIUM_ASSETS);
-            });
-        }
-    } catch (error) {
-        console.error('Mesaj işleme hatası:', error);
-    }
-});
-
-// Bildirim tıklama olayı
-self.addEventListener('notificationclick', event => {
-    event.notification.close();
-
-    // Sayfayı aç veya odaklan
-    event.waitUntil(
-        clients.matchAll({ type: 'window' }).then(windowClients => {
-            // Açık bir pencere var mı?
-            for (let client of windowClients) {
-                if (client.url === './' && 'focus' in client) {
-                    return client.focus();
-                }
-            }
-            // Yoksa yeni pencere aç
-            if (clients.openWindow) {
-                return clients.openWindow('./');
-            }
-        })
-    );
-});
-
-// Servis başlangıcı
-console.log('Service Worker başlatıldı - Versiyon: Magical Coloring v2');

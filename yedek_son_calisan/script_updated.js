@@ -1,0 +1,2078 @@
+// =========================================================================
+// MAGICAL COLORING GAME - KONSOLİDE VE ONARILMIŞ SCRIPT (v.FINAL)
+// Bu dosya, tüm oyun fonksiyonlarını, hata düzeltmelerini ve 
+// çalışan Magic Photos sistemini içerir.
+// =========================================================================
+
+console.log('🚀 Magical Coloring Game Ana Script Yükleniyor...');
+
+// --- BÖLÜM 1: GLOBAL DEĞİŞKENLER VE TEMEL AYARLAR ---
+
+let isPremiumUser = localStorage.getItem('isPremium') === 'true';
+let currentTool = 'pencil';
+let currentColor = '#FF00FF';
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let characterImage = new Image();
+let lastDraggableTextPosition = { x: 0, y: 0 }; // Sürüklenen yazının son pozisyonunu saklar
+// Araç boyutları
+let pencilSize = 2,
+    brushSize = 10,
+    spraySize = 10,
+    watercolorSize = 20,
+    eraseSize = 10;
+let glitterSize = 20,
+    rainbowSize = 25,
+    glowSize = 25;
+markerSize = 15,
+    pastelSize = 20;
+let rainbowHue = 0; // <-- BU SATIRI EKLEYİN
+
+// Undo/Redo sistemi
+let drawingHistory = [];
+let currentStep = -1;
+const HISTORY_LIMIT = 50;
+
+// İsim yazma modu
+window.isWritingMode = false;
+window.selectedFont = 'Comic Sans MS';
+window.selectedFontSize = 24;
+window.textColor = '#FF69B4';
+
+// PWA Yükleme istemi için
+let deferredPrompt;
+
+// --- BÖLÜM 2: ANA OYUN MANTIKLARI VE YARDIMCI FONKSİYONLAR ---
+
+// Araç değiştirme fonksiyonu
+function setTool(toolName) {
+    if (window.isWritingMode) {
+        exitNameWritingMode();
+    }
+    if (['glitter', 'rainbow', 'glow'].includes(toolName) && !isPremiumUser) {
+        if (typeof showPremiumModal === 'function') showPremiumModal();
+        return;
+    }
+
+    if (window.isWritingMode) {
+        exitNameWritingMode();
+    }
+
+    currentTool = toolName;
+
+    document.querySelectorAll('.tool-btn, .magic-btn, #nameBtn, #quickNameBtn').forEach(btn => btn.classList.remove('active'));
+
+    const toolButtons = document.querySelectorAll(`[onclick="setTool('${toolName}')"]`);
+    toolButtons.forEach(btn => btn.classList.add('active'));
+
+    const activeButtonById = document.getElementById(`${toolName}Btn`) || document.getElementById(toolName);
+    if (activeButtonById) activeButtonById.classList.add('active');
+
+
+    const sizeSlider = document.getElementById('toolSize');
+    const sizeDisplay = document.getElementById('sizeValue');
+    const currentSize = getCurrentToolSize();
+
+    if (sizeSlider) sizeSlider.value = currentSize;
+    if (sizeDisplay) sizeDisplay.textContent = currentSize;
+
+    const canvas = document.getElementById('coloringCanvas');
+    if (canvas) canvas.style.cursor = 'crosshair';
+
+    console.log(`Tool changed to: ${toolName}, Size: ${currentSize}`);
+}
+
+// Boyut güncelleme
+function updateSize(size) {
+    size = parseInt(size);
+    if (isNaN(size)) return;
+    const sizeValue = document.getElementById('sizeValue');
+    if (sizeValue) sizeValue.textContent = size;
+    switch (currentTool) {
+        case 'pencil':
+            pencilSize = size;
+            break;
+        case 'brush':
+            brushSize = size;
+            break;
+        case 'watercolor':
+            watercolorSize = size;
+            break;
+        case 'spray':
+            spraySize = size;
+            break;
+        case 'erase':
+            eraseSize = size;
+            break;
+        case 'glitter':
+            glitterSize = size;
+            break;
+        case 'rainbow':
+            rainbowSize = size;
+            break;
+        case 'glow':
+            glowSize = size;
+            break;
+        case 'marker':         // Yeni isim
+            markerSize = size;
+            break;
+        case 'pastel':       // Yeni isim
+            pastelSize = size;
+            break;
+    }
+}
+
+// Mevcut aracın boyutunu al
+function getCurrentToolSize() {
+    switch (currentTool) {
+        case 'pencil':
+            return pencilSize;
+        case 'brush':
+            return brushSize;
+        case 'spray':
+            return spraySize;
+        case 'watercolor':
+            return watercolorSize;
+        case 'erase':
+            return eraseSize;
+        case 'glitter':
+            return glitterSize;
+        case 'rainbow':
+            return rainbowSize;
+        case 'glow':
+            return glowSize;
+        case 'marker':         // Yeni isim
+            return markerSize;
+        case 'pastel':       // Yeni isim
+            return pastelSize;
+        default:
+            return 10;
+    }
+}
+
+// Canvas koordinatlarını al
+function getCanvasCoordinates(e) {
+    const canvas = document.getElementById('coloringCanvas');
+    const rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX,
+        clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    }
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
+    return {
+        x,
+        y
+    };
+}
+
+// Geri alma sistemi
+function saveDrawingState() {
+    try {
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+        if (currentStep < drawingHistory.length - 1) {
+            drawingHistory = drawingHistory.slice(0, currentStep + 1);
+        }
+        drawingHistory.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        currentStep++;
+        if (drawingHistory.length > HISTORY_LIMIT) {
+            drawingHistory.shift();
+            currentStep--;
+        }
+        updateUndoButtonState();
+    } catch (error) {
+        console.error("Error saving drawing state:", error);
+    }
+}
+
+function handleUndoClick() {
+    if (currentStep > 0) {
+        currentStep--;
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.putImageData(drawingHistory[currentStep], 0, 0);
+    }
+    updateUndoButtonState();
+}
+
+function updateUndoButtonState() {
+    const undoButton = document.getElementById('undoBtn');
+    if (undoButton) undoButton.disabled = currentStep <= 0;
+}
+
+// Renk yardımcı fonksiyonu
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return {
+        r,
+        g,
+        b
+    };
+}
+
+function resizeCanvas() {
+    const canvas = document.getElementById('coloringCanvas');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    // Oranı koru (4:3)
+    let newWidth = container.clientWidth;
+    if (window.innerWidth < 850) { // Sadece mobil ve tablet boyutlarında küçült
+        newWidth = window.innerWidth * 0.95;
+    } else {
+        newWidth = 800; // Geniş ekranlarda sabit boyut
+    }
+
+    canvas.style.width = newWidth + "px";
+    canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
+}
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file || !file.type.startsWith('image/')) {
+        alert('Please select a valid image file (PNG, JPG, etc.).');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function () {
+            console.log("🖼️ User image uploaded and drawing to canvas.");
+            const canvas = document.getElementById('coloringCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Clear canvas and set white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the uploaded image, fitting it to the canvas
+            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+            const x = (canvas.width / 2) - (img.width / 2) * scale;
+            const y = (canvas.height / 2) - (img.height / 2) * scale;
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+            // Reset history and save the new state
+            drawingHistory = [];
+            currentStep = -1;
+            saveDrawingState();
+        };
+        img.onerror = function () {
+            alert("Sorry, there was an error loading your image. Please try another one.");
+        };
+        img.src = e.target.result;
+    };
+    reader.onerror = function () {
+        alert("Sorry, there was an error reading your file.");
+    };
+    reader.readAsDataURL(file);
+}
+// YENİ VE GARANTİLİ FLOOD FILL FONKSİYONU
+function floodFill(imageData, startX, startY, fillColor) {
+    const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    startX = Math.round(startX);
+    startY = Math.round(startY);
+
+    const startPos = (startY * width + startX) * 4;
+    const startR = data[startPos];
+    const startG = data[startPos + 1];
+    const startB = data[startPos + 2];
+
+    // Tıklanan yer zaten doldurulacak renk ise, hiçbir şey yapma.
+    if (startR === fillColor.r && startG === fillColor.g && startB === fillColor.b) {
+        console.log("Fill iptal: Zaten aynı renk.");
+        return false;
+    }
+
+    // Tıklanan yer siyah bir çizgi ise (veya siyaha çok yakınsa), hiçbir şey yapma.
+    const blackThreshold = 40; // Siyah olarak kabul edilecek ton sınırı
+    if (startR < blackThreshold && startG < blackThreshold && startB < blackThreshold) {
+        console.log("Fill iptal: Siyah çizgi koruması.");
+        return false;
+    }
+
+    const pixelStack = [[startX, startY]];
+    const tolerance = 40; // Toleransı biraz daha artırdık
+
+    while (pixelStack.length > 0) {
+        const [x, y] = pixelStack.pop();
+        const currentPos = (y * width + x) * 4;
+
+        // Sınır kontrolü
+        if (x < 0 || x >= width || y < 0 || y >= height) continue;
+
+        const r = data[currentPos];
+        const g = data[currentPos + 1];
+        const b = data[currentPos + 2];
+        const a = data[currentPos + 3];
+
+        // Renk tolerans dahilinde mi ve henüz boyanmamış mı?
+        if (a > 0 && Math.abs(r - startR) <= tolerance && Math.abs(g - startG) <= tolerance && Math.abs(b - startB) <= tolerance) {
+
+            // Pikseli boya
+            data[currentPos] = fillColor.r;
+            data[currentPos + 1] = fillColor.g;
+            data[currentPos + 2] = fillColor.b;
+            data[currentPos + 3] = 255;
+
+            // Komşuları sıraya ekle
+            pixelStack.push([x + 1, y]);
+            pixelStack.push([x - 1, y]);
+            pixelStack.push([x, y + 1]);
+            pixelStack.push([x, y - 1]);
+        }
+    }
+    return true; // Değişiklik yapıldığını belirt
+}
+
+// YENİ EKLENEN FONKSİYONLAR: SİHİRLİ DEĞNEKLER
+function drawMagicStar(x, y, ctx) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1.0;
+    const colors = ['#FFFDD0', '#FFFACD', '#FFFFF0', '#FFF8DC', '#FFFFE0'];
+    const size = Math.random() * 10 + 8;
+
+    ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 0.8;
+
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+        ctx.lineTo(
+            x + size * Math.cos(i * 4 * Math.PI / 5),
+            y + size * Math.sin(i * 4 * Math.PI / 5)
+        );
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+        ctx.lineTo(
+            x + (size * 0.6) * Math.cos(i * 4 * Math.PI / 5),
+            y + (size * 0.6) * Math.sin(i * 4 * Math.PI / 5)
+        );
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function drawMagicFlower(x, y, ctx) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1.0;
+    const flowerColors = ['#FFFFFF', '#FF0000', '#0000FF', '#800080'];
+    const selectedColor = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+    const size = Math.random() * 7 + 8;
+    const petalCount = Math.floor(Math.random() * 3) + 7;
+
+    for (let i = 0; i < petalCount; i++) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 0.5;
+        ctx.fillStyle = selectedColor;
+        ctx.ellipse(
+            x + (size * 0.8) * Math.cos(i * Math.PI / (petalCount / 2)),
+            y + (size * 0.8) * Math.sin(i * Math.PI / (petalCount / 2)),
+            size * 0.6, size * 0.3, i * Math.PI / (petalCount / 2), 0, 2 * Math.PI
+        );
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.fillStyle = '#FFD700';
+    ctx.strokeStyle = '#000000';
+    ctx.arc(x, y, size * 0.4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+}
+// SİHİRLİ DEĞNEK FONKSİYONLARI BİTTİ
+// =======================================================
+// NİHAİ GÖRSEL YÜKLEME FONKSİYONU (Tüm zamanlama sorunlarını çözer)
+// =======================================================
+function loadAndDrawImage(imageName) {
+    console.log(`🖼️ Yükleme ve çizme başlatıldı: ${imageName}`);
+
+    // Yüklenecek resmin tam yolunu belirle.
+    // Eğer bir isim verilmediyse, varsayılan 'image.png' kullanılır.
+    const imagePath = imageName ? `coloring-pages-png/${imageName}.png` : 'image.png';
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+
+    // Resim başarıyla indirildiğinde SADECE bu kod çalışır.
+    img.onload = function () {
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 1. Canvas'ı temizle
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Resmi doğru boyutlarda çiz
+        const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.9;
+        const x = (canvas.width - img.width * scale) / 2;
+        const y = (canvas.height - img.height * scale) / 2;
+        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+        // 3. Çizim geçmişini ve durumunu sıfırla
+        drawingHistory = [];
+        currentStep = -1;
+        isDrawing = false;
+        lastX = 0;
+        lastY = 0;
+        saveDrawingState();
+
+        console.log(`✅ ${imagePath} başarıyla canvas'a çizildi.`);
+    };
+
+    // Hata durumunda
+    img.onerror = function () {
+        console.error(`HATA: ${imagePath} yüklenemedi.`);
+        alert(`Sorry, the image "${imagePath}" could not be loaded.`);
+    };
+
+    // Yüklemeyi başlat
+    img.src = imagePath;
+}
+// =======================================================
+// GÖREV 23: ANİMASYON FONKSİYONU
+// =======================================================
+function animateCharacter() {
+    console.log("✨ Animation started!");
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Animasyondan önce o anki çizimi kaydet
+    const originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    let frame = 0;
+    const totalFrames = 120; // Animasyonun uzunluğu (saniye cinsinden yaklaşık 4 saniye)
+
+    function addSparkles() {
+        // Parıltı efekti için rastgele noktalar çiz
+        for (let i = 0; i < 15; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            ctx.beginPath();
+            ctx.arc(x, y, Math.random() * 2, 0, Math.PI * 2);
+            const sparkleColor = `hsl(${Math.random() * 360}, 100%, 85%)`; // Daha parlak parıltılar
+            ctx.fillStyle = sparkleColor;
+            ctx.fill();
+        }
+    }
+
+    const magicAnimation = setInterval(() => {
+        frame++;
+
+        // Her frame'de orijinal resmi geri yükle
+        ctx.putImageData(originalImage, 0, 0);
+
+        // Renk değiştiren bir katman uygula
+        const hue = frame * 3; // Renk tonunu zamanla değiştir
+        ctx.globalCompositeOperation = 'hue';
+        ctx.fillStyle = `hsl(${hue}, 50%, 50%)`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Parıltı efekti ekle
+        ctx.globalCompositeOperation = 'lighter';
+        addSparkles();
+
+        // Animasyon bittiğinde temizle
+        if (frame >= totalFrames) {
+            clearInterval(magicAnimation);
+            // Her şeyi orijinal haline geri döndür
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.putImageData(originalImage, 0, 0);
+            console.log("✨ Animation finished!");
+        }
+    }, 1000 / 30); // Saniyede 30 frame
+}
+// =================================================================
+// GÖREV 28 NİHAİ VE SON ÇÖZÜM (v17 - SAF DOKUNMATİK KOORDİNATLARI)
+// =================================================================
+// =================================================================
+// EKSİK PARÇA: BU FONKSİYONU writeNameToCanvas'ın HEMEN ÜSTÜNE EKLEYİN
+// =================================================================
+
+function showNameInputModal(x, y) {
+    // Önceki modal varsa kaldır
+    const oldModal = document.querySelector('.text-input-modal');
+    if (oldModal) oldModal.remove();
+
+    // Yeni modal'ı oluştur
+    const modalHTML = `
+        <div class="text-input-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:10000;">
+            <div class="text-input-content" style="background:white; padding:20px; border-radius:10px; width:90%; max-width:400px; text-align:center;">
+                <h3>Write Your Message</h3>
+                <input type="text" id="textInput" placeholder="Enter text..." style="width:95%; padding:10px; margin-bottom:15px; font-size:16px;">
+                <div style="margin-bottom:10px;">
+                    <label>Font: </label>
+                    <select id="fontSelect">
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Brush Script MT">Brush Script</option>
+                        <option value="Papyrus">Papyrus</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Size: </label>
+                    <input type="range" id="fontSizeSlider" min="12" max="72" value="24"> <span id="fontSizeDisplay">24px</span>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label>Color: </label>
+                    <input type="color" id="textColorPicker" value="#FF69B4">
+                </div>
+                <button id="addTextBtn" style="padding:10px 20px; background: #4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Add Text</button>
+                <button id="cancelTextBtn" style="padding:10px 20px; background: #f44336; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Modal içindeki olayları bağla
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+    fontSizeSlider.addEventListener('input', () => { fontSizeDisplay.textContent = `${fontSizeSlider.value}px`; });
+
+    // --- İŞTE DÜZELTME BURADA ---
+    document.getElementById('addTextBtn').onclick = () => writeNameToCanvas(x, y);
+    // --- DÜZELTME BİTTİ ---
+
+    document.getElementById('cancelTextBtn').onclick = closeNameModal;
+}
+function writeNameToCanvas(initialX, initialY) {
+    // Element kontrolleri aynı kalacak...
+    const textInput = document.getElementById('textInput');
+    const fontSelect = document.getElementById('fontSelect');
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const textColorPicker = document.getElementById('textColorPicker');
+
+    if (!textInput || !fontSelect || !fontSizeSlider || !textColorPicker) {
+        console.error('Modal elementleri bulunamadı!');
+        return;
+    }
+
+    const text = textInput.value.trim();
+    const font = fontSelect.value;
+    const size = parseInt(fontSizeSlider.value);
+    const color = textColorPicker.value;
+
+    if (!text) {
+        alert('Please enter some text!');
+        return;
+    }
+
+    console.log('✍️ Writing text to canvas:', { text, font, size, color, x: initialX, y: initialY });
+
+    closeNameModal();
+
+    // SADECE CANVAS'A YAZ - SÜRÜKLENEBILIR ELEMENT OLUŞTURMA
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // DOĞRU KOORDİNAT HESAPLAMA
+    const canvasRect = canvas.getBoundingClientRect();
+
+    // Canvas'ın görsel boyutundan gerçek boyutuna dönüştürme
+    const scaleX = canvas.width / canvasRect.width;
+    const scaleY = canvas.height / canvasRect.height;
+
+    // initialX ve initialY zaten canvas koordinatları, tekrar dönüştürme
+    const finalX = Math.max(10, Math.min(initialX, canvas.width - 100));
+    const finalY = Math.max(20, Math.min(initialY, canvas.height - 50));
+
+    // Canvas'a direkt yaz
+    ctx.save();
+    ctx.font = `${size}px ${font}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, finalX, finalY);
+
+    // Gölge efekti
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 1;
+
+    // TEK SEFER YAZ
+    ctx.fillText(text, finalX, finalY);
+    ctx.restore();
+
+    saveDrawingState();
+    exitNameWritingMode();
+
+    // Başarı mesajı
+    const successMsg = document.createElement('div');
+    successMsg.textContent = `✅ "${text}" added to canvas!`;
+    successMsg.style.cssText = 'position:fixed; top:20%; left:50%; transform:translateX(-50%); background:#4CAF50; color:white; padding:10px 20px; border-radius:10px; z-index:10002; font-weight:bold;';
+    document.body.appendChild(successMsg);
+    setTimeout(() => successMsg.remove(), 2000);
+}
+// =======================================================
+// GÖREV 24: "WRITE MESSAGE" SİSTEMİ
+// =======================================================
+
+function activateNameWriting() {
+    console.log('✍️ Write Message modu aktive ediliyor...');
+    window.isWritingMode = true;
+
+    // Diğer tüm araçların 'active' durumunu kaldır
+    document.querySelectorAll('.tool-btn, .magic-btn, #quickNameBtn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('nameBtn').classList.add('active');
+
+    const canvas = document.getElementById('coloringCanvas');
+    canvas.style.cursor = 'text';
+
+    // Kullanıcıya bilgi ver
+    const infoBox = document.createElement('div');
+    infoBox.textContent = 'Write Message Mode: Click on the canvas to place your text!';
+    infoBox.style.cssText = 'position:fixed; top:15%; left:50%; transform:translateX(-50%); background: #FF69B4; color:white; padding:10px 20px; border-radius:15px; z-index:10001; font-weight:bold;';
+    document.body.appendChild(infoBox);
+    setTimeout(() => infoBox.remove(), 3000);
+}
+
+function exitNameWritingMode() {
+    window.isWritingMode = false;
+    const canvas = document.getElementById('coloringCanvas');
+    canvas.style.cursor = 'crosshair';
+    document.getElementById('nameBtn').classList.remove('active');
+    setTool('pencil'); // Varsayılan araca geri dön
+}
+
+function showNameInputModal(x, y) {
+    // Önceki modal varsa kaldır
+    const oldModal = document.querySelector('.text-input-modal');
+    if (oldModal) oldModal.remove();
+
+    // Yeni modal'ı oluştur
+    const modalHTML = `
+        <div class="text-input-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:10000;">
+            <div class="text-input-content" style="background:white; padding:20px; border-radius:10px; width:90%; max-width:400px; text-align:center;">
+                <h3>Write Your Message</h3>
+                <input type="text" id="textInput" placeholder="Enter text..." style="width:95%; padding:10px; margin-bottom:15px; font-size:16px;">
+                <div style="margin-bottom:10px;">
+                    <label>Font: </label>
+                    <select id="fontSelect">
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Brush Script MT">Brush Script</option>
+                        <option value="Papyrus">Papyrus</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>Size: </label>
+                    <input type="range" id="fontSizeSlider" min="12" max="72" value="24"> <span id="fontSizeDisplay">24px</span>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label>Color: </label>
+                    <input type="color" id="textColorPicker" value="#FF69B4">
+                </div>
+                <button id="addTextBtn" style="padding:10px 20px; background: #4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Add Text</button>
+                <button id="cancelTextBtn" style="padding:10px 20px; background: #f44336; color:white; border:none; border-radius:5px; cursor:pointer; margin-left:10px;">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Modal içindeki olayları bağla
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+    fontSizeSlider.addEventListener('input', () => { fontSizeDisplay.textContent = `${fontSizeSlider.value}px`; });
+
+    // 706. satır civarı...
+    // "Add Text" butonu "damgalama" işlemini başlatacak.
+    document.getElementById('addTextBtn').onclick = () => writeNameToCanvas(x, y);
+    document.getElementById('cancelTextBtn').onclick = closeNameModal;
+}
+
+function closeNameModal() {
+    const modal = document.querySelector('.text-input-modal');
+    if (modal) modal.remove();
+}
+
+
+// =======================================================
+// GÖREV 27: "SIGNATURE" SİSTEMİ
+// =======================================================
+
+function activateSignatureMode() {
+    console.log("✍️ Signature modu aktive ediliyor...");
+
+    // Önceki modal varsa kaldır
+    const oldModal = document.querySelector('.signature-input-modal');
+    if (oldModal) oldModal.remove();
+
+    // Yeni modal'ı oluştur
+    // activateSignatureMode fonksiyonu içindeyiz...
+
+    // YENİ VE MOBİL UYUMLU MODAL HTML'İ
+    const modalHTML = `
+    <div class="signature-input-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:10000; padding: 15px;">
+        <div class="signature-input-content" style="background:linear-gradient(135deg, #8B4513, #D2691E); color:white; padding:20px; border-radius:15px; width:100%; max-width:400px; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <h3>Create Your Signature</h3>
+            <input type="text" id="signatureInput" placeholder="Enter your name..." maxlength="20" style="width:95%; padding:10px; margin-bottom:15px; border-radius:8px; border:none; font-size:16px;">
+            
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <label for="signatureFontSelect">Style:</label>
+                <select id="signatureFontSelect" style="flex-grow:1; padding:8px; border-radius:5px; border:none;">
+                    <option value="Brush Script MT">Brush Script</option>
+                    <option value="Lucida Handwriting">Handwriting</option>
+                    <option value="Segoe Script">Elegant Script</option>
+                </select>
+            </div>
+            
+            <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                 <label for="signatureColorPicker">Color:</label>
+                 <input type="color" id="signatureColorPicker" value="#444444" style="border-radius:5px; border:none; height:35px; width:50px;">
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button id="addSignatureBtn" style="padding:12px 20px; background:#4CAF50; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; flex-grow:1;">Add Signature</button>
+                <button id="cancelSignatureBtn" style="padding:12px 20px; background:#f44336; color:white; border:none; border-radius:8px; cursor:pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
+`;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Modal içindeki olayları bağla
+    document.getElementById('addSignatureBtn').onclick = writeSignatureToCanvas;
+    document.getElementById('cancelSignatureBtn').onclick = () => {
+        const modal = document.querySelector('.signature-input-modal');
+        if (modal) modal.remove();
+    };
+}
+
+function writeSignatureToCanvas() {
+    const text = document.getElementById('signatureInput').value;
+    const font = document.getElementById('signatureFontSelect').value;
+    const color = document.getElementById('signatureColorPicker').value;
+    const size = 22; // İmza için sabit veya ayarlanabilir bir boyut
+
+    if (!text) {
+        alert("Please enter your name for the signature!");
+        return;
+    }
+
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.font = `italic ${size}px ${font}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'right'; // Sağa hizala
+    ctx.textBaseline = 'bottom'; // Alta hizala
+
+    // Canvas'ın sağ alt köşesine yerleştir (küçük bir boşluk bırakarak)
+    const x = canvas.width - 20;
+    const y = canvas.height - 20;
+
+    ctx.fillText(text, x, y);
+
+    saveDrawingState();
+
+    const modal = document.querySelector('.signature-input-modal');
+    if (modal) modal.remove();
+}
+// --- BÖLÜM 3: SAYFA YÜKLENDİĞİNDE ÇALIŞACAK ANA KOD BLOĞU ---
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('✅ DOM Yüklendi. Tüm oyun sistemleri başlatılıyor...');
+
+    const canvas = document.getElementById('coloringCanvas');
+    if (!canvas) {
+        console.error('KRİTİK HATA: Canvas elementi bulunamadı!');
+        return;
+    }
+    const ctx = canvas.getContext('2d', {
+        willReadFrequently: true
+    });
+
+    // 1. RENK PALETİNİ OLUŞTUR
+    const colorPalette = document.getElementById('colorPalette');
+    // ESKİ HALİ:
+    // const colors = ['#FF0000', '#8B0000', ...];
+
+    // YENİ VE ZENGİNLEŞTİRİLMİŞ HALİ:
+    const colors = [
+        // Kırmızılar & Pembeler
+        '#FF0000', '#DC143C', '#FF69B4', '#FFC0CB', '#8B0000',
+        // Turuncular & Sarılar
+        '#FFA500', '#FF8C00', '#FFD700', '#FFFF00', '#F0E68C',
+        // Yeşiller
+        '#32CD32', '#008000', '#9ACD32', '#2E8B57', '#006400',
+        // Maviler & Turkuazlar
+        '#0000FF', '#1E90FF', '#87CEEB', '#00CED1', '#000080',
+        // Morlar
+        '#8A2BE2', '#9400D3', '#BA55D3', '#4B0082', '#E6E6FA',
+        // Kahverengiler & Ten Renkleri
+        '#A0522D', '#D2691E', '#8B4513', '#F4A460', '#FFDFC4',
+        // Griler, Siyah & Beyaz
+        '#708090', '#A9A9A9', '#D3D3D3', '#724B4B', '#2A2323',
+    ];
+    colors.forEach(color => {
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = color;
+        swatch.addEventListener('click', () => {
+            currentColor = color;
+        });
+        colorPalette.appendChild(swatch);
+    });
+    const customColorPicker = document.createElement('input');
+    customColorPicker.type = 'color';
+    customColorPicker.className = 'custom-color-picker';
+    customColorPicker.addEventListener('input', (e) => {
+        currentColor = e.target.value;
+    });
+    colorPalette.appendChild(customColorPicker);
+
+
+    // 3. ÇİZİM OLAYLARINI AYARLA (v2 - MOBİL VE MASAÜSTÜ UYUMLU)
+
+    let isDragging = false; // Sadece sürükleme yapılıp yapılmadığını kontrol eder.
+
+    function startDrawing(e) {
+        if (currentTool === 'text' || window.isWritingMode) return;
+
+        const coords = getCanvasCoordinates(e);
+        lastX = coords.x;
+        lastY = coords.y;
+
+        isDrawing = true; // Çizim başladı (tıklandı)
+        isDragging = false; // Henüz sürüklenmedi
+    }
+
+    // =======================================================
+    // PRO ARAÇLAR EKLENMİŞ, MEVCUT YAPIYI KORUYAN DRAW FONKSİYONU
+    // =======================================================
+    function draw(e) {
+        // 1. KORUMA KALKANI: Sadece sürükleme araçları için çalış.
+        // Pro araçları listeye eklendi.
+        const dragTools = ['pencil', 'brush', 'marker', 'pastel', 'watercolor', 'spray', 'erase', 'glitter', 'rainbow', 'glow',];
+        if (!isDrawing || !dragTools.includes(currentTool)) {
+            return;
+        }
+        isDragging = true;
+
+        // 2. KOORDİNATLARI AL
+        const coords = getCanvasCoordinates(e);
+        const x = coords.x, y = coords.y;
+
+        // 3. HER ARAÇ İÇİN ÖZEL MANTIK
+        switch (currentTool) {
+
+            // --- YENİ EKLENEN PRO ARAÇLAR ---
+            case 'glow':
+                // Glow efekti artık tek ve güçlü bir gölgeyle çalışıyor.
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // 1. Ana Çizgi (Hafif saydam ve bulanık)
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = getCurrentToolSize();
+                ctx.globalAlpha = 0.8; // Hafif saydamlık
+
+                // 2. Işıltı (En önemli kısım)
+                ctx.shadowColor = currentColor; // Gölge rengi ana renkle aynı
+                ctx.shadowBlur = 20; // ÇOK GÜÇLÜ BİR BULANIKLIK EFEKTİ
+
+                ctx.stroke();
+
+                // Efektin diğer çizimleri etkilememesi için gölgeyi sıfırla
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1.0;
+                break;
+
+            // ... switch (currentTool) { ...
+
+            case 'rainbow':
+                // Seçenek 2: Gradyan Gökkuşağı Fırçası
+
+                // Renk döngüsü için global rainbowHue değişkenini kullanmaya devam ediyoruz.
+                rainbowHue = (rainbowHue + 5) % 360; // Renk geçişini hızlandıralım
+                const nextHue = (rainbowHue + 30) % 360; // Çizginin sonundaki renk
+
+                // Çizdiğimiz kısa çizginin başlangıç ve bitiş noktaları arasında bir gradyan oluştur.
+                const gradient = ctx.createLinearGradient(lastX, lastY, x, y);
+
+                // Gradyanın başlangıç ve bitiş renklerini belirle.
+                gradient.addColorStop(0, `hsl(${rainbowHue}, 90%, 60%)`); // Başlangıç rengi
+                gradient.addColorStop(1, `hsl(${nextHue}, 90%, 60%)`); // Bitiş rengi
+
+                // Şimdi bu gradyanı "boya" olarak kullanarak çizgiyi çiz.
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = getCurrentToolSize();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                break;
+
+            // ... diğer case bloklarınız (pencil, brush, glow, vs.) burada devam eder ...
+
+            case 'glitter':
+                // Glitter artık canlı bir renk paleti ve daha parlak parçacıklar kullanıyor
+                const glitterColors = ['#FFD700', '#FFFFFF', '#FF69B4', '#00BFFF', '#7CFC00']; // Altın, Beyaz, Pembe, Mavi, Yeşil
+                const glitterDensity = 30;
+                const size = getCurrentToolSize();
+
+                for (let i = 0; i < glitterDensity; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = Math.random() * size;
+                    const particleX = x + Math.cos(angle) * distance;
+                    const particleY = y + Math.sin(angle) * distance;
+
+                    // Her parçacığın boyutunu ve opaklığını rastgele ayarla
+                    const particleSize = Math.random() * 3 + 1.5;
+
+                    // PARILTI EFEKTİ: Renkli bir dairenin içine daha küçük beyaz bir daire çiziyoruz
+
+                    // 1. Ana Renkli Daire
+                    ctx.beginPath();
+                    ctx.globalAlpha = Math.random() * 0.5 + 0.3; // Yarı saydam
+                    ctx.fillStyle = glitterColors[Math.floor(Math.random() * glitterColors.length)];
+                    ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 2. İçteki Parlak Beyaz Nokta
+                    ctx.beginPath();
+                    ctx.globalAlpha = 0.9; // Neredeyse opak
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.arc(particleX, particleY, particleSize * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0; // Opaklığı sıfırla
+                break;
+
+            // --- MEVCUT, ÇALIŞAN ARAÇLARINIZ (DEĞİŞTİRİLMEDİ) ---
+
+            case 'pencil':
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+                ctx.lineWidth = getCurrentToolSize();
+                ctx.strokeStyle = currentColor;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                break;
+
+            case 'brush':
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.9;
+                ctx.strokeStyle = currentColor;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                const brushDistance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+                const steps = Math.max(Math.floor(brushDistance / 2), 1);
+                for (let i = 0; i < steps; i++) {
+                    const t = (i + 1) / steps;
+                    const interpolatedX = lastX + (x - lastX) * t;
+                    const interpolatedY = lastY + (y - lastY) * t;
+                    const variation = getCurrentToolSize() * 0.1;
+                    const offsetX = (Math.random() - 0.5) * variation;
+                    const offsetY = (Math.random() - 0.5) * variation;
+                    ctx.beginPath();
+                    ctx.arc(interpolatedX + offsetX, interpolatedY + offsetY, getCurrentToolSize() / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = currentColor;
+                    ctx.fill();
+                }
+                break;
+
+            // =... switch (currentTool) ...
+
+
+            // ... switch (currentTool) { ...
+
+            case 'marker':
+                // YENİ VE NİHAİ MARKER: Üst üste binen, yarı şeffaf daireler çizer.
+
+                // 1. ŞEFFAFLIĞI AYARLA: Bu, rengin üst üste binince koyulaşmasını sağlar.
+                ctx.globalAlpha = 0.03; // %30 opaklık. Değeri düşürdükçe daha şeffaf olur.
+
+                // 2. DİĞER AYARLAR
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // 3. PÜRÜZSÜZ ÇİZİM İÇİN ARA NOKTALARI HESAPLA
+                const markerDistance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+                const markerSteps = Math.max(Math.floor(markerDistance / 2), 1);
+
+                for (let i = 0; i < markerSteps; i++) {
+                    const markerT = (i + 1) / markerSteps;
+                    const markerInterpolatedX = lastX + (x - lastX) * markerT;
+                    const markerInterpolatedY = lastY + (y - lastY) * markerT;
+
+                    // 4. HER ARA NOKTAYA BİR YARI ŞEFFAF DAİRE ÇİZ
+                    ctx.beginPath();
+                    ctx.arc(markerInterpolatedX, markerInterpolatedY, getCurrentToolSize() / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = currentColor;
+                    ctx.fill();
+                }
+
+                // 5. SONRAKİ ARAÇLAR İÇİN ŞEFFAFLIĞI SIFIRLA (ÇOK ÖNEMLİ)
+                ctx.globalAlpha = 1.0;
+                break;
+
+            // ... diğer case bloklarınız (brush, pastel, vs.) burada devam eder ...
+            case 'watercolor':
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.globalAlpha = 0.05;
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = getCurrentToolSize();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                break;
+
+            case 'pastel':
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                const pastelDistance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+                const pastelSteps = Math.max(Math.floor(pastelDistance), 1);
+                for (let i = 0; i < pastelSteps; i++) {
+                    const pastelT = (i + 1) / pastelSteps;
+                    const pastelCenterX = lastX + (x - lastX) * pastelT;
+                    const pastelCenterY = lastY + (y - lastY) * pastelT;
+                    const pastelRadius = getCurrentToolSize();
+                    for (let j = 0; j < 30; j++) {
+                        // EKSİK OLAN VE ŞİMDİ EKLENEN KRİTİK SATIR:
+                        const angle = Math.random() * Math.PI * 2;
+
+                        const r = Math.random() * pastelRadius;
+                        const pixelX = Math.floor(pastelCenterX + Math.cos(angle) * r);
+                        const pixelY = Math.floor(pastelCenterY + Math.sin(angle) * r);
+                        const dist = r / pastelRadius;
+                        ctx.globalAlpha = 0.03 * (1 - dist);
+                        ctx.fillStyle = currentColor;
+                        ctx.fillRect(pixelX, pixelY, 2, 2);
+                    }
+                }
+                ctx.globalAlpha = 1.0;
+                break;
+
+            case 'spray':
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+                const radius = getCurrentToolSize();
+                const density = 50;
+                ctx.fillStyle = currentColor;
+                for (let i = 0; i < density; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const sprayDistance = Math.random() * radius;
+                    ctx.fillRect(x + Math.cos(angle) * sprayDistance, y + Math.sin(angle) * sprayDistance, 1, 1);
+                }
+                break;
+
+            case 'erase':
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.globalAlpha = 1.0;
+                ctx.lineWidth = getCurrentToolSize();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                break;
+        }
+
+        // 4. SON POZİSYONU GÜNCELLE
+        [lastX, lastY] = [x, y];
+    }
+    // stopDrawing fonksiyonunun doğru hali
+    function stopDrawing(e) {
+        if (isDrawing) {
+            // Sadece sürükleme yapıldıysa (çizgi çizildiyse) durumu kaydet
+            if (isDragging) {
+                saveDrawingState();
+            }
+        }
+        // Her durumda durumları sıfırla
+        isDrawing = false;
+        isDragging = false;
+    }
+    // Tüm platformlar için olay dinleyicileri
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', () => { isDrawing = false; isDragging = false; }); // Sadece durumu sıfırla
+
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
+    // DOKUNMA BİTTİĞİNDE (MOBİL)
+    // DOKUNMA BİTTİĞİNDE (MOBİL)
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+
+        // Sürüklenip sürüklenmediğini kontrol etmek için bir kopya al
+        const wasDragging = isDragging;
+
+        // Önce normal çizim bitirme fonksiyonunu çağır (bu, isDragging'i sıfırlar)
+        stopDrawing(e.changedTouches[0]);
+
+        // Şimdi, eğer bu bir sürükleme DEĞİLSE,
+        // bu dokunmanın bir "click" olduğunu simüle et.
+        if (!wasDragging) {
+            console.log("📱 Mobile tap detected, simulating a click event.");
+
+            // Gerçek bir click olayı oluştur
+            const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                clientX: e.changedTouches[0].clientX,
+                clientY: e.changedTouches[0].clientY
+            });
+            // Oluşturduğun bu olayı canvas'a gönder
+            e.target.dispatchEvent(clickEvent);
+        }
+    }, { passive: false });
+
+    // =======================================================
+    // GÖREV 24 DÜZELTMESİ: NİHAİ TIKLAMA OLAY YÖNETİCİSİ
+    // Hem tek tık araçlarını hem de metin yazma modunu yönetir.
+    // =======================================================
+
+    canvas.addEventListener('click', function (e) {
+        const coords = getCanvasCoordinates(e);
+        const x = Math.round(coords.x);
+        const y = Math.round(coords.y);
+
+        // 1. ÖNCELİK KONTROLÜ: Metin yazma modu aktif mi?
+        if (window.isWritingMode) {
+            console.log("✍️ Text mode is active. Opening text input modal.");
+            showNameInputModal(x, y);
+            return; // Başka hiçbir işlem yapma, fonksiyondan çık.
+        }
+
+        // 2. KONTROL: Tek tık çizim araçları mı seçili?
+        const singleClickTools = ['fill', 'star', 'flower'];
+        if (singleClickTools.includes(currentTool)) {
+
+            console.log(`Tek tık aracı aktive edildi: ${currentTool}`);
+            let stateChanged = false;
+
+            switch (currentTool) {
+                case 'fill':
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    if (floodFill(imageData, x, y, hexToRgb(currentColor))) {
+                        ctx.putImageData(imageData, 0, 0);
+                        stateChanged = true;
+                    }
+                    break;
+                case 'star':
+                    drawMagicStar(x, y, ctx);
+                    stateChanged = true;
+                    break;
+                case 'flower':
+                    drawMagicFlower(x, y, ctx);
+                    stateChanged = true;
+                    break;
+            }
+
+            if (stateChanged) {
+                setTimeout(() => {
+                    saveDrawingState();
+                }, 10);
+            }
+        }
+        // Eğer metin yazma modu veya tek tık aracı aktif değilse, bu 'click' olayı hiçbir şey yapmaz.
+    });
+
+    // 4. BUTONLARI BAĞLA
+    document.getElementById('undoBtn').addEventListener('click', handleUndoClick);
+    document.getElementById('toolSize').addEventListener('input', (e) => updateSize(e.target.value));
+    document.getElementById('homeBtn').addEventListener('click', () => loadAndDrawImage());
+    document.getElementById('newPageBtn').addEventListener('click', function () {
+        console.log("📄 New Drawing Page created.");
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Clear the canvas and fill with white
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Reset the drawing history for the new page
+        drawingHistory = [];
+        currentStep = -1;
+        saveDrawingState(); // Save the blank state
+    });
+    document.getElementById('uploadBtn').addEventListener('click', function () {
+        // Create a temporary file input element
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+
+        // When a file is selected, call our handler function
+        fileInput.onchange = handleFileUpload;
+
+        // Programmatically click the input to open the file dialog
+        fileInput.click();
+    });
+    // --- YENİ EKLENEN BUTON BAĞLANTILARI ---
+    document.getElementById('pencilBtn').addEventListener('click', () => setTool('pencil'));
+    document.getElementById('brushBtn').addEventListener('click', () => setTool('brush'));
+    document.getElementById('markerBtn').addEventListener('click', () => setTool('marker')); // <<< DÜZELTİLDİ
+    document.getElementById('watercolorBtn').addEventListener('click', () => setTool('watercolor'));
+    document.getElementById('pastelBtn').addEventListener('click', () => setTool('pastel'))
+    document.getElementById('sprayBtn').addEventListener('click', () => setTool('spray'));
+    document.getElementById('eraseBtn').addEventListener('click', () => setTool('erase'));
+    document.getElementById('fillBtn').addEventListener('click', () => setTool('fill')); // Fill'i de buraya ekledik.
+
+    // Henüz yapmasak da, sihirli değnekleri de şimdiden bağlayalım
+    document.getElementById('starWand').addEventListener('click', () => setTool('star'));
+    document.getElementById('flowerWand').addEventListener('click', () => setTool('flower'));
+    document.getElementById('animateBtn').addEventListener('click', animateCharacter);
+    document.getElementById('nameBtn').addEventListener('click', activateNameWriting);
+    document.getElementById('quickNameBtn').addEventListener('click', activateSignatureMode);
+
+    // --- YENİ BAĞLANTILAR BİTTİ ---
+    document.getElementById('saveBtn').onclick = () => {
+        const link = document.createElement('a');
+        link.download = 'magical-coloring.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    };
+
+    // ... Diğer butonlar (Home, Upload, New Page etc.) ...
+    // 5. THUMBNAIL VE KATEGORİLERİ BAĞLA (ONARILMIŞ)
+    document.querySelectorAll('.page-thumbnail').forEach(thumbnail => { thumbnail.addEventListener('click', function () { loadAndDrawImage(this.dataset.page); }); });
+
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            // Önce tüm sekmelerden ve thumbnail gruplarından 'active' sınıfını kaldır
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.page-thumbnails').forEach(c => c.classList.remove('active'));
+
+            // Tıklanan sekmeye ve ilgili thumbnail grubuna 'active' sınıfını ekle
+            button.classList.add('active');
+            const category = button.dataset.category;
+            const categoryContainer = document.querySelector(`.page-thumbnails.${category}`);
+            if (categoryContainer) {
+                categoryContainer.classList.add('active');
+                console.log(`Kategori değiştirildi: ${category}`);
+            } else {
+                console.error(`Kategori konteyneri bulunamadı: .page-thumbnails.${category}`);
+            }
+        });
+    });
+
+    // =======================================================
+    // GÖREV 19 & 20: ONARILMIŞ GÖRSEL YÜKLEME FONKSİYONLARI
+    // =======================================================
+
+    /**
+     * Belirtilen bir boyama sayfasını yükler, canvas'ı temizler ve çizer.
+     * @param {string} pageName - Yüklenecek resmin adı (uzantısız).
+     */
+
+
+    // 6. BAŞLANGIÇ AYARLARI
+    loadAndDrawImage(); // Sayfa ilk açıldığında ana görseli yükle
+    setTool('pencil');
+    console.log('✅ Tüm oyun sistemleri başarıyla başlatıldı.');
+});
+
+// =========================================================================
+// ONARILMIŞ VE İYİLEŞTİRİLMİŞ MAGIC PHOTOS SİSTEMİ (v2)
+// Lütfen script_updated.js dosyanızdaki eski enhancedMagicPhotosSystemFixed
+// bloğunu bu yeni kodla tamamen değiştirin.
+// =========================================================================
+
+(function enhancedMagicPhotosSystemFixed() {
+    console.log('🎨 Gelişmiş Canvas-tabanlı Magic Photos sistemi başlatılıyor...');
+
+    // Gerekli değişkenler
+    let isEditingPhoto = false;
+    let userPhoto = new Image(); // Kullanıcının yüklediği fotoğrafı saklar
+    let templateImage = new Image(); // Seçilen şablonu saklar
+
+    let editingSettings = {
+        x: 0,
+        y: 0,
+        scale: 1,
+        isDragging: false,
+        startX: 0,
+        startY: 0
+    };
+
+    let currentTemplate = null;
+    let selectedStyle = 'colored';
+
+    // --- YENİ VE KOORDİNATLARI DÜZELTİLMİŞ TEMPLATES_CONFIG (BUNUNLA DEĞİŞTİRİN) ---
+
+    const TEMPLATES_CONFIG = {
+        birthday: {
+            name: "Birthday Star", icon: "🎂",
+            colored: "birthday_colored_transparent.png", outline: "birthday_outline_transparent.png",
+            colored_thumb: "birthday_colored_thumb.png", outline_thumb: "birthday_outline_thumb.png",
+            faceArea: { x: 400, y: 300, width: 200, height: 240 },
+        },
+        firefighter: {
+            name: "Hero Firefighter", icon: "🚒",
+            colored: "firefighter_colored_transparent.png", outline: "firefighter_outline_transparent.png",
+            colored_thumb: "firefighter_colored_thumb.png", outline_thumb: "firefighter_outline_thumb.png",
+            faceArea: { x: 550, y: 240, width: 170, height: 210 },
+        },
+        pirate: {
+            name: "Adventure Pirate", icon: "🏴‍☠️",
+            colored: "pirate_colored_transparent.png", outline: "pirate_outline_transparent.png",
+            colored_thumb: "pirate_colored_thumb.png", outline_thumb: "pirate_outline_thumb.png",
+            faceArea: { x: 400, y: 280, width: 180, height: 220 },
+        },
+        princess: {
+            name: "Magical Princess", icon: "👑",
+            colored: "princess_colored_transparent.png", outline: "princess_outline_transparent.png",
+            colored_thumb: "princess_colored_thumb.png", outline_thumb: "princess_outline_thumb.png",
+            faceArea: { x: 400, y: 310, width: 200, height: 240 },
+        },
+        safari: {
+            name: "Safari Explorer", icon: "🦁",
+            colored: "safari_colored_transparent.png", outline: "safari_outline_transparent.png",
+            colored_thumb: "safari_colored_thumb.png", outline_thumb: "safari_outline_thumb.png",
+            faceArea: { x: 400, y: 290, width: 180, height: 220 }, isPremium: true
+        },
+        space: {
+            name: "Space Explorer", icon: "🚀",
+            colored: "space_colored_transparent.png", outline: "space_outline_transparent.png",
+            colored_thumb: "space_colored_thumb.png", outline_thumb: "space_outline_thumb.png",
+            faceArea: { x: 400, y: 300, width: 200, height: 240 }, isPremium: true
+        },
+        superhero: {
+            name: "Super Hero", icon: "🦸‍♂️",
+            colored: "superhero_colored_transparent.png", outline: "superhero_outline_transparent.png",
+            colored_thumb: "superhero_colored_thumb.png", outline_thumb: "superhero_outline_thumb.png",
+            faceArea: { x: 400, y: 240, width: 160, height: 200 }, isPremium: true
+        },
+        underwater: {
+            name: "Underwater World", icon: "🐠",
+            colored: "underwater_colored_transparent.png", outline: "underwater_outline_transparent.png",
+            colored_thumb: "underwater_colored_thumb.png", outline_thumb: "underwater_outline_thumb.png",
+            faceArea: { x: 400, y: 290, width: 200, height: 240 }, isPremium: true
+        },
+        // --- DÜZELTİLMİŞ ŞABLONLAR ---
+        unicorn: {
+            name: "Unicorn Magic", icon: "🦄",
+            colored: "unicorn_colored_transparent.png", outline: "unicorn_outline_transparent.png",
+            colored_thumb: "unicorn_colored_thumb.png", outline_thumb: "unicorn_outline_thumb.png",
+            faceArea: { x: 360, y: 250, width: 200, height: 220 }, isPremium: true // Yüksekliği ayarlandı
+        },
+        unicorn_girl: {
+            name: "Unicorn Girl", icon: "👧🦄",
+            colored: "unicorn_girl_colored_transparent.png", outline: "unicorn_girl_outline_transparent.png",
+            colored_thumb: "unicorn_girl_colored_thumb.png", outline_thumb: "unicorn_girl_outline_thumb.png",
+            faceArea: { x: 450, y: 215, width: 190, height: 220 }, isPremium: true // Yüksekliği ve boyutu ayarlandı
+        },
+        wizzard: {
+            name: "Wizard Academy", icon: "🧙‍♂️",
+            colored: "wizzard_colored_transparent.png", outline: "wizzard_outline_transparent.png",
+            colored_thumb: "wizzard_colored_thumb.png", outline_thumb: "wizzard_outline_thumb.png",
+            faceArea: { x: 445, y: 295, width: 160, height: 200 }, isPremium: true // Konumu ve boyutu ayarlandı
+        }
+    };
+    function start() {
+        createMainModal();
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
+        const instructions = document.getElementById('editingInstructions');
+        if (instructions) instructions.remove();
+    }
+
+    // Bu fonksiyonlarda bir değişiklik yok, aynı kalabilir
+    function createMainModal() {
+        closeAllModals();
+        const modal = document.createElement('div');
+        modal.className = 'magic-photos-modal-container';
+        modal.innerHTML = `
+            <div class="magic-photos-modal">
+                <div class="magic-photos-content">
+                    <span class="magic-photos-close">×</span>
+                    <h2 class="magic-photos-title">✨ Magic Photos Studio ✨</h2>
+                    <p class="magic-photos-subtitle">Choose template → Upload photo → Edit on canvas</p>
+                    <div class="magic-photos-style-selector">
+                        <button id="mpColoredBtn" class="mp-style-btn active">🎨 Colored</button>
+                        <button id="mpOutlineBtn" class="mp-style-btn">✏️ Outline</button>
+                    </div>
+                    <div class="magic-photos-grid"></div>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector('.magic-photos-close').onclick = closeAllModals;
+        const grid = modal.querySelector('.magic-photos-grid');
+        const coloredBtn = modal.querySelector('#mpColoredBtn');
+        const outlineBtn = modal.querySelector('#mpOutlineBtn');
+        function setStyle(style) {
+            selectedStyle = style;
+            coloredBtn.classList.toggle('active', style === 'colored');
+            outlineBtn.classList.toggle('active', style === 'outline');
+            loadTemplates(grid);
+        }
+        coloredBtn.onclick = () => setStyle('colored');
+        outlineBtn.onclick = () => setStyle('outline');
+        setStyle('colored');
+    }
+    // YENİ VE İNTERAKTİF loadTemplateToCanvas FONKSİYONU
+    function loadTemplateToCanvas(templateKey) {
+        const template = TEMPLATES_CONFIG[templateKey];
+        currentTemplate = template;
+        const templateFile = selectedStyle === 'colored' ? template.colored : template.outline;
+        console.log('📋 Şablon canvasa yüklendi, yüz alanına tıklama bekleniyor...');
+
+        templateImage.crossOrigin = 'anonymous';
+        templateImage.onload = () => {
+            const canvas = document.getElementById('coloringCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+
+            // KULLANICIYA GÖRSEL İPUCU VER
+            drawFaceAreaIndicator(ctx);
+
+            // DOSYA YÜKLEMEYİ BAŞLATMAK YERİNE, TIKLAMA DİNLEYİCİSİNİ AKTİVE ET
+            activateFaceAreaClick();
+            showFaceClickInstruction();
+        };
+        templateImage.onerror = () => alert(`Template could not be loaded: ${templateFile}`);
+        templateImage.src = `template-images/${templateFile}`;
+    }
+    // --- BURADAN KOPYALAMAYA BAŞLAYIN ---
+
+    // Canvas üzerinde yüz alanını gösteren bir ipucu çizer
+    function drawFaceAreaIndicator(ctx) {
+        if (!currentTemplate) return;
+        const canvas = ctx.canvas;
+        const faceArea = currentTemplate.faceArea;
+        const scaleX = canvas.width / 800;
+        const scaleY = canvas.height / 600;
+
+        const centerX = faceArea.x * scaleX;
+        const centerY = faceArea.y * scaleY;
+        const radiusX = (faceArea.width / 2) * scaleX;
+        const radiusY = (faceArea.height / 2) * scaleY;
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.9)';
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([8, 8]); // Kesik çizgi stili
+
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // Yüz alanına tıklama dinleyicisini ayarlar
+    function activateFaceAreaClick() {
+        const canvas = document.getElementById('coloringCanvas');
+        // Önceki dinleyicileri temizle (varsa)
+        canvas.removeEventListener('click', handleFaceAreaClick);
+        // Yeni dinleyiciyi ekle
+        canvas.addEventListener('click', handleFaceAreaClick);
+    }
+
+    // Yüz alanına tıklandığında ne olacağını yönetir
+    function handleFaceAreaClick(event) {
+        if (!currentTemplate) return;
+        const canvas = document.getElementById('coloringCanvas');
+        const coords = getEventCoordinates(event);
+
+        // Yüz alanının sınırlarını hesapla
+        const faceArea = currentTemplate.faceArea;
+        const scaleX = canvas.width / 800;
+        const scaleY = canvas.height / 600;
+        const bounds = {
+            left: (faceArea.x - faceArea.width / 2) * scaleX,
+            right: (faceArea.x + faceArea.width / 2) * scaleX,
+            top: (faceArea.y - faceArea.height / 2) * scaleY,
+            bottom: (faceArea.y + faceArea.height / 2) * scaleY
+        };
+
+        // Tıklama, sınırlar içinde mi?
+        if (coords.x > bounds.left && coords.x < bounds.right && coords.y > bounds.top && coords.y < bounds.bottom) {
+            console.log('✅ Yüz alanı tıklandı! Fotoğraf yükleme başlatılıyor.');
+
+            // Bu geçici dinleyiciyi kaldır
+            canvas.removeEventListener('click', handleFaceAreaClick);
+
+            // Talimat metnini kaldır
+            const instructionBox = document.getElementById('faceClickInstruction');
+            if (instructionBox) instructionBox.remove();
+
+            // Şimdi fotoğraf yüklemeyi başlat
+            showPhotoUpload();
+        }
+    }
+
+    // Kullanıcıya talimat gösteren bir kutucuk oluşturur
+    function showFaceClickInstruction() {
+        // Varsa eskisini kaldır
+        const oldBox = document.getElementById('faceClickInstruction');
+        if (oldBox) oldBox.remove();
+
+        const instructionBox = document.createElement('div');
+        instructionBox.id = 'faceClickInstruction';
+        instructionBox.innerHTML = `
+        <div class="instruction-icon">🖼️</div>
+        <div><strong>Click the glowing area</strong> to add your photo!</div>
+    `;
+        document.body.appendChild(instructionBox);
+    }
+
+    // --- KOPYALAMAYI BURADA BİTİRİN ---
+    // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM BAŞLANGICI ---
+
+    // YENİ VE PRO SİSTEMİNE UYGUN loadTemplates FONKSİYONU
+    function loadTemplates(grid) {
+        grid.innerHTML = '';
+        const isUserPremium = localStorage.getItem('isPremium') === 'true';
+
+        for (const key in TEMPLATES_CONFIG) {
+            const template = TEMPLATES_CONFIG[key];
+            const isTemplatePremium = template.isPremium === true;
+
+            const card = document.createElement('div');
+            card.className = 'magic-template-card';
+
+            const thumbnailFile = selectedStyle === 'colored' ? template.colored_thumb : template.outline_thumb;
+            let cardHTML = `
+            <div class="magic-template-image-wrapper">
+                <img src="template-images/${thumbnailFile}" class="magic-template-thumb" alt="${template.name}">
+            </div>
+            <div class="magic-template-name">${template.icon} ${template.name}</div>
+        `;
+
+            // Eğer şablon Pro ise VE kullanıcı Pro değilse, kartı kilitle
+            if (isTemplatePremium && !isUserPremium) {
+                card.classList.add('locked');
+                // Tıklayınca Pro modal'ı aç
+                card.onclick = () => {
+                    if (typeof showPremiumModal === 'function') {
+                        showPremiumModal();
+                    } else {
+                        alert('This is a premium feature!');
+                    }
+                };
+                // Kartın üzerine Pro rozeti ekle
+                cardHTML += `<div class="magic-pro-badge">⭐ Pro</div>`;
+            } else {
+                // Aksi halde, normal tıklama işlevini ata
+                card.onclick = () => {
+                    currentTemplate = { key, ...template };
+                    loadTemplateToCanvas(key);
+                    closeAllModals();
+                };
+            }
+
+            card.innerHTML = cardHTML;
+            grid.appendChild(card);
+        }
+    }
+
+    function showPhotoUpload() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                userPhoto.crossOrigin = "Anonymous";
+                userPhoto.onload = () => {
+                    startCanvasEditing();
+                };
+                userPhoto.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
+    }
+
+    function startCanvasEditing() {
+        const canvas = document.getElementById('coloringCanvas');
+        isEditingPhoto = true;
+
+        // Fotoğrafı şablondaki yüz alanına ortala ve başlangıç boyutunu ayarla
+        const faceArea = currentTemplate.faceArea;
+        const canvasScaleX = canvas.width / 800; // Canvas'ın orijinal genişliğe oranı
+        const canvasScaleY = canvas.height / 600; // Canvas'ın orijinal yüksekliğe oranı
+
+        // Fotoğrafın en/boy oranını koruyarak sığdır
+        const photoAspectRatio = userPhoto.width / userPhoto.height;
+        const faceAreaAspectRatio = faceArea.width / faceArea.height;
+        let photoWidth, photoHeight;
+
+        if (photoAspectRatio > faceAreaAspectRatio) {
+            photoWidth = faceArea.width * 1.2 * canvasScaleX; // Biraz daha büyük başla
+            photoHeight = photoWidth / photoAspectRatio;
+        } else {
+            photoHeight = faceArea.height * 1.2 * canvasScaleY; // Biraz daha büyük başla
+            photoWidth = photoHeight * photoAspectRatio;
+        }
+
+        editingSettings = {
+            x: faceArea.x * canvasScaleX,
+            y: faceArea.y * canvasScaleY,
+            width: photoWidth,
+            height: photoHeight,
+            scale: 1, // Ölçekleme artık genişlik/yükseklik ile yönetiliyor
+            isDragging: false
+        };
+
+        setupEventListeners();
+        redrawCanvas();
+        showInstructions();
+    }
+
+    function redrawCanvas() {
+        if (!userPhoto.src || !templateImage.src) return;
+
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Canvas'ı temizle
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. ÖNCE KULLANICI FOTOĞRAFINI ÇİZ
+        // Fotoğrafı merkezinden tutup sürüklemek için x ve y'yi ayarla
+        const drawX = editingSettings.x - (editingSettings.width / 2);
+        const drawY = editingSettings.y - (editingSettings.height / 2);
+        ctx.drawImage(userPhoto, drawX, drawY, editingSettings.width, editingSettings.height);
+
+        // 2. SONRA ŞABLONU ÜZERİNE ÇİZ (Şeffaf alanlar fotoğrafı gösterecek)
+        ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    function finishEditing() {
+        isEditingPhoto = false;
+        const canvas = document.getElementById('coloringCanvas');
+        canvas.style.cursor = 'crosshair';
+
+        // Son hali (kullanıcı fotoğrafı + şablon) tekrar çiz
+        redrawCanvas();
+
+        removeEventListeners();
+        const instructions = document.getElementById('editingInstructions');
+        if (instructions) instructions.remove();
+
+        // Sonucu ana uygulamanın geçmişine kaydet
+        if (typeof saveDrawingState === 'function') {
+            saveDrawingState();
+        }
+
+        console.log('✅ Fotoğraf düzenleme tamamlandı ve kaydedildi.');
+        showSuccessMessage();
+    }
+
+    function cancelEditing() {
+        isEditingPhoto = false;
+        const canvas = document.getElementById('coloringCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.style.cursor = 'crosshair';
+
+        // Sadece orijinal şablonu tekrar çiz
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+
+        removeEventListeners();
+        const instructions = document.getElementById('editingInstructions');
+        if (instructions) instructions.remove();
+
+        console.log('❌ Fotoğraf düzenleme iptal edildi.');
+    }
+
+    // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM SONU ---
+
+
+    function setupEventListeners() {
+        const canvas = document.getElementById('coloringCanvas');
+        canvas.style.cursor = 'move';
+
+        // Olay dinleyicilerini eklemeden önce temizle
+        removeEventListeners();
+
+        canvas.addEventListener('mousedown', handleEditMouseDown);
+        canvas.addEventListener('mousemove', handleEditMouseMove);
+        canvas.addEventListener('mouseup', handleEditMouseUp);
+        canvas.addEventListener('mouseleave', handleEditMouseUp); // Fare canvas'tan çıkınca sürüklemeyi bitir
+        canvas.addEventListener('wheel', handleEditWheel, { passive: false });
+
+        // Dokunmatik cihazlar için
+        canvas.addEventListener('touchstart', handleEditMouseDown, { passive: false });
+        canvas.addEventListener('touchmove', handleEditMouseMove, { passive: false });
+        canvas.addEventListener('touchend', handleEditMouseUp, { passive: false });
+    }
+
+    function removeEventListeners() {
+        const canvas = document.getElementById('coloringCanvas');
+        canvas.removeEventListener('mousedown', handleEditMouseDown);
+        canvas.removeEventListener('mousemove', handleEditMouseMove);
+        canvas.removeEventListener('mouseup', handleEditMouseUp);
+        canvas.removeEventListener('mouseleave', handleEditMouseUp);
+        canvas.removeEventListener('wheel', handleEditWheel);
+        canvas.removeEventListener('touchstart', handleEditMouseDown);
+        canvas.removeEventListener('touchmove', handleEditMouseMove);
+        canvas.removeEventListener('touchend', handleEditMouseUp);
+    }
+
+    function getEventCoordinates(e) {
+        const canvas = document.getElementById('coloringCanvas');
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        return {
+            x: (clientX - rect.left) * (canvas.width / rect.width),
+            y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+    }
+
+    function handleEditMouseDown(e) {
+        e.preventDefault();
+        if (!isEditingPhoto) return;
+        const coords = getEventCoordinates(e);
+        editingSettings.isDragging = true;
+        editingSettings.startX = coords.x;
+        editingSettings.startY = coords.y;
+    }
+
+    function handleEditMouseMove(e) {
+        e.preventDefault();
+        if (!isEditingPhoto || !editingSettings.isDragging) return;
+        const coords = getEventCoordinates(e);
+        const deltaX = coords.x - editingSettings.startX;
+        const deltaY = coords.y - editingSettings.startY;
+
+        editingSettings.x += deltaX;
+        editingSettings.y += deltaY;
+
+        editingSettings.startX = coords.x;
+        editingSettings.startY = coords.y;
+
+        redrawCanvas();
+    }
+
+    function handleEditMouseUp(e) {
+        if (!isEditingPhoto) return;
+        editingSettings.isDragging = false;
+    }
+
+    function handleEditWheel(e) {
+        if (!isEditingPhoto) return;
+        e.preventDefault();
+        const scaleFactor = e.deltaY > 0 ? 0.95 : 1.05;
+
+        // Oranı koruyarak boyutlandır
+        editingSettings.width *= scaleFactor;
+        editingSettings.height *= scaleFactor;
+
+        redrawCanvas();
+    }
+
+    // Yardımcı fonksiyonlar (değişiklik yok)
+    function showInstructions() {
+        const existingInstructions = document.getElementById('editingInstructions');
+        if (existingInstructions) existingInstructions.remove();
+
+        const instructions = document.createElement('div');
+        instructions.id = 'editingInstructions';
+        instructions.style.cssText = `
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8);
+            color: white; padding: 15px; border-radius: 10px; z-index: 10001; text-align: center; border: 2px solid #FFD700;
+        `;
+        instructions.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 10px;">✨ PHOTO EDITING MODE ✨</div>
+            <div>🖱️ <strong>Drag</strong> to move photo | 🔄 <strong>Scroll</strong> to resize</div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button id="finishEditingBtn" style="background: #4CAF50; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold;">✅ Finish</button>
+                <button id="cancelEditingBtn" style="background: #f44336; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;">❌ Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(instructions);
+        document.getElementById('finishEditingBtn').onclick = finishEditing;
+        document.getElementById('cancelEditingBtn').onclick = cancelEditing;
+    }
+
+    function showSuccessMessage() {
+        const msg = document.createElement('div');
+        msg.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #4CAF50;
+            color: white; padding: 20px 35px; border-radius: 12px; font-size: 1.2em; font-weight: bold;
+            z-index: 10002; border: 2px solid white;
+        `;
+        msg.textContent = '🎉 Magic Photo Applied Successfully!';
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 2500);
+    }
+
+    // Butona bağlanma (değişiklik yok)
+    function connectToMagicPhotosButton() {
+        let attempts = 0;
+        const maxAttempts = 10;
+        const intervalId = setInterval(() => {
+            attempts++;
+            const button = document.getElementById('magicPhotoBtn');
+            if (button) {
+                console.log('✅ Magic Photos butonu bulundu ve düzenleyici bağlandı.');
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+                newButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    start();
+                });
+                clearInterval(intervalId);
+            } else if (attempts >= maxAttempts) {
+                console.error('❌ Magic Photos butonu bulunamadı.');
+                clearInterval(intervalId);
+            }
+        }, 500);
+    }
+
+    // Başlat
+    window.addEventListener('load', connectToMagicPhotosButton);
+})();
+// --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
+
+function setupGiftingSystem() {
+    // Buraya istediğiniz kadar hediye kodu ekleyebilirsiniz
+    const validGiftCodes = [
+        "MAGIC-GIFT-2025",
+        "COLOR-FUN-123",
+        "PREMIUM-KID-789",
+        "BIRTHDAY-SPECIAL"
+    ];
+
+    const redeemButton = document.getElementById('redeemGiftBtn');
+    if (!redeemButton) {
+        console.error("Hediye kodu butonu bulunamadı!");
+        return;
+    }
+
+    redeemButton.addEventListener('click', () => {
+        const userCode = prompt("Please enter your gift code:", "");
+
+        if (userCode === null || userCode.trim() === "") {
+            // Kullanıcı iptal etti veya boş bıraktı
+            return;
+        }
+
+        // Kodu büyük/küçük harfe duyarsız hale getir ve boşlukları temizle
+        const formattedUserCode = userCode.trim().toUpperCase();
+
+        if (validGiftCodes.includes(formattedUserCode)) {
+            // Kod geçerli!
+            alert("Congratulations! 🎉 Premium features have been activated. The page will now reload.");
+            localStorage.setItem('isPremium', 'true');
+            location.reload();
+        } else {
+            // Kod geçersiz
+            alert("Sorry, that gift code is not valid. Please check and try again.");
+        }
+    });
+}
+
+// Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır
+document.addEventListener('DOMContentLoaded', setupGiftingSystem);
+
+// --- ENABLE APP ALERTS (BİLDİRİM SİSTEMİ) FONKSİYONU ---
+// Dosyanın en sonuna ekleyin
+
+function setupNotificationButton() {
+    const notifyBtn = document.getElementById('notifyBtn');
+    if (!notifyBtn) {
+        console.error('Bildirim butonu (notifyBtn) bulunamadı.');
+        return;
+    }
+
+    // Tarayıcı bildirimleri destekliyor mu diye kontrol et
+    if (!('Notification' in window)) {
+        console.warn('Bu tarayıcı anlık bildirimleri desteklemiyor.');
+        notifyBtn.style.display = 'none'; // Butonu desteklemeyen tarayıcılarda gizle
+        return;
+    }
+
+    // Mevcut izin durumunu kontrol et ve butonu güncelle
+    function updateButtonState() {
+        if (Notification.permission === 'granted') {
+            notifyBtn.textContent = '🔔 Alerts Enabled';
+            notifyBtn.classList.add('active');
+            notifyBtn.disabled = true; // Zaten izin verilmişse tekrar tıklanamaz yap
+        } else if (Notification.permission === 'denied') {
+            notifyBtn.textContent = '🔕 Alerts Blocked';
+            notifyBtn.disabled = true;
+            notifyBtn.style.opacity = '0.6';
+            notifyBtn.style.cursor = 'not-allowed';
+        } else {
+            notifyBtn.textContent = '🔔 Enable App Alerts';
+            notifyBtn.classList.remove('active');
+            notifyBtn.disabled = false;
+        }
+    }
+
+    notifyBtn.addEventListener('click', () => {
+        // Eğer izin zaten verilmiş veya engellenmişse bir şey yapma
+        if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+            return;
+        }
+
+        // Kullanıcıdan izin iste
+        Notification.requestPermission().then(permission => {
+            console.log(`Bildirim izni durumu: ${permission}`);
+
+            // İzin verildiyse, bir "hoş geldin" bildirimi göster
+            if (permission === 'granted') {
+                try {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification('🎨 Magical Coloring Game', {
+                            body: 'Thank you! We will notify you when new pages are added.',
+                            icon: './icons/icon-192x192.png',
+                            badge: './icons/icon-192x192.png' // Android için
+                        });
+                    });
+                } catch (error) {
+                    console.error('Bildirim gösterme hatası:', error);
+                }
+            }
+
+            // İzin durumu ne olursa olsun butonun görünümünü güncelle
+            updateButtonState();
+        });
+    });
+
+    // Sayfa yüklendiğinde butonun durumunu kontrol et
+    updateButtonState();
+}
+
+// Sayfa tamamen yüklendiğinde fonksiyonu çalıştır
+document.addEventListener('DOMContentLoaded', setupNotificationButton);
+
+// --- GET UPDATES (NEWSLETTER SİSTEMİ) ---
+// Dosyanın en sonuna ekleyin
+
+function setupNewsletterSystem() {
+    const modal = document.getElementById('newsletterModal');
+    const triggerBtn = document.getElementById('newsletterTrigger');
+    const closeBtn = document.querySelector('.newsletter-close');
+    const form = document.getElementById('newsletterForm');
+    const subscribeBtn = document.getElementById('subscribeBtn');
+    const userNameInput = document.getElementById('userName');
+    const userEmailInput = document.getElementById('userEmail');
+
+    if (!modal || !triggerBtn || !closeBtn || !form) {
+        console.error('Newsletter elementlerinden biri veya daha fazlası bulunamadı.');
+        return;
+    }
+
+    // Pencereyi aç
+    const openModal = () => modal.style.display = 'flex';
+
+    // Pencereyi kapat
+    const closeModal = () => modal.style.display = 'none';
+
+    // Butonlara tıklama olaylarını ata
+    triggerBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    // Pencerenin dışına tıklandığında kapat
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Form gönderildiğinde çalışacak fonksiyon
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
+
+        const userName = userNameInput.value.trim();
+        const userEmail = userEmailInput.value.trim();
+
+        if (!userEmail || !/^\S+@\S+\.\S+$/.test(userEmail)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+
+        subscribeBtn.disabled = true;
+        subscribeBtn.textContent = 'Sending...';
+
+        // EmailJS'e gönderilecek verileri hazırla
+        const templateParams = {
+            user_name: userName || 'Not provided', // İsim boşsa belirt
+            user_email: userEmail,
+            game_name: 'Magical Coloring Game'
+        };
+
+        // EmailJS servisini kullanarak e-postayı gönder
+        // ÖNEMLİ: Kendi EmailJS 'Service ID' ve 'Template ID'nizi girmeniz gerekecek
+        emailjs.send('service_74njv1i', 'template_kane7si', templateParams)
+            .then((response) => {
+                console.log('SUCCESS!', response.status, response.text);
+                alert('Thank you for subscribing! 🎉');
+                closeModal(); // Başarılı olunca pencereyi kapat
+                form.reset(); // Formu temizle
+            }, (error) => {
+                console.log('FAILED...', error);
+                alert('Oops! Something went wrong. Please try again.');
+            })
+            .finally(() => {
+                subscribeBtn.disabled = false;
+                subscribeBtn.textContent = '✨ Subscribe';
+            });
+    });
+}
+
+// Sayfa tamamen yüklendiğinde fonksiyonu çalıştır
+document.addEventListener('DOMContentLoaded', setupNewsletterSystem);

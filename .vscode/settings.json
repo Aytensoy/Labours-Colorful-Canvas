@@ -1,3 +1,4 @@
 {
-    "cody.chat.defaultLocation": "editor"
+    "cody.chat.defaultLocation": "editor",
+    "liveServer.settings.port": 5501
 }

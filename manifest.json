@@ -1,12 +1,21 @@
 {
-  "id": "/",
-  "name": "Magical Coloring Game",
-  "short_name": "Magical Color",
-  "description": "Creative coloring experience for everyone",
-  "start_url": "/",
+  "id": "magical-coloring-adventure",
+  "name": "Magical Coloring Adventure",
+  "short_name": "Magic Coloring",
+  "description": "Creative coloring experience with Magic Photos - Transform into characters and color your world!",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#4a90e2",
+  "lang": "en",
+  "categories": [
+    "games",
+    "education",
+    "kids",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "icons/icon-144x144.png",
@@ -18,28 +27,43 @@
       "src": "icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-
-      }
+      "purpose": "any maskable"
+    }
   ],
   "screenshots": [
-      {
-          "src": "screenshots/desktop.png",
-          "sizes": "1280x720",
-          "type": "image/png",
-          "form_factor": "wide"
-      },
-      {
-          "src": "screenshots/mobile.png",
-          "sizes": "720x1280",
-          "type": "image/png"
-      }
+    {
+      "src": "screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Magical Coloring Adventure on Desktop"
+    },
+    {
+      "src": "screenshots/mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Magical Coloring Adventure on Mobile"
+    }
   ],
-  "splash_pages": null
+  "shortcuts": [
+    {
+      "name": "Magic Photos",
+      "short_name": "Magic",
+      "description": "Create personalized coloring pages",
+      "url": "./index.html#magic",
+      "icons": [
+        {
+          "src": "icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
