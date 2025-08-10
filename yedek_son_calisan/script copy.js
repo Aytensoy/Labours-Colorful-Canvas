@@ -408,82 +408,50 @@ function drawMagicFlower(x, y, ctx) {
 // =======================================================
 // NİHAİ GÖRSEL YÜKLEME FONKSİYONU (Tüm zamanlama sorunlarını çözer)
 // =======================================================
-// =======================================================
-// NİHAİ VE EN STABİL GÖRSEL YÜKLEME FONKSİYONU
-// =======================================================
 function loadAndDrawImage(imageName) {
-  const logName = imageName || 'ana sayfa';
-  console.log(`🖼️ Yükleme ve çizme başlatıldı: ${logName}`);
+  console.log(`🖼️ Yükleme ve çizme başlatıldı: ${imageName}`);
 
-  // 1. ADIM: OYUNUN DURUMUNU ANINDA SIFIRLA
-  resetCanvasState();
-
-  const canvas = document.getElementById('coloringCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  // 2. ADIM: CANVAS'I ANINDA TEMİZLE VE "YÜKLENİYOR..." MESAJI GÖSTER
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.font = '24px Poppins';
-  ctx.fillStyle = '#cccccc';
-  ctx.textAlign = 'center';
-  ctx.fillText('Loading...', canvas.width / 2, canvas.height / 2);
-
-  // 3. ADIM: ŞİMDİ RESMİ YÜKLEMEYE BAŞLA
+  // Yüklenecek resmin tam yolunu belirle.
+  // Eğer bir isim verilmediyse, varsayılan 'image.png' kullanılır.
   const imagePath = imageName ? `coloring-pages-png/${imageName}.png` : 'image.png';
+
   const img = new Image();
   img.crossOrigin = "anonymous";
 
-  // Resim yüklendiğinde, sadece resmi çiz.
+  // Resim başarıyla indirildiğinde SADECE bu kod çalışır.
   img.onload = function () {
-    // "Yükleniyor..." yazısını temizlemek için canvas'ı tekrar temizle
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 1. Canvas'ı temizle
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Resmi doğru boyutlarda çiz
+    // 2. Resmi doğru boyutlarda çiz
     const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.9;
     const x = (canvas.width - img.width * scale) / 2;
     const y = (canvas.height - img.height * scale) / 2;
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-    // Yeni, boş durumu geçmişe kaydet
+    // 3. Çizim geçmişini ve durumunu sıfırla
+    drawingHistory = [];
+    currentStep = -1;
+    isDrawing = false;
+    lastX = 0;
+    lastY = 0;
     saveDrawingState();
+
     console.log(`✅ ${imagePath} başarıyla canvas'a çizildi.`);
   };
 
-  // Hata durumunda kullanıcıya bilgi ver
+  // Hata durumunda
   img.onerror = function () {
-    // "Yükleniyor..." yazısını temizle
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#ff0000';
-    ctx.fillText('Error loading image.', canvas.width / 2, canvas.height / 2);
-
     console.error(`HATA: ${imagePath} yüklenemedi.`);
+    alert(`Sorry, the image "${imagePath}" could not be loaded.`);
   };
 
   // Yüklemeyi başlat
   img.src = imagePath;
-}
-
-// YENİ YARDIMCI FONKSİYON: Tüm oyun durumunu sıfırlar
-function resetCanvasState() {
-  console.log("🔄 Tüm canvas durumları sıfırlanıyor...");
-  isDrawing = false;
-  isDragging = false;
-  lastX = 0;
-  lastY = 0;
-  drawingHistory = [];
-  currentStep = -1;
-  updateUndoButtonState();
-
-  // Varsayılan araca geri dön
-  if (typeof setTool === 'function') {
-    setTool('pencil');
-  } else {
-    currentTool = 'pencil';
-  }
 }
 // =======================================================
 // GÖREV 23: ANİMASYON FONKSİYONU
@@ -1206,23 +1174,20 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('undoBtn').addEventListener('click', handleUndoClick);
   document.getElementById('toolSize').addEventListener('input', (e) => updateSize(e.target.value));
   document.getElementById('homeBtn').addEventListener('click', () => loadAndDrawImage());
-  // ...
   document.getElementById('newPageBtn').addEventListener('click', function () {
     console.log("📄 New Drawing Page created.");
-
-    // 1. ÖNCE OYUNUN TÜM DURUMUNU SIFIRLA
-    resetCanvasState();
-
-    // 2. SONRA CANVAS'I BEYAZLA DOLDUR
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');
+
+    // Clear the canvas and fill with white
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. BU BOŞ DURUMU GEÇMİŞE KAYDET
-    saveDrawingState();
+    // Reset the drawing history for the new page
+    drawingHistory = [];
+    currentStep = -1;
+    saveDrawingState(); // Save the blank state
   });
-  // ...
   document.getElementById('uploadBtn').addEventListener('click', function () {
     const isUserPremium = localStorage.getItem('isPremium') === 'true';
     if (!isUserPremium) {

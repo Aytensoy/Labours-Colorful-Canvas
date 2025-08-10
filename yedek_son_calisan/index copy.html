@@ -83,8 +83,7 @@
     </script>
     <script>
         // Splash screen'i gizle ve ana içeriği göster
-        document.addEventListener('DOMContentLoaded', function () {
-            // Sayfanın temel yapısı hazır olduğunda, 2 saniye sonra splash'ı kaldır
+        window.addEventListener('load', function () {
             setTimeout(function () {
                 const splashScreen = document.querySelector('.splash-screen');
                 const mainContent = document.getElementById('mainContent');
@@ -93,7 +92,7 @@
                     splashScreen.style.display = 'none';
                     mainContent.style.display = 'block';
                 }
-            }, 2000); // Süreyi 2 saniyeye sabitledik
+            }, 1000);
         });
     </script>
 </head>
@@ -363,12 +362,10 @@
                                 delicate Watercolor, and fun Spray paint.</li>
                             <li><strong>NEW Unique Brushes:</strong> Create bold strokes with the vibrant
                                 <strong>Marker</strong> and achieve beautiful, textured effects with the realistic
-                                <strong>Pastel</strong> brush.
-                            </li>
+                                <strong>Pastel</strong> brush.</li>
                             <li><strong>Premium Magic Tools:</strong> Go Premium to dazzle your creations with sparkling
                                 <strong>Glitter</strong>, flowing <strong>Rainbow</strong> colors, and radiant
-                                <strong>Glow</strong> effects!
-                            </li>
+                                <strong>Glow</strong> effects!</li>
                         </ul>
                     </li>
                     <li>✨ <strong>Magic Wands & More:</strong> Instantly add flair with the Star and Flower Wands, or
