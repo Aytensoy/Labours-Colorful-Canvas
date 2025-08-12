@@ -36,52 +36,6 @@
     </script>
 
     <script>
-        // Coloring Pages için önceden yükleme
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log("Boyama sayfaları önceden yükleniyor...");
-            const pagesToPreload = [
-                "unicorn", "dragon", "fairy", "wizard",
-                "narcissus", "poppies", "daisies", "carnation",
-                "cat_and_dog", "flapping_bird", "iconic_birds", "smiling_fish",
-                "sun_mandala", "modern_mandala", "tree_of_life", "oriental_mandala",
-                "boho_style", "boat", "k-pop", "cute_cat", "shapes",
-
-                // YENİ SAYFALAR
-                // Magical
-                "magic_wand", "fantasy_castle", "fantasy_unicorn", "fairytale_castle",
-                "fairy_flying", "magical_book", "wizards_reading", "cute_bunny_fairy", "ornate_owl",
-
-                // Flowers
-                "floral_frame", "doodle_flowers", "heart_flowers", "detailed_flowers",
-                "big_flower", "simple_flower", "lotus_flowers",
-
-                // Animals
-                "cute_elephant", "birds_on_branch", "happy_kangaroo", "bear_in_forest",
-                "funny_monkey", "cute_bunny", "kitten_in_garden", "happy_whale",
-                "squirrel_with_acorn", "butterflies", "bulldog_portrait", "frog_on_grass",
-                "cute_lamb", "kawaii_bunny_face", "cat_on_crocodile",
-
-                // Mandalas
-                "mandala_pattern", "mandala_horse", "mandala_bird", "panda_mandala",
-                "detailed_lotus_mandala", "mandala_flower", "circle_mandala",
-
-                // Various
-                "girl_on_swing", "beach_cleanup_boy", "boy_on_swing", "craft_girl",
-                "boy_with_glasses", "kawaii_twin_girls", "dancing_bean_character"
-            ];
-
-            pagesToPreload.forEach(page => {
-                const link = document.createElement('link');
-                link.rel = "preload";
-                link.as = "image";
-                link.href = `coloring-pages-png/${page}.png`;
-                link.crossOrigin = "anonymous";
-                document.head.appendChild(link);
-                console.log(`Önceden yükleme bağlantısı eklendi: ${link.href}`);
-            });
-        });
-    </script>
-    <script>
         // Splash screen'i gizle ve ana içeriği göster
         document.addEventListener('DOMContentLoaded', function () {
             // Sayfanın temel yapısı hazır olduğunda, 2 saniye sonra splash'ı kaldır

@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Kahverengiler & Ten Renkleri
     '#A0522D', '#D2691E', '#8B4513', '#F4A460', '#FFDFC4',
     // Griler, Siyah & Beyaz
-    '#708090', '#A9A9A9', '#D3D3D3', '#724B4B', '#2A2323',
+    '#FFFFFF', '#708090', '#A9A9A9', '#D3D3D3', '#724B4B', '#2A2323',
   ];
   colors.forEach(color => {
     const swatch = document.createElement('div');
