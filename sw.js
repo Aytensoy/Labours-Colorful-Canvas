@@ -1,21 +1,27 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ VE TEMİZLENMİŞ SÜRÜM (v8)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (v10)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-v8-final';
+const CACHE_NAME = 'magical-coloring-v10-final';
 
 const FILES_TO_CACHE = [
+    // Çekirdek Dosyalar
     './',
-    './index.html', // DOĞRU DOSYA ADI
-    './styles.css', // DOĞRU DOSYA ADI
-    './script.js',  // DOĞRU DOSYA ADI
+    './index.html',
+    './styles.css',
+    './script.js',
     './manifest.json',
+
+    // İkonlar ve Ana Görseller
     './icons/icon-192x192.png',
     './icons/icon-512x512.png',
     './icons/splash-logo.png',
     './Background1.jpg',
     './image.png',
+
+    // Harici FontAwesome (İkonlar için)
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css',
+
 
     // --- Boyama Sayfaları ---
     './coloring-pages-png/image.png',
@@ -37,7 +43,7 @@ const FILES_TO_CACHE = [
     './coloring-pages-png/girl_on_swing.png', './coloring-pages-png/beach_cleanup_boy.png', './coloring-pages-png/boy_on_swing.png', './coloring-pages-png/craft_girl.png',
     './coloring-pages-png/boy_with_glasses.png', './coloring-pages-png/kawaii_twin_girls.png', './coloring-pages-png/dancing_bean_character.png',
 
-    // --- Magic Photos Şablonları (Ana Dosyalar) ---
+    // --- Magic Photos Şablonları ---
     './template-images/birthday_colored_transparent.png', './template-images/birthday_outline_transparent.png',
     './template-images/firefighter_colored_transparent.png', './template-images/firefighter_outline_transparent.png',
     './template-images/pirate_colored_transparent.png', './template-images/pirate_outline_transparent.png',
@@ -50,7 +56,7 @@ const FILES_TO_CACHE = [
     './template-images/unicorn_girl_colored_transparent.png', './template-images/unicorn_girl_outline_transparent.png',
     './template-images/wizzard_colored_transparent.png', './template-images/wizzard_outline_transparent.png',
 
-    // --- Magic Photos Küçük Resimleri (Thumbnails) ---
+    // --- Magic Photos Thumbnails ---
     './template-images/birthday_colored_thumb.png', './template-images/birthday_outline_thumb.png',
     './template-images/firefighter_colored_thumb.png', './template-images/firefighter_outline_thumb.png',
     './template-images/pirate_colored_thumb.png', './template-images/pirate_outline_thumb.png',
@@ -64,43 +70,47 @@ const FILES_TO_CACHE = [
     './template-images/wizzard_colored_thumb.png', './template-images/wizzard_outline_thumb.png'
 ];
 
-// 1. Install Olayı: Dosyaları önbelleğe al
+// 1. Install: Güvenli ve Kapsamlı Önbelleğe Alma
 self.addEventListener('install', (event) => {
-    console.log('[ServiceWorker] Install: Caching all game assets for offline mode...');
+    console.log('[ServiceWorker] Install: Safe caching starting...');
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(FILES_TO_CACHE);
-        }).catch(error => {
-            console.error('[ServiceWorker] Caching failed:', error);
+        caches.open(CACHE_NAME).then(async (cache) => {
+            console.log('[ServiceWorker] Caching individual files...');
+            for (const fileUrl of FILES_TO_CACHE) {
+                try {
+                    // Harici linkler için 'no-cors' modunu kullanmak daha güvenlidir.
+                    const request = new Request(fileUrl, { mode: 'no-cors' });
+                    const response = await fetch(request);
+                    await cache.put(request, response);
+                } catch (err) {
+                    console.warn(`[ServiceWorker] Failed to cache: ${fileUrl}`, err);
+                }
+            }
         })
     );
 });
 
-// 2. Activate Olayı: Eski önbellekleri temizle
+// 2. Activate: Eski cache'leri sil
 self.addEventListener('activate', (event) => {
     console.log('[ServiceWorker] Activate');
     event.waitUntil(
-        caches.keys().then((keyList) => {
-            return Promise.all(keyList.map((key) => {
+        caches.keys().then((keyList) =>
+            Promise.all(keyList.map((key) => {
                 if (key !== CACHE_NAME) {
-                    console.log('[ServiceWorker] Removing old cache', key);
+                    console.log('[ServiceWorker] Removing old cache:', key);
                     return caches.delete(key);
                 }
-            }));
-        })
+            }))
+        )
     );
     return self.clients.claim();
 });
 
-// 3. Fetch Olayı: İstekleri yönet (Cache First stratejisi)
+// 3. Fetch: Cache First Stratejisi
 self.addEventListener('fetch', (event) => {
-    // Sadece GET isteklerine yanıt ver
     if (event.request.method !== 'GET') return;
-
     event.respondWith(
         caches.match(event.request).then((response) => {
-            // Önbellekte varsa, önbellekten döndür.
-            // Yoksa, ağdan istemeye çalış.
             return response || fetch(event.request);
         })
     );

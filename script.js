@@ -409,82 +409,91 @@ function drawMagicFlower(x, y, ctx) {
 // NİHAİ GÖRSEL YÜKLEME FONKSİYONU (Tüm zamanlama sorunlarını çözer)
 // =======================================================
 // =======================================================
-// NİHAİ VE EN STABİL GÖRSEL YÜKLEME FONKSİYONU
+// DOSYA YOLU HATASI GİDERİLMİŞ NİHAİ YÜKLEME FONKSİYONU
 // =======================================================
 function loadAndDrawImage(imageName) {
-  const logName = imageName || 'ana sayfa';
+  const logName = imageName || 'boş sayfa';
   console.log(`🖼️ Yükleme ve çizme başlatıldı: ${logName}`);
 
-  // 1. ADIM: OYUNUN DURUMUNU ANINDA SIFIRLA
   resetCanvasState();
 
   const canvas = document.getElementById('coloringCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  // 2. ADIM: CANVAS'I ANINDA TEMİZLE VE "YÜKLENİYOR..." MESAJI GÖSTER
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Eğer bir resim adı YOKSA (Drawing Page), burada dur.
+  if (!imageName) {
+    saveDrawingState();
+    return;
+  }
+
+  // Yükleniyor... mesajını sadece resim yüklenecekse göster
   ctx.font = '24px Poppins';
   ctx.fillStyle = '#cccccc';
   ctx.textAlign = 'center';
   ctx.fillText('Loading...', canvas.width / 2, canvas.height / 2);
 
-  // 3. ADIM: ŞİMDİ RESMİ YÜKLEMEYE BAŞLA
-  const imagePath = imageName ? `coloring-pages-png/${imageName}.png` : 'image.png';
+  // DOSYA YOLUNU DOĞRU BİR ŞEKİLDE BELİRLE
+  const imagePath = imageName.includes('.png') ? imageName : `coloring-pages-png/${imageName}.png`;
+
   const img = new Image();
   img.crossOrigin = "anonymous";
 
-  // Resim yüklendiğinde, sadece resmi çiz.
   img.onload = function () {
-    // "Yükleniyor..." yazısını temizlemek için canvas'ı tekrar temizle
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Resmi doğru boyutlarda çiz
     const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.9;
     const x = (canvas.width - img.width * scale) / 2;
     const y = (canvas.height - img.height * scale) / 2;
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-    // Yeni, boş durumu geçmişe kaydet
     saveDrawingState();
     console.log(`✅ ${imagePath} başarıyla canvas'a çizildi.`);
   };
 
-  // Hata durumunda kullanıcıya bilgi ver
   img.onerror = function () {
-    // "Yükleniyor..." yazısını temizle
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#ff0000';
     ctx.fillText('Error loading image.', canvas.width / 2, canvas.height / 2);
-
     console.error(`HATA: ${imagePath} yüklenemedi.`);
   };
 
-  // Yüklemeyi başlat
   img.src = imagePath;
 }
-
-// YENİ YARDIMCI FONKSİYON: Tüm oyun durumunu sıfırlar
+// YENİ VE TAM KAPSAMLI resetCanvasState FONKSİYONU
 function resetCanvasState() {
-  console.log("🔄 Tüm canvas durumları sıfırlanıyor...");
+  console.log("🔄 Tüm canvas ve oyun durumları sıfırlanıyor...");
   isDrawing = false;
   isDragging = false;
   lastX = 0;
   lastY = 0;
   drawingHistory = [];
   currentStep = -1;
+  boundaryColor = null; // Akıllı fırça için
+
+  const canvas = document.getElementById('coloringCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    // Canvas'ın çizim durumunu (şeffaflık, dönüşüm vb.) sıfırla
+    ctx.globalAlpha = 1.0;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
   updateUndoButtonState();
 
-  // Varsayılan araca geri dön
   if (typeof setTool === 'function') {
     setTool('pencil');
   } else {
     currentTool = 'pencil';
   }
 }
+
 // =======================================================
 // GÖREV 23: ANİMASYON FONKSİYONU
 // =======================================================
@@ -1205,23 +1214,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // 4. BUTONLARI BAĞLA
   document.getElementById('undoBtn').addEventListener('click', handleUndoClick);
   document.getElementById('toolSize').addEventListener('input', (e) => updateSize(e.target.value));
-  document.getElementById('homeBtn').addEventListener('click', () => loadAndDrawImage());
-  // ...
-  document.getElementById('newPageBtn').addEventListener('click', function () {
-    console.log("📄 New Drawing Page created.");
+  document.getElementById('homeBtn').addEventListener('click', () => loadAndDrawImage('image.png'));
 
-    // 1. ÖNCE OYUNUN TÜM DURUMUNU SIFIRLA
-    resetCanvasState();
+  document.getElementById('newPageBtn').addEventListener('click', () => loadAndDrawImage());
 
-    // 2. SONRA CANVAS'I BEYAZLA DOLDUR
-    const canvas = document.getElementById('coloringCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 3. BU BOŞ DURUMU GEÇMİŞE KAYDET
-    saveDrawingState();
-  });
   // ...
   document.getElementById('uploadBtn').addEventListener('click', function () {
     // Premium kontrolünü kaldırdık
@@ -1283,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   // 6. BAŞLANGIÇ AYARLARI
-  loadAndDrawImage(); // Sayfa ilk açıldığında ana görseli yükle
+  loadAndDrawImage('image.png'); // Parametre olarak 'image.png' veriyoruz
   setTool('pencil');
   console.log('✅ Tüm oyun sistemleri başarıyla başlatıldı.');
 });
