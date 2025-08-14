@@ -373,47 +373,6 @@
                 <p>&copy; 2025 Labour Things. All rights reserved. | Magical Coloring Game</p>
             </footer>
         </div>
-        <script>
-            // Son çare - doğrudan HTML'e gömülü çözüm
-            window.onload = function () {
-                // Sayfanın tamamen yüklenmesini bekle
-                setTimeout(function () {
-                    console.log("HTML içindeki thumbnail düzeltme kodu çalışıyor...");
-
-                    // Tüm thumbnail'ları bul
-                    var thumbs = document.querySelectorAll('.page-thumbnail');
-                    console.log(thumbs.length + " thumbnail bulundu");
-
-                    // Her thumbnail'a tıklama olayı ekle
-                    for (var i = 0; i < thumbs.length; i++) {
-                        thumbs[i].onclick = function () {
-                            var pageName = this.getAttribute('data-page');
-                            console.log("Tıklanan: " + pageName);
-
-                            // Manuel olarak boyama sayfasını yükle
-                            var img = new Image();
-                            img.crossOrigin = "anonymous";
-
-                            img.onload = function () {
-                                var c = document.getElementById('coloringCanvas');
-                                var cx = c.getContext('2d');
-
-                                cx.fillStyle = 'white';
-                                cx.fillRect(0, 0, c.width, c.height);
-
-                                // Resmi canvas'a çiz
-                                cx.drawImage(img, 0, 0, c.width, c.height);
-                                console.log("Resim yüklendi!");
-                            };
-
-                            img.src = "coloring-pages-png/" + pageName + ".png";
-                        };
-                    }
-
-                    console.log("Thumbnail olayları ayarlandı!");
-                }, 3000); // 3 saniye bekle
-            };
-        </script>
 
         <script>
             // PREMIUM KONTROL - TEMİZ VERSİYON

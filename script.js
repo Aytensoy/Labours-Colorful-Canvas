@@ -446,7 +446,7 @@ function loadAndDrawImage(imageName) {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.9;
+    const scale = Math.min(canvas.width / img.width, canvas.height / img.height)
     const x = (canvas.width - img.width * scale) / 2;
     const y = (canvas.height - img.height * scale) / 2;
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
