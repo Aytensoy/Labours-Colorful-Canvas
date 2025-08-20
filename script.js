@@ -1294,12 +1294,32 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+  // ... (DOMContentLoaded bloğunun içindeyiz)
+
   // 6. BAŞLANGIÇ AYARLARI
-  loadAndDrawImage('image.png'); // Parametre olarak 'image.png' veriyoruz
+  loadAndDrawImage('image.png');
   setTool('pencil');
+  // Sayfa yüklendiğinde URL'de başarı mesajı var mı diye kontrol et
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('subscription') === 'success') {
+    // Kendi şık başarı mesajımızı gösterelim
+    const successMsg = document.createElement('div');
+    successMsg.textContent = '✅ Thank you! Your subscription has been successful.';
+    // Bu mesaja CSS'te .success-message sınıfı ile stil verebiliriz
+    successMsg.className = 'subscription-success-message'; // <<< DOĞRU SINIF ADI
+    document.body.appendChild(successMsg);
+
+    // Mesaj birkaç saniye sonra kaybolsun
+    setTimeout(() => {
+      successMsg.remove();
+      // URL'den gereksiz parametreyi temizle
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }, 4000);
+  }
+
   console.log('✅ Tüm oyun sistemleri başarıyla başlatıldı.');
 });
-
+// <--- Ana DOMContentLoaded bloğu burada biter
 // =========================================================================
 // ONARILMIŞ VE İYİLEŞTİRİLMİŞ MAGIC PHOTOS SİSTEMİ (v2)
 // Lütfen script_updated.js dosyanızdaki eski enhancedMagicPhotosSystemFixed

@@ -2532,3 +2532,33 @@ canvas.editing-mode:active {
     color: #333333 !important;
     /* Yazı rengini koyu gri/siyah yap */
 }
+
+.success-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4CAF50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 100001;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.subscription-success-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 16px 30px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1em;
+    z-index: 100002;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s ease;
+}
