@@ -2547,6 +2547,7 @@ canvas.editing-mode:active {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* ABONELİK BAŞARI MESAJI - NİHAİ VERSİYON */
 .subscription-success-message {
     position: fixed;
     top: 20px;
@@ -2558,7 +2559,10 @@ canvas.editing-mode:active {
     border-radius: 10px;
     font-weight: bold;
     font-size: 1.1em;
-    z-index: 100002;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     transition: opacity 0.5s ease;
+
+    /* EN ÖNEMLİ SATIR: */
+    z-index: 100001;
+    /* Diğer tüm pencerelerden daha yüksek bir değer */
 }
