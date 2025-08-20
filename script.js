@@ -1276,8 +1276,24 @@ document.addEventListener('DOMContentLoaded', function () {
    * Belirtilen bir boyama sayfasını yükler, canvas'ı temizler ve çizer.
    * @param {string} pageName - Yüklenecek resmin adı (uzantısız).
    */
+  // ... (DOMContentLoaded içinde)
 
+  // Newsletter popup'ını yönet
+  const triggerBtn = document.getElementById('newsletterTrigger');
+  const sibFormContainer = document.querySelector('.sib-form-container');
 
+  if (triggerBtn && sibFormContainer) {
+    triggerBtn.addEventListener('click', () => {
+      sibFormContainer.style.display = 'flex';
+    });
+
+    // Dışarı tıklayınca kapat
+    sibFormContainer.addEventListener('click', (event) => {
+      if (event.target === sibFormContainer) {
+        sibFormContainer.style.display = 'none';
+      }
+    });
+  }
   // 6. BAŞLANGIÇ AYARLARI
   loadAndDrawImage('image.png'); // Parametre olarak 'image.png' veriyoruz
   setTool('pencil');
@@ -1976,83 +1992,6 @@ function setupNotificationButton() {
 // Sayfa tamamen yüklendiğinde fonksiyonu çalıştır
 document.addEventListener('DOMContentLoaded', setupNotificationButton);
 
-// --- GET UPDATES (NEWSLETTER SİSTEMİ) ---
-// Dosyanın en sonuna ekleyin
-
-function setupNewsletterSystem() {
-  const modal = document.getElementById('newsletterModal');
-  const triggerBtn = document.getElementById('newsletterTrigger');
-  const closeBtn = document.querySelector('.newsletter-close');
-  const form = document.getElementById('newsletterForm');
-  const subscribeBtn = document.getElementById('subscribeBtn');
-  const userNameInput = document.getElementById('userName');
-  const userEmailInput = document.getElementById('userEmail');
-
-  if (!modal || !triggerBtn || !closeBtn || !form) {
-    console.error('Newsletter elementlerinden biri veya daha fazlası bulunamadı.');
-    return;
-  }
-
-  // Pencereyi aç
-  const openModal = () => modal.style.display = 'flex';
-
-  // Pencereyi kapat
-  const closeModal = () => modal.style.display = 'none';
-
-  // Butonlara tıklama olaylarını ata
-  triggerBtn.addEventListener('click', openModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  // Pencerenin dışına tıklandığında kapat
-  window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-
-  // Form gönderildiğinde çalışacak fonksiyon
-  form.addEventListener('submit', (event) => {
-    event.preventDefault(); // Sayfanın yeniden yüklenmesini engelle
-
-    const userName = userNameInput.value.trim();
-    const userEmail = userEmailInput.value.trim();
-
-    if (!userEmail || !/^\S+@\S+\.\S+$/.test(userEmail)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-
-    subscribeBtn.disabled = true;
-    subscribeBtn.textContent = 'Sending...';
-
-    // EmailJS'e gönderilecek verileri hazırla
-    const templateParams = {
-      user_name: userName || 'Not provided', // İsim boşsa belirt
-      user_email: userEmail,
-      game_name: 'Magical Coloring Game'
-    };
-
-    // EmailJS servisini kullanarak e-postayı gönder
-    // ÖNEMLİ: Kendi EmailJS 'Service ID' ve 'Template ID'nizi girmeniz gerekecek
-    emailjs.send('service_74njv1i', 'template_kane7si', templateParams)
-      .then((response) => {
-        console.log('SUCCESS!', response.status, response.text);
-        alert('Thank you for subscribing! 🎉');
-        closeModal(); // Başarılı olunca pencereyi kapat
-        form.reset(); // Formu temizle
-      }, (error) => {
-        console.log('FAILED...', error);
-        alert('Oops! Something went wrong. Please try again.');
-      })
-      .finally(() => {
-        subscribeBtn.disabled = false;
-        subscribeBtn.textContent = '✨ Subscribe';
-      });
-  });
-}
-
-// Sayfa tamamen yüklendiğinde fonksiyonu çalıştır
-document.addEventListener('DOMContentLoaded', setupNewsletterSystem);
 // --- YENİ VE GELİŞTİRİLMİŞ CANVAS YAZDIRMA FONKSİYONU ---
 function printCanvas() {
   const canvas = document.getElementById('coloringCanvas');

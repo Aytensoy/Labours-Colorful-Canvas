@@ -2481,3 +2481,54 @@ canvas.editing-mode:active {
 .buy-premium-btn:hover {
     transform: scale(1.05);
 }
+
+/* ============================================= */
+/* NİHAİ BREVO FORM STİLİ (POPUP OLARAK GÖSTERME) */
+/* ============================================= */
+
+/* Brevo'nun ana kapsayıcısını, ekranı kaplayan bir modal'a dönüştür */
+.sib-form-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    /* Başlangıçta gizli */
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+/* Formun kendisini ortala ve stil ver */
+#sib-container {
+    background-color: #3e4857 !important;
+    /* Arka plan rengi */
+    color: white !important;
+    padding: 30px !important;
+    border-radius: 15px !important;
+}
+
+/* Yazıları ve etiketleri bizim stilimize uydur */
+#sib-container p,
+#sib-container label {
+    color: white !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+#sib-container .sib-form-block__button {
+    background-color: #FFD700 !important;
+    color: #333 !important;
+    font-weight: bold !important;
+}
+
+/* ============================================= */
+/* BREVO FORM INPUT YAZI RENGİ DÜZELTMESİ      */
+/* ============================================= */
+
+/* Sadece .sib-form-container içindeki input'ları hedef al */
+.sib-form-container .input {
+    color: #333333 !important;
+    /* Yazı rengini koyu gri/siyah yap */
+}
