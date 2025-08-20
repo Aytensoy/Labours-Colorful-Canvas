@@ -12,17 +12,7 @@
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="preload" href="icons/splash-logo.png" as="image" type="image/png">
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-    <script>
-        // EmailJS'nin yüklendiğini kontrol et
-        if (typeof emailjs !== 'undefined') {
-            console.log('✅ EmailJS loaded successfully');
-            emailjs.init("8fTA3BZ9D30BF27Ce");
-            console.log('✅ EmailJS initialized');
-        } else {
-            console.error('❌ EmailJS failed to load');
-        }
-    </script>
+
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
