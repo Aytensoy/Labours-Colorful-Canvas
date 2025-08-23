@@ -2107,6 +2107,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // --- DOWNLOAD & PLAY OFFLINE SİSTEMİ (NİHAİ VERSİYON) ---
 
+// =======================================================
+// DOWNLOAD & PLAY OFFLINE SİSTEMİ (PWA KURULUM TEKLİFİ İLE)
+// =======================================================
 function initiateOfflineDownload() {
   const isUserPremium = localStorage.getItem('isPremium') === 'true';
 
@@ -2114,7 +2117,7 @@ function initiateOfflineDownload() {
     if (typeof showPremiumModal === 'function') {
       showPremiumModal();
     } else {
-      alert('This is a Premium feature. Please activate your gift code to use it.');
+      alert('This is a Premium feature.');
     }
     return;
   }
@@ -2124,28 +2127,51 @@ function initiateOfflineDownload() {
     return;
   }
 
-  // Kullanıcıya indirme işleminin başladığını bildir
   const downloadMsg = document.createElement('div');
-  downloadMsg.className = 'download-progress-msg'; // Stil vermek için
-  downloadMsg.textContent = '📥 Downloading all game content for offline play... This may take a moment.';
+  downloadMsg.className = 'download-progress-msg';
+  downloadMsg.textContent = '📥 Downloading all game content for offline play...';
   document.body.appendChild(downloadMsg);
 
-  // Service Worker'ı kaydettirerek 'install' olayını tetikle
   navigator.serviceWorker.register('/sw.js')
     .then(registration => {
-      console.log('Service Worker registered successfully for offline caching.');
-      // Başarı mesajını göster ve eskisini kaldır
-      downloadMsg.textContent = '✅ Success! The game is now ready for offline play.';
-      setTimeout(() => downloadMsg.remove(), 4000); // Mesaj 4 saniye sonra kaybolsun
+      console.log('Service Worker registered for offline caching.');
+      downloadMsg.textContent = '✅ Success! The game is downloaded.';
+
+      // --- YENİ EKLENEN PWA KURULUM MANTIĞI BURADA BAŞLIYOR ---
+
+      // Saklanmış bir kurulum teklifi var mı diye kontrol et
+      if (deferredPrompt) {
+        console.log('Saklanmış kurulum teklifi bulundu, kullanıcıya gösteriliyor...');
+        // Saklanan teklifi kullanıcıya sun
+        deferredPrompt.prompt();
+
+        // Kullanıcının cevabını dinle
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          // Teklif sadece bir kere kullanılabilir, o yüzden sıfırla
+          deferredPrompt = null;
+        });
+      } else {
+        // Eğer bir teklif yakalanmadıysa (örneğin, uygulama zaten kuruluysa
+        // veya tarayıcı desteklemiyorsa), kullanıcıya manuel yolu göster
+        console.log('Kurulum teklifi bulunamadı, manuel yol gösteriliyor.');
+        alert('The game is ready for offline play. You can now add it to your Home Screen from your browser menu (⋮).');
+      }
+
+      // --- PWA KURULUM MANTIĞI BURADA BİTİYOR ---
+
+      setTimeout(() => downloadMsg.remove(), 4000);
     })
     .catch(error => {
       console.error('Offline download failed:', error);
-      // Hata mesajını göster ve eskisini kaldır
       downloadMsg.textContent = '❌ Sorry, there was an error downloading the game content.';
       setTimeout(() => downloadMsg.remove(), 4000);
     });
 }
-
 // Butonu fonksiyona bağla
 document.addEventListener('DOMContentLoaded', () => {
   const downloadBtn = document.getElementById('downloadAppBtn');
@@ -2210,3 +2236,11 @@ function showPremiumModal() {
     }
   });
 }
+// --- PWA KURULUM TEKLİFİNİ YAKALAMA ---
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Tarayıcının teklifi otomatik olarak göstermesini engelle
+  e.preventDefault();
+  // Teklifi daha sonra kullanmak üzere sakla
+  deferredPrompt = e;
+  console.log('beforeinstallprompt olayı yakalandı ve teklif saklandı.');
+});
