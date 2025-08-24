@@ -2566,3 +2566,9 @@ canvas.editing-mode:active {
     z-index: 100001;
     /* Diğer tüm pencerelerden daha yüksek bir değer */
 }
+
+/* YouTube sosyal medya butonu için stil */
+.social-button.youtube {
+    background-color: #FF0000;
+    /* YouTube'un ikonik kırmızı rengi */
+}

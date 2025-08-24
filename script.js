@@ -2088,7 +2088,12 @@ function initiateOfflineDownload() {
         // Eğer bir teklif yakalanmadıysa (örneğin, uygulama zaten kuruluysa
         // veya tarayıcı desteklemiyorsa), kullanıcıya manuel yolu göster
         console.log('Kurulum teklifi bulunamadı, manuel yol gösteriliyor.');
-        alert('The game is ready for offline play. You can now add it to your Home Screen from your browser menu (⋮).');
+        alert("✅ Download Complete!\n\n" +
+          "To add the game to your Home Screen like an app:\n\n" +
+          "1. Click the (⋮) menu button in your browser.\n" +
+          "2. Go to 'Save and Share'.\n" +
+          "3. Select 'Install App' or 'Create shortcut...'."
+        );
       }
 
       // --- PWA KURULUM MANTIĞI BURADA BİTİYOR ---
