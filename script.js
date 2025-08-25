@@ -1897,10 +1897,10 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('load', connectToMagicPhotosButton);
   initializeMagicPhotoInput(); // <<< BU SATIRI EKLEYİN
 })();
-// ==================================================
-// HEDİYE KODU SİSTEMİ (ÜCRETSİZ - Mailto Yöntemi)
-// ==================================================
+// --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
+
 function setupGiftingSystem() {
+  // Buraya istediğiniz kadar hediye kodu ekleyebilirsiniz
   const validGiftCodes = [
     "MAGIC-GIFT-2025",
     "COLOR-FUN-123",
@@ -1909,46 +1909,36 @@ function setupGiftingSystem() {
   ];
 
   const redeemButton = document.getElementById('redeemGiftBtn');
-  if (!redeemButton) return;
+  if (!redeemButton) {
+    console.error("Hediye kodu butonu bulunamadı!");
+    return;
+  }
 
   redeemButton.addEventListener('click', () => {
-    // 1. Kodu iste
     const userCode = prompt("Please enter your gift code:", "");
-    if (!userCode) return;
+
+    if (userCode === null || userCode.trim() === "") {
+      // Kullanıcı iptal etti veya boş bıraktı
+      return;
+    }
+
+    // Kodu büyük/küçük harfe duyarsız hale getir ve boşlukları temizle
     const formattedUserCode = userCode.trim().toUpperCase();
 
-    // 2. Kodu kontrol et
     if (validGiftCodes.includes(formattedUserCode)) {
-      // 3. Kod geçerliyse, kullanıcıyı Pro yap ve aktivasyon için yönlendir
-
-      // Önce kullanıcıyı yerel olarak Pro yapalım ki beklemek zorunda kalmasın
+      // Kod geçerli!
+      alert("Congratulations! 🎉 Premium features have been activated. The page will now reload.");
       localStorage.setItem('isPremium', 'true');
-
-      // Şimdi onlara Pro listesine eklenmeleri için bir talimat verelim
-      const activationEmail = 'hello@magicalcoloringgame.com'; // E-postanın geleceği adres
-      const emailSubject = 'Activate My Magical Coloring Game Pro Account';
-      const emailBody = `Hello! I am activating my Pro account with the gift code: ${formattedUserCode}.\n\nPlease add my email to the PRO Users list.\n\nThank you!`;
-
-      // Kullanıcının e-posta programını açacak olan özel link
-      const mailtoLink = `mailto:${activationEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-
-      // Kullanıcıyı bilgilendir ve yönlendir
-      alert(
-        "Congratulations! 🎉 Premium features are now active on THIS BROWSER.\n\n" +
-        "To save your Pro status and receive special updates, please click OK to send us a quick activation email."
-      );
-
-      // Yeni bir sekmede e-posta gönderme penceresini aç
-      window.open(mailtoLink, '_blank');
-
-      // Sayfayı yenileyerek Pro özellikleri anında göster
       location.reload();
-
     } else {
-      alert("Sorry, that gift code is not valid.");
+      // Kod geçersiz
+      alert("Sorry, that gift code is not valid. Please check and try again.");
     }
   });
 }
+
+// Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır
+document.addEventListener('DOMContentLoaded', setupGiftingSystem);
 
 
 // --- YENİ VE GELİŞTİRİLMİŞ CANVAS YAZDIRMA FONKSİYONU ---
