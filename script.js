@@ -43,6 +43,8 @@ window.textColor = '#FF69B4';
 // PWA Yükleme istemi için
 let deferredPrompt;
 
+let saveStateTimeout = null; // <-- BU SATIRI EKLEYİN
+
 // --- BÖLÜM 2: ANA OYUN MANTIKLARI VE YARDIMCI FONKSİYONLAR ---
 
 // Araç değiştirme fonksiyonu
@@ -274,13 +276,16 @@ function handleFileUpload(event) {
   };
   reader.readAsDataURL(file);
 }
-// YENİ VE GARANTİLİ FLOOD FILL FONKSİYONU
+// =======================================================
+// YENİ VE ÇÖKME KARŞITI FLOOD FILL FONKSİYONU
+// =======================================================
 function floodFill(imageData, startX, startY, fillColor) {
-  const data = imageData.data;
   const width = imageData.width;
   const height = imageData.height;
-  startX = Math.round(startX);
-  startY = Math.round(startY);
+  const data = imageData.data;
+
+  startX = Math.floor(startX);
+  startY = Math.floor(startY);
 
   const startPos = (startY * width + startX) * 4;
   const startR = data[startPos];
@@ -289,49 +294,55 @@ function floodFill(imageData, startX, startY, fillColor) {
 
   // Tıklanan yer zaten doldurulacak renk ise, hiçbir şey yapma.
   if (startR === fillColor.r && startG === fillColor.g && startB === fillColor.b) {
-    console.log("Fill iptal: Zaten aynı renk.");
     return false;
   }
 
-  // Tıklanan yer siyah bir çizgi ise (veya siyaha çok yakınsa), hiçbir şey yapma.
-  const blackThreshold = 40; // Siyah olarak kabul edilecek ton sınırı
+  // Tıklanan yer siyah bir çizgi ise, hiçbir şey yapma.
+  const blackThreshold = 50;
   if (startR < blackThreshold && startG < blackThreshold && startB < blackThreshold) {
-    console.log("Fill iptal: Siyah çizgi koruması.");
     return false;
   }
 
   const pixelStack = [[startX, startY]];
-  const tolerance = 40; // Toleransı biraz daha artırdık
+  // YENİ: Ziyaret edilen pikselleri takip etmek için bir set oluştur
+  const visited = new Set();
+  visited.add(`${startX},${startY}`);
 
   while (pixelStack.length > 0) {
     const [x, y] = pixelStack.pop();
+
     const currentPos = (y * width + x) * 4;
+    data[currentPos] = fillColor.r;
+    data[currentPos + 1] = fillColor.g;
+    data[currentPos + 2] = fillColor.b;
+    data[currentPos + 3] = 255;
 
-    // Sınır kontrolü
-    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+    // Komşuları kontrol et
+    const neighbors = [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]];
+    for (const [nx, ny] of neighbors) {
+      const key = `${nx},${ny}`;
 
-    const r = data[currentPos];
-    const g = data[currentPos + 1];
-    const b = data[currentPos + 2];
-    const a = data[currentPos + 3];
+      // Eğer komşu sınırlar içindeyse VE daha önce ziyaret edilmediyse...
+      if (nx >= 0 && nx < width && ny >= 0 && ny < height && !visited.has(key)) {
+        visited.add(key); // Ziyaret edildi olarak işaretle
 
-    // Renk tolerans dahilinde mi ve henüz boyanmamış mı?
-    if (a > 0 && Math.abs(r - startR) <= tolerance && Math.abs(g - startG) <= tolerance && Math.abs(b - startB) <= tolerance) {
+        const neighborPos = (ny * width + nx) * 4;
+        const nR = data[neighborPos];
+        const nG = data[neighborPos + 1];
+        const nB = data[neighborPos + 2];
 
-      // Pikseli boya
-      data[currentPos] = fillColor.r;
-      data[currentPos + 1] = fillColor.g;
-      data[currentPos + 2] = fillColor.b;
-      data[currentPos + 3] = 255;
-
-      // Komşuları sıraya ekle
-      pixelStack.push([x + 1, y]);
-      pixelStack.push([x - 1, y]);
-      pixelStack.push([x, y + 1]);
-      pixelStack.push([x, y - 1]);
+        // Renk toleransı kontrolü
+        const tolerance = 10;
+        if (Math.abs(nR - startR) <= tolerance &&
+          Math.abs(nG - startG) <= tolerance &&
+          Math.abs(nB - startB) <= tolerance) {
+          // Boyanacaklar listesine ekle
+          pixelStack.push([nx, ny]);
+        }
+      }
     }
   }
-  return true; // Değişiklik yapıldığını belirt
+  return true;
 }
 
 // YENİ EKLENEN FONKSİYONLAR: SİHİRLİ DEĞNEKLER
