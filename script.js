@@ -32,7 +32,7 @@ let rainbowHue = 0; // <-- BU SATIRI EKLEYİN
 // Undo/Redo sistemi
 let drawingHistory = [];
 let currentStep = -1;
-const HISTORY_LIMIT = 50;
+const HISTORY_LIMIT = 15;
 
 // İsim yazma modu
 window.isWritingMode = false;
@@ -1112,15 +1112,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. SON POZİSYONU GÜNCELLE
     [lastX, lastY] = [x, y];
   }
-  // stopDrawing fonksiyonunun doğru hali
   function stopDrawing(e) {
-    if (isDrawing) {
-      // Sadece sürükleme yapıldıysa (çizgi çizildiyse) durumu kaydet
-      if (isDragging) {
+    if (isDrawing && isDragging) {
+      // Önceki zamanlayıcıyı (varsa) iptal et
+      clearTimeout(saveStateTimeout);
+      // Durumu, kullanıcı 100 milisaniye boyunca başka bir şey yapmazsa kaydet
+      saveStateTimeout = setTimeout(() => {
         saveDrawingState();
-      }
+      }, 100); // 100 milisaniye = 0.1 saniye
     }
-    // Her durumda durumları sıfırla
     isDrawing = false;
     isDragging = false;
   }
@@ -1349,6 +1349,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- YENİ VE KOORDİNATLARI DÜZELTİLMİŞ TEMPLATES_CONFIG (BUNUNLA DEĞİŞTİRİN) ---
 
   const TEMPLATES_CONFIG = {
+    princess: {
+      name: "Magical Princess", icon: "👑",
+      colored: "princess_colored_transparent.png", outline: "princess_outline_transparent.png",
+      colored_thumb: "princess_colored_thumb.png", outline_thumb: "princess_outline_thumb.png",
+      faceArea: { x: 400, y: 310, width: 200, height: 240 },
+    },
     birthday: {
       name: "Birthday Star", icon: "🎂",
       colored: "birthday_colored_transparent.png", outline: "birthday_outline_transparent.png",
@@ -1366,12 +1372,6 @@ document.addEventListener('DOMContentLoaded', function () {
       colored: "pirate_colored_transparent.png", outline: "pirate_outline_transparent.png",
       colored_thumb: "pirate_colored_thumb.png", outline_thumb: "pirate_outline_thumb.png",
       faceArea: { x: 400, y: 280, width: 180, height: 220 },
-    },
-    princess: {
-      name: "Magical Princess", icon: "👑",
-      colored: "princess_colored_transparent.png", outline: "princess_outline_transparent.png",
-      colored_thumb: "princess_colored_thumb.png", outline_thumb: "princess_outline_thumb.png",
-      faceArea: { x: 400, y: 310, width: 200, height: 240 },
     },
     safari: {
       name: "Safari Explorer", icon: "🦁",

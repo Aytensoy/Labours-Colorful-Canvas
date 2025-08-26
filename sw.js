@@ -2,7 +2,7 @@
 // SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (v10)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-v15-final';
+const CACHE_NAME = 'magical-coloring-v16-final';
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
