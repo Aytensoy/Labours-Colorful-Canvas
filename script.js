@@ -43,7 +43,7 @@ window.textColor = '#FF69B4';
 // PWA Yükleme istemi için
 let deferredPrompt;
 
-let saveStateTimeout = null; // <-- BU SATIRI EKLEYİN
+window.saveStateTimeout = null; // <-- BU SATIRI EKLEYİN
 
 // --- BÖLÜM 2: ANA OYUN MANTIKLARI VE YARDIMCI FONKSİYONLAR ---
 
@@ -1125,12 +1125,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function stopDrawing(e) {
     if (isDrawing && isDragging) {
-      // Önceki zamanlayıcıyı (varsa) iptal et
-      clearTimeout(saveStateTimeout);
-      // Durumu, kullanıcı 100 milisaniye boyunca başka bir şey yapmazsa kaydet
-      saveStateTimeout = setTimeout(() => {
+      clearTimeout(window.saveStateTimeout);
+      window.saveStateTimeout = setTimeout(() => {
         saveDrawingState();
-      }, 100); // 100 milisaniye = 0.1 saniye
+      }, 100);
     }
     isDrawing = false;
     isDragging = false;
