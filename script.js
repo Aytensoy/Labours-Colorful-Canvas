@@ -1715,6 +1715,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM SONU ---
 
 
+
   function setupEventListeners() {
     const canvas = document.getElementById('coloringCanvas');
     canvas.style.cursor = 'move';
@@ -1722,13 +1723,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // Olay dinleyicilerini eklemeden önce temizle
     removeEventListeners();
 
+    // Masaüstü için Fare Olayları
     canvas.addEventListener('mousedown', handleEditMouseDown);
     canvas.addEventListener('mousemove', handleEditMouseMove);
     canvas.addEventListener('mouseup', handleEditMouseUp);
-    canvas.addEventListener('mouseleave', handleEditMouseUp); // Fare canvas'tan çıkınca sürüklemeyi bitir
+    canvas.addEventListener('mouseleave', handleEditMouseUp);
     canvas.addEventListener('wheel', handleEditWheel, { passive: false });
 
-    // Dokunmatik cihazlar için
+    // Mobil Cihazlar için Dokunmatik Olaylar (passive: false ile)
     canvas.addEventListener('touchstart', handleEditMouseDown, { passive: false });
     canvas.addEventListener('touchmove', handleEditMouseMove, { passive: false });
     canvas.addEventListener('touchend', handleEditMouseUp, { passive: false });
@@ -1751,13 +1753,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
 
+    // Önce dokunmatik olayları kontrol et
     if (e.touches && e.touches.length > 0) {
+      // Dokunma devam ederken
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
     } else if (e.changedTouches && e.changedTouches.length > 0) {
+      // Dokunma bittiğinde
       clientX = e.changedTouches[0].clientX;
       clientY = e.changedTouches[0].clientY;
     } else {
+      // Fare olayı
       clientX = e.clientX;
       clientY = e.clientY;
     }
@@ -1767,6 +1773,7 @@ document.addEventListener('DOMContentLoaded', function () {
       y: (clientY - rect.top) * (canvas.height / rect.height)
     };
   }
+
 
   function handleEditMouseDown(e) {
     e.preventDefault();
@@ -1778,8 +1785,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function handleEditMouseMove(e) {
+    // Sürükleme sırasında sayfanın kaymasını engelle
     e.preventDefault();
+
     if (!isEditingPhoto || !editingSettings.isDragging) return;
+
     const coords = getEventCoordinates(e);
     const deltaX = coords.x - editingSettings.startX;
     const deltaY = coords.y - editingSettings.startY;
