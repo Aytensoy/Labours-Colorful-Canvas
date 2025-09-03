@@ -1898,7 +1898,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.appendChild(msg);
     setTimeout(() => msg.remove(), 2500);
   }
-  // YENİ BAŞLATICI FONKSİYON
+  // =======================================================
+  // MAGIC PHOTOS - MOBİL UYUMLULUK İÇİN NİHAİ DÜZELTME
+  // (FileReader yerine createObjectURL kullanır)
+  // =======================================================
   function initializeMagicPhotoInput() {
     const magicInput = document.getElementById('magicPhotoInput');
     if (!magicInput) return;
@@ -1907,24 +1910,35 @@ document.addEventListener('DOMContentLoaded', function () {
       const file = e.target.files[0];
 
       if (file) {
-        console.log('✅ Fotoğraf seçildi. Yükleme başlıyor...');
+        console.log('✅ Fotoğraf seçildi. URL.createObjectURL ile yükleniyor...');
 
         // Tıklama dinleyicisini ve talimatları kaldır
         document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
         const instructionBox = document.getElementById('faceClickInstruction');
         if (instructionBox) instructionBox.remove();
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          userPhoto.crossOrigin = "Anonymous";
-          userPhoto.onload = () => {
-            // Çizimden önce tarayıcıya 50 milisaniyelik bir an veriyoruz.
-            // Bu, Chrome'un mobil cihazlarda resmi doğru işlemesi için yeterli zamanı sağlar.
-            setTimeout(startCanvasEditing, 50); // <<< DEĞİŞİKLİK BURADA
-          };
-          userPhoto.src = event.target.result;
+        // --- FİLE READER YERİNE KULLANILAN YENİ YÖNTEM ---
+
+        // Seçilen dosya için geçici bir URL oluştur
+        const objectURL = URL.createObjectURL(file);
+
+        userPhoto.crossOrigin = "Anonymous";
+        userPhoto.onload = () => {
+          startCanvasEditing();
+          // ÖNEMLİ: URL'yi işimiz bittikten sonra hafızadan temizle
+          URL.revokeObjectURL(objectURL);
         };
-        reader.readAsDataURL(file);
+        userPhoto.onerror = () => {
+          // Hata durumunda da URL'yi temizle
+          URL.revokeObjectURL(objectURL);
+          alert("Sorry, there was an error loading this image.");
+        }
+
+        // userPhoto'nun kaynağı olarak bu yeni, geçici URL'yi kullan
+        userPhoto.src = objectURL;
+
+        // --- YENİ YÖNTEM BİTTİ ---
+
       } else {
         console.log('❌ Kullanıcı fotoğraf seçmekten vazgeçti.');
       }
