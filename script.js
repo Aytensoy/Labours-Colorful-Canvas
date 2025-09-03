@@ -242,39 +242,35 @@ function handleFileUpload(event) {
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.onload = function () {
-      console.log("🖼️ User image uploaded and drawing to canvas.");
-      const canvas = document.getElementById('coloringCanvas');
-      const ctx = canvas.getContext('2d');
+  // YENİ VE MOBİL UYUMLU BÖLÜM
+  const objectURL = URL.createObjectURL(file);
+  const img = new Image();
+  img.crossOrigin = "Anonymous";
 
-      // Clear canvas and set white background
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  img.onload = function () {
+    console.log("🖼️ User image uploaded via createObjectURL and drawing to canvas.");
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
 
-      // Draw the uploaded image, fitting it to the canvas
-      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-      const x = (canvas.width / 2) - (img.width / 2) * scale;
-      const y = (canvas.height / 2) - (img.height / 2) * scale;
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Reset history and save the new state
-      drawingHistory = [];
-      currentStep = -1;
-      saveDrawingState();
-    };
-    img.onerror = function () {
-      alert("Sorry, there was an error loading your image. Please try another one.");
-    };
-    img.src = e.target.result;
+    const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.95;
+    const x = (canvas.width / 2) - (img.width / 2) * scale;
+    const y = (canvas.height / 2) - (img.height / 2) * scale;
+    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+    drawingHistory = [];
+    currentStep = -1;
+    saveDrawingState();
+
+    URL.revokeObjectURL(objectURL);
   };
-  reader.onerror = function () {
-    alert("Sorry, there was an error reading your file.");
+  img.onerror = function () {
+    URL.revokeObjectURL(objectURL);
+    alert("Sorry, there was an error loading your image. Please try another one.");
   };
-  reader.readAsDataURL(file);
+  img.src = objectURL;
 }
 // =======================================================
 // YENİ VE ÇÖKME KARŞITI FLOOD FILL FONKSİYONU
@@ -1908,42 +1904,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     magicInput.addEventListener('change', function (e) {
       const file = e.target.files[0];
-
       if (file) {
-        console.log('✅ Fotoğraf seçildi. URL.createObjectURL ile yükleniyor...');
+        console.log('✅ Magic Photo seçildi. createObjectURL ile yükleniyor...');
 
-        // Tıklama dinleyicisini ve talimatları kaldır
         document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
         const instructionBox = document.getElementById('faceClickInstruction');
         if (instructionBox) instructionBox.remove();
 
-        // --- FİLE READER YERİNE KULLANILAN YENİ YÖNTEM ---
-
-        // Seçilen dosya için geçici bir URL oluştur
         const objectURL = URL.createObjectURL(file);
-
         userPhoto.crossOrigin = "Anonymous";
         userPhoto.onload = () => {
-          startCanvasEditing();
-          // ÖNEMLİ: URL'yi işimiz bittikten sonra hafızadan temizle
+          setTimeout(() => { // Chrome için küçük gecikmeyi koruyalım
+            startCanvasEditing();
+          }, 50);
           URL.revokeObjectURL(objectURL);
         };
         userPhoto.onerror = () => {
-          // Hata durumunda da URL'yi temizle
           URL.revokeObjectURL(objectURL);
           alert("Sorry, there was an error loading this image.");
         }
-
-        // userPhoto'nun kaynağı olarak bu yeni, geçici URL'yi kullan
         userPhoto.src = objectURL;
 
-        // --- YENİ YÖNTEM BİTTİ ---
-
       } else {
-        console.log('❌ Kullanıcı fotoğraf seçmekten vazgeçti.');
+        console.log('❌ Kullanıcı Magic Photo seçmekten vazgeçti.');
       }
-
-      // Input'un değerini sıfırla ki aynı dosyayı tekrar seçebilsin
       e.target.value = '';
     });
   }
