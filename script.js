@@ -1352,6 +1352,8 @@ document.addEventListener('DOMContentLoaded', function () {
     startY: 0
   };
 
+  let initialPinchDistance = null; // <-- DEĞİŞKENİ BURAYA EKLEYİN
+
   let currentTemplate = null;
   let selectedStyle = 'colored';
 
@@ -1734,6 +1736,11 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.addEventListener('touchstart', handleEditMouseDown, { passive: false });
     canvas.addEventListener('touchmove', handleEditMouseMove, { passive: false });
     canvas.addEventListener('touchend', handleEditMouseUp, { passive: false });
+
+    // YENİ: İki Parmakla Yakınlaştırma için
+    canvas.addEventListener('touchstart', handlePinchStart, { passive: false });
+    canvas.addEventListener('touchmove', handlePinchMove, { passive: false });
+    canvas.addEventListener('touchend', handlePinchEnd, { passive: false });
   }
 
   function removeEventListeners() {
@@ -1747,7 +1754,43 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.removeEventListener('touchmove', handleEditMouseMove);
     canvas.removeEventListener('touchend', handleEditMouseUp);
   }
+  function handlePinchStart(e) {
+    if (e.touches.length === 2) {
+      // İki parmak dokunduğunda, aralarındaki başlangıç mesafesini kaydet
+      initialPinchDistance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+    }
+  }
 
+  function handlePinchMove(e) {
+    if (e.touches.length === 2 && initialPinchDistance) {
+      e.preventDefault(); // Sayfanın yakınlaşmasını engelle
+
+      // Parmaklar hareket ettikçe yeni mesafeyi hesapla
+      const newPinchDistance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+
+      // Mesafedeki değişime göre ölçeği ayarla
+      const scaleFactor = newPinchDistance / initialPinchDistance;
+
+      editingSettings.width *= scaleFactor;
+      editingSettings.height *= scaleFactor;
+
+      // Bir sonraki hareket için mesafeyi güncelle
+      initialPinchDistance = newPinchDistance;
+
+      redrawCanvas();
+    }
+  }
+
+  function handlePinchEnd(e) {
+    // Parmaklardan biri kalktığında, pinch işlemini sıfırla
+    initialPinchDistance = null;
+  }
   function getEventCoordinates(e) {
     const canvas = document.getElementById('coloringCanvas');
     const rect = canvas.getBoundingClientRect();
@@ -1875,7 +1918,9 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.onload = (event) => {
           userPhoto.crossOrigin = "Anonymous";
           userPhoto.onload = () => {
-            startCanvasEditing();
+            // Çizimden önce tarayıcıya 50 milisaniyelik bir an veriyoruz.
+            // Bu, Chrome'un mobil cihazlarda resmi doğru işlemesi için yeterli zamanı sağlar.
+            setTimeout(startCanvasEditing, 50); // <<< DEĞİŞİKLİK BURADA
           };
           userPhoto.src = event.target.result;
         };
