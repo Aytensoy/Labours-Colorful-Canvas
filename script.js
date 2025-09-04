@@ -235,40 +235,41 @@ function resizeCanvas() {
   canvas.style.width = newWidth + "px";
   canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
 }
+// YENİ VE EN STABİL handleFileUpload
 function handleFileUpload(event) {
   const file = event.target.files[0];
-  if (!file || !file.type.startsWith('image/')) {
-    alert('Please select a valid image file (PNG, JPG, etc.).');
-    return;
-  }
+  if (!file || !file.type.startsWith('image/')) return;
 
-  // YENİ VE MOBİL UYUMLU BÖLÜM
   const objectURL = URL.createObjectURL(file);
   const img = new Image();
   img.crossOrigin = "Anonymous";
 
   img.onload = function () {
-    console.log("🖼️ User image uploaded via createObjectURL and drawing to canvas.");
-    const canvas = document.getElementById('coloringCanvas');
-    const ctx = canvas.getContext('2d');
+    // <<< DEĞİŞİKLİK BURADA BAŞLIYOR >>>
+    requestAnimationFrame(() => {
+      console.log("🖼️ User image loaded. Drawing to canvas via requestAnimationFrame.");
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 0.95;
-    const x = (canvas.width / 2) - (img.width / 2) * scale;
-    const y = (canvas.height / 2) - (img.height / 2) * scale;
-    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width / 2) - (img.width / 2) * scale;
+      const y = (canvas.height / 2) - (img.height / 2) * scale;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-    drawingHistory = [];
-    currentStep = -1;
-    saveDrawingState();
+      drawingHistory = [];
+      currentStep = -1;
+      saveDrawingState();
 
-    URL.revokeObjectURL(objectURL);
+      URL.revokeObjectURL(objectURL);
+    });
+    // <<< DEĞİŞİKLİK BURADA BİTİYOR >>>
   };
   img.onerror = function () {
     URL.revokeObjectURL(objectURL);
-    alert("Sorry, there was an error loading your image. Please try another one.");
+    alert("Sorry, there was an error loading your image.");
   };
   img.src = objectURL;
 }
@@ -1898,6 +1899,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // MAGIC PHOTOS - MOBİL UYUMLULUK İÇİN NİHAİ DÜZELTME
   // (FileReader yerine createObjectURL kullanır)
   // =======================================================
+  // YENİ VE EN STABİL initializeMagicPhotoInput
   function initializeMagicPhotoInput() {
     const magicInput = document.getElementById('magicPhotoInput');
     if (!magicInput) return;
@@ -1905,7 +1907,7 @@ document.addEventListener('DOMContentLoaded', function () {
     magicInput.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
-        console.log('✅ Magic Photo seçildi. createObjectURL ile yükleniyor...');
+        console.log('✅ Magic Photo selected. Loading via createObjectURL...');
 
         document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
         const instructionBox = document.getElementById('faceClickInstruction');
@@ -1914,10 +1916,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const objectURL = URL.createObjectURL(file);
         userPhoto.crossOrigin = "Anonymous";
         userPhoto.onload = () => {
-          setTimeout(() => { // Chrome için küçük gecikmeyi koruyalım
+          // <<< DEĞİŞİKLİK BURADA BAŞLIYOR >>>
+          requestAnimationFrame(() => {
+            console.log("Magic Photo loaded. Starting canvas editing via requestAnimationFrame.");
             startCanvasEditing();
-          }, 50);
-          URL.revokeObjectURL(objectURL);
+            URL.revokeObjectURL(objectURL);
+          });
+          // <<< DEĞİŞİKLİK BURADA BİTİYOR >>>
         };
         userPhoto.onerror = () => {
           URL.revokeObjectURL(objectURL);
@@ -1926,7 +1931,7 @@ document.addEventListener('DOMContentLoaded', function () {
         userPhoto.src = objectURL;
 
       } else {
-        console.log('❌ Kullanıcı Magic Photo seçmekten vazgeçti.');
+        console.log('❌ User cancelled Magic Photo selection.');
       }
       e.target.value = '';
     });
