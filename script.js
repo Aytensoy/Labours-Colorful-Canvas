@@ -236,42 +236,34 @@ function resizeCanvas() {
   canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
 }
 // YENİ VE EN STABİL handleFileUpload
+// YENİ VE EN STABİL handleFileUpload (createImageBitmap ile)
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file || !file.type.startsWith('image/')) return;
 
-  const objectURL = URL.createObjectURL(file);
-  const img = new Image();
-  img.crossOrigin = "Anonymous";
-
-  img.onload = function () {
-    // <<< DEĞİŞİKLİK BURADA BAŞLIYOR >>>
-    requestAnimationFrame(() => {
-      console.log("🖼️ User image loaded. Drawing to canvas via requestAnimationFrame.");
+  // FileReader ve new Image() yerine createImageBitmap kullan
+  createImageBitmap(file)
+    .then(imageBitmap => {
+      console.log("🖼️ User image loaded via createImageBitmap. Drawing to canvas.");
       const canvas = document.getElementById('coloringCanvas');
       const ctx = canvas.getContext('2d');
 
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-      const x = (canvas.width / 2) - (img.width / 2) * scale;
-      const y = (canvas.height / 2) - (img.height / 2) * scale;
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+      const scale = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
+      const x = (canvas.width / 2) - (imageBitmap.width / 2) * scale;
+      const y = (canvas.height / 2) - (imageBitmap.height / 2) * scale;
+      ctx.drawImage(imageBitmap, x, y, imageBitmap.width * scale, imageBitmap.height * scale);
 
       drawingHistory = [];
       currentStep = -1;
       saveDrawingState();
-
-      URL.revokeObjectURL(objectURL);
+    })
+    .catch(e => {
+      console.error("createImageBitmap failed:", e);
+      alert("Sorry, there was an error processing your image.");
     });
-    // <<< DEĞİŞİKLİK BURADA BİTİYOR >>>
-  };
-  img.onerror = function () {
-    URL.revokeObjectURL(objectURL);
-    alert("Sorry, there was an error loading your image.");
-  };
-  img.src = objectURL;
 }
 // =======================================================
 // YENİ VE ÇÖKME KARŞITI FLOOD FILL FONKSİYONU
@@ -1900,6 +1892,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // (FileReader yerine createObjectURL kullanır)
   // =======================================================
   // YENİ VE EN STABİL initializeMagicPhotoInput
+  // YENİ VE EN STABİL initializeMagicPhotoInput (createImageBitmap ile)
   function initializeMagicPhotoInput() {
     const magicInput = document.getElementById('magicPhotoInput');
     if (!magicInput) return;
@@ -1907,28 +1900,25 @@ document.addEventListener('DOMContentLoaded', function () {
     magicInput.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
-        console.log('✅ Magic Photo selected. Loading via createObjectURL...');
+        console.log('✅ Magic Photo selected. Loading via createImageBitmap...');
 
         document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
         const instructionBox = document.getElementById('faceClickInstruction');
         if (instructionBox) instructionBox.remove();
 
-        const objectURL = URL.createObjectURL(file);
-        userPhoto.crossOrigin = "Anonymous";
-        userPhoto.onload = () => {
-          // <<< DEĞİŞİKLİK BURADA BAŞLIYOR >>>
-          requestAnimationFrame(() => {
-            console.log("Magic Photo loaded. Starting canvas editing via requestAnimationFrame.");
+        // FileReader ve new Image() yerine createImageBitmap kullan
+        createImageBitmap(file)
+          .then(imageBitmap => {
+            // Bu yeni imageBitmap'i global userPhoto'ya atayalım
+            // ancak doğrudan çizmek yerine, bir sonraki adımda kullanacağız.
+            // Bu, en güvenli yoldur.
+            userPhoto = imageBitmap;
             startCanvasEditing();
-            URL.revokeObjectURL(objectURL);
+          })
+          .catch(e => {
+            console.error("Magic Photos createImageBitmap failed:", e);
+            alert("Sorry, there was an error processing your image.");
           });
-          // <<< DEĞİŞİKLİK BURADA BİTİYOR >>>
-        };
-        userPhoto.onerror = () => {
-          URL.revokeObjectURL(objectURL);
-          alert("Sorry, there was an error loading this image.");
-        }
-        userPhoto.src = objectURL;
 
       } else {
         console.log('❌ User cancelled Magic Photo selection.');
