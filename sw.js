@@ -1,8 +1,8 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (v25)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (v26)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-v25-bitmap-fix';
+const CACHE_NAME = 'magical-coloring-v26-objecturl-fallback)';
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
