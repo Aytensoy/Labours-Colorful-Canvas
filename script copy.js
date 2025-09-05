@@ -1224,11 +1224,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ...
   document.getElementById('uploadBtn').addEventListener('click', function () {
-    // Premium kontrolünü kaldırdık
+    console.log('📁 Upload Image tıklandı! Input hazırlanıyor...');
+
+    // Geçici bir input elementi oluştur
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
-    fileInput.onchange = handleFileUpload;
+
+    // Input'a taze bir olay dinleyicisi ata
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleFileUpload(e); // Mevcut, çalışan handleFileUpload'u çağır
+      }
+    };
+
+    // Şimdi input'a tıkla
     fileInput.click();
   });
   // --- YENİ EKLENEN BUTON BAĞLANTILARI ---
@@ -1526,14 +1537,18 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.addEventListener('click', handleFaceAreaClick);
   }
 
-  // Yüz alanına tıklandığında ne olacağını yönetir (NİHAİ DÜZELTME)
+
+  // =======================================================
+  // YÜZ ALANI TIKLAMA FONKSİYONU (NİHAİ VE HATASIZ VERSİYON)
+  // =======================================================
   function handleFaceAreaClick(event) {
-    if (!currentTemplate || isEditingPhoto) return; // Eğer template seçilmemişse veya zaten düzenleme modundaysa bir şey yapma
+    if (!currentTemplate || isEditingPhoto) return;
 
     const canvas = document.getElementById('coloringCanvas');
     const coords = getEventCoordinates(event);
     const faceArea = currentTemplate.faceArea;
 
+    // GEREKLİ TÜM DEĞİŞKENLERİ BURADA TANIMLIYORUZ
     const scaleX = canvas.width / 800;
     const scaleY = canvas.height / 600;
     const centerX = faceArea.x * scaleX;
@@ -1541,13 +1556,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const radiusX = (faceArea.width / 2) * scaleX;
     const radiusY = (faceArea.height / 2) * scaleY;
 
+    // HATA VEREN "distanceX" VE "distanceY" DEĞİŞKENLERİ ARTIK BURADA
     const distanceX = coords.x - centerX;
     const distanceY = coords.y - centerY;
 
     // Elips denklemi
     if ((distanceX * distanceX) / (radiusX * radiusX) + (distanceY * distanceY) / (radiusY * radiusY) <= 1) {
-      console.log('✅ Yüz alanı tıklandı! Dosya seçici açılıyor...');
-      document.getElementById('magicPhotoInput').click();
+      console.log('✅ Yüz alanı tıklandı! Input hazırlanıyor...');
+
+      const magicInput = document.getElementById('magicPhotoInput');
+
+      // Input'a taze bir olay dinleyicisi ata
+      magicInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
+          const instructionBox = document.getElementById('faceClickInstruction');
+          if (instructionBox) instructionBox.remove();
+
+          const objectURL = URL.createObjectURL(file);
+          userPhoto = new Image();
+          userPhoto.crossOrigin = "Anonymous";
+          userPhoto.onload = () => {
+            startCanvasEditing();
+            URL.revokeObjectURL(objectURL);
+          };
+          userPhoto.src = objectURL;
+        }
+        e.target.value = '';
+      };
+
+      magicInput.click();
     }
   }
   // Kullanıcıya talimat gösteren bir kutucuk oluşturur
@@ -1897,45 +1936,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // MAGIC PHOTOS - MOBİL UYUMLULUK İÇİN NİHAİ DÜZELTME
   // (FileReader yerine createObjectURL kullanır)
   // =======================================================
-  // YENİ VE EN STABİL initializeMagicPhotoInput
-  // YENİ VE EN STABİL initializeMagicPhotoInput (createImageBitmap ile)
-  // YENİ VE DAHA UYUMLU initializeMagicPhotoInput
-  function initializeMagicPhotoInput() {
-    const magicInput = document.getElementById('magicPhotoInput');
-    if (!magicInput) return;
 
-    magicInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
-        console.log('✅ Magic Photo seçildi. createObjectURL ile yükleniyor...');
-
-        document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
-        const instructionBox = document.getElementById('faceClickInstruction');
-        if (instructionBox) instructionBox.remove();
-
-        const objectURL = URL.createObjectURL(file);
-
-        // userPhoto'nun klasik bir Image nesnesi olduğundan emin olalım
-        userPhoto = new Image();
-        userPhoto.crossOrigin = "Anonymous";
-
-        userPhoto.onload = () => {
-          console.log("userPhoto başarıyla yüklendi, düzenleme başlıyor.");
-          startCanvasEditing();
-          URL.revokeObjectURL(objectURL);
-        };
-        userPhoto.onerror = () => {
-          URL.revokeObjectURL(objectURL);
-          alert("Sorry, there was an error loading this image.");
-        }
-        userPhoto.src = objectURL;
-
-      } else {
-        console.log('❌ Kullanıcı Magic Photo seçmekten vazgeçti.');
-      }
-      e.target.value = '';
-    });
-  }
   // Butona bağlanma (değişiklik yok)
   function connectToMagicPhotosButton() {
     let attempts = 0;
@@ -1962,7 +1963,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Başlat
   window.addEventListener('load', connectToMagicPhotosButton);
-  initializeMagicPhotoInput(); // <<< BU SATIRI EKLEYİN
 })();
 // --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
 

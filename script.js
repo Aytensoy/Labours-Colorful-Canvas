@@ -1436,14 +1436,26 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   function start() {
     createMainModal();
+    // Dinleyicileri aktive et
+    window.addEventListener('scroll', positionMagicInputOverFace);
+    window.addEventListener('resize', positionMagicInputOverFace);
   }
 
   function closeAllModals() {
     document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
-  }
 
+    // Dinleyicileri kaldır
+    window.removeEventListener('scroll', positionMagicInputOverFace);
+    window.removeEventListener('resize', positionMagicInputOverFace);
+
+    // Görünmez input'u da gizle
+    const magicInput = document.getElementById('magicPhotoInput');
+    if (magicInput) {
+      magicInput.style.display = 'none';
+    }
+  }
   // Bu fonksiyonlarda bir değişiklik yok, aynı kalabilir
   function createMainModal() {
     closeAllModals();
@@ -1495,7 +1507,8 @@ document.addEventListener('DOMContentLoaded', function () {
       drawFaceAreaIndicator(ctx);
 
       // DOSYA YÜKLEMEYİ BAŞLATMAK YERİNE, TIKLAMA DİNLEYİCİSİNİ AKTİVE ET
-      activateFaceAreaClick();
+      positionMagicInputOverFace();
+
       showFaceClickInstruction();
     };
     templateImage.onerror = () => alert(`Template could not be loaded: ${templateFile}`);
@@ -1528,67 +1541,50 @@ document.addEventListener('DOMContentLoaded', function () {
     ctx.fill();
     ctx.restore();
   }
-  // Yüz alanına tıklama dinleyicisini ayarlar
-  function activateFaceAreaClick() {
+  // YENİ VE NİHAİ FONKSİYON: Görünmez Input'u Yüz Alanının Üzerine Konumlandırır
+  // YENİ VE DAHA GÜVENİLİR KONUMLANDIRMA FONKSİYONU
+  function positionMagicInputOverFace() {
+    if (!currentTemplate) return;
     const canvas = document.getElementById('coloringCanvas');
-    // Önceki dinleyicileri temizle
-    canvas.removeEventListener('click', handleFaceAreaClick);
-    // Yeni dinleyiciyi ekle
-    canvas.addEventListener('click', handleFaceAreaClick);
-  }
+    const magicInput = document.getElementById('magicPhotoInput');
 
+    // Canvas'ın, GÖRÜNEN EKRANA GÖRE konumunu ve boyutunu al
+    const rect = canvas.getBoundingClientRect();
 
-  // =======================================================
-  // YÜZ ALANI TIKLAMA FONKSİYONU (NİHAİ VE HATASIZ VERSİYON)
-  // =======================================================
-  function handleFaceAreaClick(event) {
-    if (!currentTemplate || isEditingPhoto) return;
-
-    const canvas = document.getElementById('coloringCanvas');
-    const coords = getEventCoordinates(event);
     const faceArea = currentTemplate.faceArea;
+    // Canvas'ın gerçek boyutu ile ekrandaki görünen boyutu arasındaki oranı hesapla
+    const canvasScaleX = rect.width / canvas.width;
+    const canvasScaleY = rect.height / canvas.height;
 
-    // GEREKLİ TÜM DEĞİŞKENLERİ BURADA TANIMLIYORUZ
-    const scaleX = canvas.width / 800;
-    const scaleY = canvas.height / 600;
-    const centerX = faceArea.x * scaleX;
-    const centerY = faceArea.y * scaleY;
-    const radiusX = (faceArea.width / 2) * scaleX;
-    const radiusY = (faceArea.height / 2) * scaleY;
+    // Yüz alanının, canvas'ın sol üst köşesine göre olan konumunu hesapla (ekran pikselleri cinsinden)
+    const faceX_inCanvas = faceArea.x * canvasScaleX;
+    const faceY_inCanvas = faceArea.y * canvasScaleY;
 
-    // HATA VEREN "distanceX" VE "distanceY" DEĞİŞKENLERİ ARTIK BURADA
-    const distanceX = coords.x - centerX;
-    const distanceY = coords.y - centerY;
+    // Yüz alanının, TÜM SAYFAYA GÖRE olan nihai konumunu hesapla
+    // (Canvas'ın konumu + Sayfanın kaydırma miktarı + Yüzün canvas içindeki konumu)
+    const finalX = rect.left + window.scrollX;
+    const finalY = rect.top + window.scrollY;
 
-    // Elips denklemi
-    if ((distanceX * distanceX) / (radiusX * radiusX) + (distanceY * distanceY) / (radiusY * radiusY) <= 1) {
-      console.log('✅ Yüz alanı tıklandı! Input hazırlanıyor...');
+    const centerX = finalX + faceX_inCanvas;
+    const centerY = finalY + faceY_inCanvas;
+    const width = faceArea.width * canvasScaleX;
+    const height = faceArea.height * canvasScaleY;
 
-      const magicInput = document.getElementById('magicPhotoInput');
-
-      // Input'a taze bir olay dinleyicisi ata
-      magicInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          document.getElementById('coloringCanvas').removeEventListener('click', handleFaceAreaClick);
-          const instructionBox = document.getElementById('faceClickInstruction');
-          if (instructionBox) instructionBox.remove();
-
-          const objectURL = URL.createObjectURL(file);
-          userPhoto = new Image();
-          userPhoto.crossOrigin = "Anonymous";
-          userPhoto.onload = () => {
-            startCanvasEditing();
-            URL.revokeObjectURL(objectURL);
-          };
-          userPhoto.src = objectURL;
-        }
-        e.target.value = '';
-      };
-
-      magicInput.click();
-    }
+    // Input'u bu nihai ve doğru konuma yerleştir
+    magicInput.style.display = 'block';
+    magicInput.style.position = 'absolute';
+    magicInput.style.left = `${centerX - width / 2}px`;
+    magicInput.style.top = `${centerY - height / 2}px`;
+    magicInput.style.width = `${width}px`;
+    magicInput.style.height = `${height}px`;
+    magicInput.style.opacity = '0';
+    magicInput.style.cursor = 'pointer';
+    magicInput.style.zIndex = '100';
   }
+
+
+
+
   // Kullanıcıya talimat gösteren bir kutucuk oluşturur
   function showFaceClickInstruction() {
     // Varsa eskisini kaldır
@@ -1726,8 +1722,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof saveDrawingState === 'function') {
       saveDrawingState();
     }
+    window.removeEventListener('scroll', positionMagicInputOverFace);
+    window.removeEventListener('resize', positionMagicInputOverFace);
 
-    console.log('✅ Fotoğraf düzenleme tamamlandı ve kaydedildi.');
+    console.log('✅ Photo editing completed');
     showSuccessMessage();
   }
 
@@ -1745,7 +1743,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
 
-    console.log('❌ Fotoğraf düzenleme iptal edildi.');
+    window.removeEventListener('scroll', positionMagicInputOverFace);
+    window.removeEventListener('resize', positionMagicInputOverFace);
+
+    console.log('❌ Photo editing cancelled');
   }
 
   // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM SONU ---
@@ -1938,6 +1939,36 @@ document.addEventListener('DOMContentLoaded', function () {
   // =======================================================
 
   // Butona bağlanma (değişiklik yok)
+  // YENİ EKLENEN, KAYIP FONKSİYON
+  function initializeMagicPhotoInput() {
+    const magicInput = document.getElementById('magicPhotoInput');
+    if (!magicInput) return;
+
+    magicInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Fotoğraf seçildiğinde, input'u hemen gizle
+        magicInput.style.display = 'none';
+
+        const instructionBox = document.getElementById('faceClickInstruction');
+        if (instructionBox) instructionBox.remove();
+
+        const objectURL = URL.createObjectURL(file);
+        userPhoto = new Image();
+        userPhoto.crossOrigin = "Anonymous";
+        userPhoto.onload = () => {
+          startCanvasEditing();
+          URL.revokeObjectURL(objectURL);
+        };
+        userPhoto.onerror = () => {
+          URL.revokeObjectURL(objectURL);
+          alert("Sorry, there was an error loading this image.");
+        }
+        userPhoto.src = objectURL;
+      }
+      e.target.value = '';
+    });
+  }
   function connectToMagicPhotosButton() {
     let attempts = 0;
     const maxAttempts = 10;
@@ -1962,7 +1993,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Başlat
-  window.addEventListener('load', connectToMagicPhotosButton);
+  window.addEventListener('load', () => {
+    connectToMagicPhotosButton();
+    initializeMagicPhotoInput();
+  });
+
 })();
 // --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
 
