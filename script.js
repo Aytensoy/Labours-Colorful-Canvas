@@ -1435,9 +1435,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   function start() {
     createMainModal();
-    // Dinleyicileri aktive et
-    window.addEventListener('scroll', positionMagicInputOverFace);
-    window.addEventListener('resize', positionMagicInputOverFace);
+    // Dinleyicileri, sadece label konumlandırıldığında ekleyeceğiz
   }
 
   function closeAllModals() {
@@ -1445,11 +1443,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
 
-    // Dinleyicileri kaldır
-    window.removeEventListener('scroll', positionMagicInputOverFace);
-    window.removeEventListener('resize', positionMagicInputOverFace);
+    // Dinleyicileri kaldır (yeni, güvenli yöntem)
+    window.removeEventListener('scroll', positionClickableLabel);
+    window.removeEventListener('resize', positionClickableLabel);
 
-    // Görünmez input'u da gizle
     const magicInput = document.getElementById('magicPhotoInput');
     if (magicInput) {
       magicInput.style.display = 'none';
@@ -1540,49 +1537,6 @@ document.addEventListener('DOMContentLoaded', function () {
     ctx.fill();
     ctx.restore();
   }
-  // YENİ VE NİHAİ FONKSİYON: Görünmez Input'u Yüz Alanının Üzerine Konumlandırır
-  // YENİ VE DAHA GÜVENİLİR KONUMLANDIRMA FONKSİYONU
-  function positionMagicInputOverFace() {
-    if (!currentTemplate) return;
-    const canvas = document.getElementById('coloringCanvas');
-    const magicInput = document.getElementById('magicPhotoInput');
-
-    // Canvas'ın, GÖRÜNEN EKRANA GÖRE konumunu ve boyutunu al
-    const rect = canvas.getBoundingClientRect();
-
-    const faceArea = currentTemplate.faceArea;
-    // Canvas'ın gerçek boyutu ile ekrandaki görünen boyutu arasındaki oranı hesapla
-    const canvasScaleX = rect.width / canvas.width;
-    const canvasScaleY = rect.height / canvas.height;
-
-    // Yüz alanının, canvas'ın sol üst köşesine göre olan konumunu hesapla (ekran pikselleri cinsinden)
-    const faceX_inCanvas = faceArea.x * canvasScaleX;
-    const faceY_inCanvas = faceArea.y * canvasScaleY;
-
-    // Yüz alanının, TÜM SAYFAYA GÖRE olan nihai konumunu hesapla
-    // (Canvas'ın konumu + Sayfanın kaydırma miktarı + Yüzün canvas içindeki konumu)
-    const finalX = rect.left + window.scrollX;
-    const finalY = rect.top + window.scrollY;
-
-    const centerX = finalX + faceX_inCanvas;
-    const centerY = finalY + faceY_inCanvas;
-    const width = faceArea.width * canvasScaleX;
-    const height = faceArea.height * canvasScaleY;
-
-    // Input'u bu nihai ve doğru konuma yerleştir
-    magicInput.style.display = 'block';
-    magicInput.style.position = 'absolute';
-    magicInput.style.left = `${centerX - width / 2}px`;
-    magicInput.style.top = `${centerY - height / 2}px`;
-    magicInput.style.width = `${width}px`;
-    magicInput.style.height = `${height}px`;
-    magicInput.style.opacity = '0';
-    magicInput.style.cursor = 'pointer';
-    magicInput.style.zIndex = '100';
-  }
-
-
-
 
   // Kullanıcıya talimat gösteren bir kutucuk oluşturur
   function showFaceClickInstruction() {
@@ -1709,25 +1663,15 @@ document.addEventListener('DOMContentLoaded', function () {
     isEditingPhoto = false;
     const canvas = document.getElementById('coloringCanvas');
     canvas.style.cursor = 'crosshair';
-
-    // Son hali (kullanıcı fotoğrafı + şablon) tekrar çiz
-    redrawCanvas();
-
-    removeEventListeners();
+    removeEventListeners(); // Bu fonksiyon hem mouse/touch hem de scroll/resize'ı temizlemeli
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
-
-    // Sonucu ana uygulamanın geçmişine kaydet
     if (typeof saveDrawingState === 'function') {
       saveDrawingState();
     }
-    window.removeEventListener('scroll', positionMagicInputOverFace);
-    window.removeEventListener('resize', positionMagicInputOverFace);
-
     console.log('✅ Photo editing completed');
     showSuccessMessage();
   }
-
   function cancelEditing() {
     isEditingPhoto = false;
     const canvas = document.getElementById('coloringCanvas');
@@ -1741,9 +1685,6 @@ document.addEventListener('DOMContentLoaded', function () {
     removeEventListeners();
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
-
-    window.removeEventListener('scroll', positionMagicInputOverFace);
-    window.removeEventListener('resize', positionMagicInputOverFace);
 
     console.log('❌ Photo editing cancelled');
   }
@@ -1787,6 +1728,9 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.removeEventListener('touchstart', handleEditMouseDown);
     canvas.removeEventListener('touchmove', handleEditMouseMove);
     canvas.removeEventListener('touchend', handleEditMouseUp);
+    // YENİ EKLENEN KISIM: Scroll ve Resize olaylarını da buradan kaldır
+    window.removeEventListener('scroll', positionClickableLabel);
+    window.removeEventListener('resize', positionClickableLabel);
   }
   function handlePinchStart(e) {
     if (e.touches.length === 2) {
@@ -1937,37 +1881,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // (FileReader yerine createObjectURL kullanır)
   // =======================================================
 
-  // Butona bağlanma (değişiklik yok)
-  // YENİ EKLENEN, KAYIP FONKSİYON
-  // NİHAİ initializeMagicPhotoInput (createImageBitmap ile)
-  function initializeMagicPhotoInput() {
-    const magicInput = document.getElementById('magicPhotoInput');
-    if (!magicInput) return;
-
-    magicInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
-        console.log('✅ Magic Photo selected. Loading via createImageBitmap...');
-
-        magicInput.style.display = 'none';
-        const instructionBox = document.getElementById('faceClickInstruction');
-        if (instructionBox) instructionBox.remove();
-
-        createImageBitmap(file)
-          .then(imageBitmap => {
-            // Bu yeni imageBitmap'i global userPhoto'ya atayalım
-            userPhoto = imageBitmap;
-            startCanvasEditing();
-          })
-          .catch(e => {
-            console.error("createImageBitmap failed for Magic Photos:", e);
-            alert("Sorry, there was an error processing your image.");
-          });
-
-      }
-      e.target.value = '';
-    });
-  }
   function connectToMagicPhotosButton() {
     let attempts = 0;
     const maxAttempts = 10;
@@ -1996,7 +1909,91 @@ document.addEventListener('DOMContentLoaded', function () {
     connectToMagicPhotosButton();
     initializeMagicPhotoInput();
   });
+  // =======================================================
+  // NİHAİ MAGIC PHOTOS SİSTEMİ (LABEL TEKNİĞİ)
+  // =======================================================
 
+  // 1. Tıklanabilir Label'ı Yüz Alanının Üzerine Konumlandırır
+  function positionClickableLabel() {
+    if (!currentTemplate || isEditingPhoto) {
+      // Eğer label'ı konumlandırmıyorsak, dinleyicileri kaldır
+      window.removeEventListener('scroll', positionClickableLabel);
+      window.removeEventListener('resize', positionClickableLabel);
+      return;
+    }
+
+    const canvas = document.getElementById('coloringCanvas');
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    const rect = canvas.getBoundingClientRect();
+    const faceArea = currentTemplate.faceArea;
+    const scaleX = rect.width / canvas.width;
+    const scaleY = rect.height / canvas.height;
+
+    const centerX = rect.left + window.scrollX + faceArea.x * scaleX;
+    const centerY = rect.top + window.scrollY + faceArea.y * scaleY;
+    const width = faceArea.width * scaleX;
+    const height = faceArea.height * scaleY;
+
+    clickableLabel.style.display = 'block';
+    clickableLabel.style.left = `${centerX - width / 2}px`;
+    clickableLabel.style.top = `${centerY - height / 2}px`;
+    clickableLabel.style.width = `${width}px`;
+    clickableLabel.style.height = `${height}px`;
+
+    // --- YENİ EKLENEN KISIM ---
+    // Önce eski dinleyicileri temizle (garanti olsun diye)
+    window.removeEventListener('scroll', positionClickableLabel);
+    window.removeEventListener('resize', positionClickableLabel);
+    // Yeni dinleyicileri ekle
+    window.addEventListener('scroll', positionClickableLabel);
+    window.addEventListener('resize', positionClickableLabel);
+  }
+
+  // 2. Şablon Yüklendiğinde Label'ı Konumlandırır
+  function loadTemplateToCanvas(templateKey) {
+    currentTemplate = TEMPLATES_CONFIG[templateKey];
+    const templateFile = selectedStyle === 'colored' ? currentTemplate.colored : currentTemplate.outline;
+
+    templateImage.onload = () => {
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+
+      drawFaceAreaIndicator(ctx);
+      positionClickableLabel(); // Yeni fonksiyonu çağır
+      showFaceClickInstruction();
+    };
+    templateImage.src = `template-images/${templateFile}`;
+  }
+
+  // 3. Dosya Seçildiğinde Ne Olacağını Yönetir
+  function initializeMagicPhotoInput() {
+    const magicInput = document.getElementById('magicPhotoInput');
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    if (!magicInput || !clickableLabel) return;
+
+    magicInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Fotoğraf seçildiğinde, tıklanabilir alanı ve talimatları gizle
+        clickableLabel.style.display = 'none';
+        const instructionBox = document.getElementById('faceClickInstruction');
+        if (instructionBox) instructionBox.remove();
+
+        // createObjectURL ile dosyayı işle (en uyumlu yöntem)
+        const objectURL = URL.createObjectURL(file);
+        userPhoto = new Image();
+        userPhoto.crossOrigin = "Anonymous";
+        userPhoto.onload = () => {
+          startCanvasEditing();
+          URL.revokeObjectURL(objectURL);
+        };
+        userPhoto.src = objectURL;
+      }
+      e.target.value = '';
+    });
+  }
 })();
 // --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
 

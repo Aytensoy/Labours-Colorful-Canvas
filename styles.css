@@ -2544,3 +2544,14 @@ canvas.editing-mode:active {
     background-color: #FF0000;
     /* YouTube'un ikonik kırmızı rengi */
 }
+
+.magic-photos-clickable-area {
+    display: none;
+    /* Başlangıçta gizli */
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100;
+    /* Test için hafif sarı bir arka plan ekleyebiliriz: */
+    /* background-color: rgba(255, 215, 0, 0.5); */
+}
