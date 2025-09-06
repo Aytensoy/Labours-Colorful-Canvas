@@ -238,38 +238,34 @@ function resizeCanvas() {
 // YENİ VE EN STABİL handleFileUpload
 // YENİ VE EN STABİL handleFileUpload (createImageBitmap ile)
 // YENİ VE DAHA UYUMLU handleFileUpload
+// NİHAİ handleFileUpload (createImageBitmap ile)
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file || !file.type.startsWith('image/')) return;
 
-  const objectURL = URL.createObjectURL(file);
-  const img = new Image(); // Burada yeni bir Image nesnesi oluşturuyoruz
-  img.crossOrigin = "Anonymous";
+  // FileReader ve new Image() yerine createImageBitmap kullan
+  createImageBitmap(file)
+    .then(imageBitmap => {
+      console.log("🖼️ User image loaded via createImageBitmap. Drawing to canvas.");
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
 
-  img.onload = function () {
-    console.log("🖼️ User image uploaded via createObjectURL.");
-    const canvas = document.getElementById('coloringCanvas');
-    const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const scale = Math.min(canvas.width / imageBitmap.width, canvas.height / imageBitmap.height);
+      const x = (canvas.width / 2) - (imageBitmap.width / 2) * scale;
+      const y = (canvas.height / 2) - (imageBitmap.height / 2) * scale;
+      ctx.drawImage(imageBitmap, x, y, imageBitmap.width * scale, imageBitmap.height * scale);
 
-    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-    const x = (canvas.width / 2) - (img.width / 2) * scale;
-    const y = (canvas.height / 2) - (img.height / 2) * scale;
-    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-
-    drawingHistory = [];
-    currentStep = -1;
-    saveDrawingState();
-
-    URL.revokeObjectURL(objectURL);
-  };
-  img.onerror = function () {
-    URL.revokeObjectURL(objectURL);
-    alert("Sorry, there was an error loading your image.");
-  };
-  img.src = objectURL;
+      drawingHistory = [];
+      currentStep = -1;
+      saveDrawingState();
+    })
+    .catch(e => {
+      console.error("createImageBitmap failed for Upload Image:", e);
+      alert("Sorry, there was an error processing your image.");
+    });
 }
 // =======================================================
 // YENİ VE ÇÖKME KARŞITI FLOOD FILL FONKSİYONU
@@ -1291,25 +1287,28 @@ document.addEventListener('DOMContentLoaded', function () {
    * Belirtilen bir boyama sayfasını yükler, canvas'ı temizler ve çizer.
    * @param {string} pageName - Yüklenecek resmin adı (uzantısız).
    */
-  // ... (DOMContentLoaded içinde)
-
-  // Newsletter popup'ını yönet
+  // =============================================
+  // NİHAİ NEWSLETTER POPUP YÖNETİMİ
+  // =============================================
+  const modal = document.getElementById('newsletterModal');
   const triggerBtn = document.getElementById('newsletterTrigger');
-  const sibFormContainer = document.querySelector('.sib-form-container');
+  const closeBtn = document.getElementById('newsletterCloseBtn');
 
-  if (triggerBtn && sibFormContainer) {
-    triggerBtn.addEventListener('click', () => {
-      sibFormContainer.style.display = 'flex';
-    });
+  if (modal && triggerBtn && closeBtn) {
+    const openModal = () => modal.style.display = 'flex';
+    const closeModal = () => modal.style.display = 'none';
 
-    // Dışarı tıklayınca kapat
-    sibFormContainer.addEventListener('click', (event) => {
-      if (event.target === sibFormContainer) {
-        sibFormContainer.style.display = 'none';
+    triggerBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    window.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
       }
     });
+  } else {
+    console.warn('Newsletter için gerekli elementlerden biri (modal, trigger, veya close button) bulunamadı.');
   }
-  // ... (DOMContentLoaded bloğunun içindeyiz)
 
   // 6. BAŞLANGIÇ AYARLARI
   loadAndDrawImage('image.png');
@@ -1940,6 +1939,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Butona bağlanma (değişiklik yok)
   // YENİ EKLENEN, KAYIP FONKSİYON
+  // NİHAİ initializeMagicPhotoInput (createImageBitmap ile)
   function initializeMagicPhotoInput() {
     const magicInput = document.getElementById('magicPhotoInput');
     if (!magicInput) return;
@@ -1947,24 +1947,23 @@ document.addEventListener('DOMContentLoaded', function () {
     magicInput.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
-        // Fotoğraf seçildiğinde, input'u hemen gizle
-        magicInput.style.display = 'none';
+        console.log('✅ Magic Photo selected. Loading via createImageBitmap...');
 
+        magicInput.style.display = 'none';
         const instructionBox = document.getElementById('faceClickInstruction');
         if (instructionBox) instructionBox.remove();
 
-        const objectURL = URL.createObjectURL(file);
-        userPhoto = new Image();
-        userPhoto.crossOrigin = "Anonymous";
-        userPhoto.onload = () => {
-          startCanvasEditing();
-          URL.revokeObjectURL(objectURL);
-        };
-        userPhoto.onerror = () => {
-          URL.revokeObjectURL(objectURL);
-          alert("Sorry, there was an error loading this image.");
-        }
-        userPhoto.src = objectURL;
+        createImageBitmap(file)
+          .then(imageBitmap => {
+            // Bu yeni imageBitmap'i global userPhoto'ya atayalım
+            userPhoto = imageBitmap;
+            startCanvasEditing();
+          })
+          .catch(e => {
+            console.error("createImageBitmap failed for Magic Photos:", e);
+            alert("Sorry, there was an error processing your image.");
+          });
+
       }
       e.target.value = '';
     });
