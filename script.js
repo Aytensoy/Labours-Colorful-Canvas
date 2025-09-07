@@ -235,9 +235,7 @@ function resizeCanvas() {
   canvas.style.width = newWidth + "px";
   canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
 }
-// YENİ VE EN STABİL handleFileUpload
-// YENİ VE EN STABİL handleFileUpload (createImageBitmap ile)
-// YENİ VE DAHA UYUMLU handleFileUpload
+
 // NİHAİ handleFileUpload (createImageBitmap ile)
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -1440,12 +1438,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function closeAllModals() {
     document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
-    const instructions = document.getElementById('editingInstructions');
-    if (instructions) instructions.remove();
 
-    // Dinleyicileri kaldır (yeni, güvenli yöntem)
-    window.removeEventListener('scroll', positionClickableLabel);
-    window.removeEventListener('resize', positionClickableLabel);
+    // Artık "glowing area" talimatı olmadığı için, onu da silmeye gerek yok.
+    // Sadece Magic Photos ana penceresini kapattığımızdan emin olalım.
 
     const magicInput = document.getElementById('magicPhotoInput');
     if (magicInput) {
@@ -1453,108 +1448,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   // Bu fonksiyonlarda bir değişiklik yok, aynı kalabilir
+  // YENİ VE KAYDIRMA OLAYINI DİNLEYEN createMainModal
   function createMainModal() {
     closeAllModals();
     const modal = document.createElement('div');
     modal.className = 'magic-photos-modal-container';
     modal.innerHTML = `
-            <div class="magic-photos-modal">
-                <div class="magic-photos-content">
-                    <span class="magic-photos-close">×</span>
-                    <h2 class="magic-photos-title">✨ Magic Photos Studio ✨</h2>
-                    <p class="magic-photos-subtitle">Choose template → Upload photo → Edit on canvas</p>
-                    <div class="magic-photos-style-selector">
-                        <button id="mpColoredBtn" class="mp-style-btn active">🎨 Colored</button>
-                        <button id="mpOutlineBtn" class="mp-style-btn">✏️ Outline</button>
-                    </div>
-                    <div class="magic-photos-grid"></div>
-                </div>
-            </div>`;
+      <div class="magic-photos-modal">
+          <div class="magic-photos-content">
+              <span class="magic-photos-close">×</span>
+              <h2 class="magic-photos-title">✨ Magic Photos Studio ✨</h2>
+              <p class="magic-photos-subtitle">Choose template → Upload photo → Edit on canvas</p>
+              <div class="magic-photos-style-selector">
+                  <button id="mpColoredBtn" class="mp-style-btn active">🎨 Colored</button>
+                  <button id="mpOutlineBtn" class="mp-style-btn">✏️ Outline</button>
+              </div>
+              <div class="magic-photos-grid"></div>
+          </div>
+      </div>`;
     document.body.appendChild(modal);
     modal.querySelector('.magic-photos-close').onclick = closeAllModals;
+
     const grid = modal.querySelector('.magic-photos-grid');
     const coloredBtn = modal.querySelector('#mpColoredBtn');
     const outlineBtn = modal.querySelector('#mpOutlineBtn');
+
+    // --- YENİ EKLENEN KISIM ---
+    // Eğer kullanıcı şablon listesini kaydırırsa, alttaki talimat kutusunu kaldır.
+    grid.addEventListener('scroll', () => {
+      const instructionBox = document.getElementById('faceClickInstruction');
+      if (instructionBox) {
+        instructionBox.remove();
+      }
+    });
+    // --- YENİ KISIM BİTTİ ---
+
     function setStyle(style) {
       selectedStyle = style;
       coloredBtn.classList.toggle('active', style === 'colored');
       outlineBtn.classList.toggle('active', style === 'outline');
       loadTemplates(grid);
     }
+
     coloredBtn.onclick = () => setStyle('colored');
     outlineBtn.onclick = () => setStyle('outline');
     setStyle('colored');
   }
-  // YENİ VE İNTERAKTİF loadTemplateToCanvas FONKSİYONU
-  function loadTemplateToCanvas(templateKey) {
-    const template = TEMPLATES_CONFIG[templateKey];
-    currentTemplate = template;
-    const templateFile = selectedStyle === 'colored' ? template.colored : template.outline;
-    console.log('📋 Şablon canvasa yüklendi, yüz alanına tıklama bekleniyor...');
-
-    templateImage.crossOrigin = 'anonymous';
-    templateImage.onload = () => {
-      const canvas = document.getElementById('coloringCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
-
-      // KULLANICIYA GÖRSEL İPUCU VER
-      drawFaceAreaIndicator(ctx);
-
-      // DOSYA YÜKLEMEYİ BAŞLATMAK YERİNE, TIKLAMA DİNLEYİCİSİNİ AKTİVE ET
-      positionMagicInputOverFace();
-
-      showFaceClickInstruction();
-    };
-    templateImage.onerror = () => alert(`Template could not be loaded: ${templateFile}`);
-    templateImage.src = `template-images/${templateFile}`;
-  }
-  // --- BURADAN KOPYALAMAYA BAŞLAYIN ---
-
-  // Canvas üzerinde yüz alanını gösteren bir ipucu çizer
-  function drawFaceAreaIndicator(ctx) {
-    if (!currentTemplate) return;
-    const canvas = ctx.canvas;
-    const faceArea = currentTemplate.faceArea;
-    const scaleX = canvas.width / 800;
-    const scaleY = canvas.height / 600;
-
-    const centerX = faceArea.x * scaleX;
-    const centerY = faceArea.y * scaleY;
-    const radiusX = (faceArea.width / 2) * scaleX;
-    const radiusY = (faceArea.height / 2) * scaleY;
-
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 215, 0, 0.9)';
-    ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([8, 8]); // Kesik çizgi stili
-
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.fill();
-    ctx.restore();
-  }
-
-  // Kullanıcıya talimat gösteren bir kutucuk oluşturur
-  function showFaceClickInstruction() {
-    // Varsa eskisini kaldır
-    const oldBox = document.getElementById('faceClickInstruction');
-    if (oldBox) oldBox.remove();
-
-    const instructionBox = document.createElement('div');
-    instructionBox.id = 'faceClickInstruction';
-    instructionBox.innerHTML = `
-        <div class="instruction-icon">🖼️</div>
-        <div><strong>Click the glowing area</strong> to add your photo!</div>
-    `;
-    document.body.appendChild(instructionBox);
-  }
-
-  // --- KOPYALAMAYI BURADA BİTİRİN ---
-  // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM BAŞLANGICI ---
 
   // YENİ VE PRO SİSTEMİNE UYGUN loadTemplates FONKSİYONU
   function loadTemplates(grid) {
@@ -1728,9 +1667,6 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.removeEventListener('touchstart', handleEditMouseDown);
     canvas.removeEventListener('touchmove', handleEditMouseMove);
     canvas.removeEventListener('touchend', handleEditMouseUp);
-    // YENİ EKLENEN KISIM: Scroll ve Resize olaylarını da buradan kaldır
-    window.removeEventListener('scroll', positionClickableLabel);
-    window.removeEventListener('resize', positionClickableLabel);
   }
   function handlePinchStart(e) {
     if (e.touches.length === 2) {
@@ -1912,58 +1848,103 @@ document.addEventListener('DOMContentLoaded', function () {
   // =======================================================
   // NİHAİ MAGIC PHOTOS SİSTEMİ (LABEL TEKNİĞİ)
   // =======================================================
+  // =======================================================
+  // YENİDEN AKTİVE EDİLEN TIKLAMA FONKSİYONLARI
+  // =======================================================
 
   // 1. Tıklanabilir Label'ı Yüz Alanının Üzerine Konumlandırır
   function positionClickableLabel() {
-    if (!currentTemplate || isEditingPhoto) {
-      // Eğer label'ı konumlandırmıyorsak, dinleyicileri kaldır
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    if (!currentTemplate || isEditingPhoto || !clickableLabel) {
+      if (clickableLabel) clickableLabel.style.display = 'none';
       window.removeEventListener('scroll', positionClickableLabel);
       window.removeEventListener('resize', positionClickableLabel);
       return;
     }
 
     const canvas = document.getElementById('coloringCanvas');
-    const clickableLabel = document.getElementById('magicPhotoLabel');
     const rect = canvas.getBoundingClientRect();
     const faceArea = currentTemplate.faceArea;
     const scaleX = rect.width / canvas.width;
     const scaleY = rect.height / canvas.height;
 
-    const centerX = rect.left + window.scrollX + faceArea.x * scaleX;
-    const centerY = rect.top + window.scrollY + faceArea.y * scaleY;
-    const width = faceArea.width * scaleX;
-    const height = faceArea.height * scaleY;
+    const displayWidth = faceArea.width * scaleX;
+    const displayHeight = faceArea.height * scaleY;
+    const displayTop = rect.top + (faceArea.y * scaleY) - (displayHeight / 2);
+    const displayLeft = rect.left + (faceArea.x * scaleX) - (displayWidth / 2);
 
     clickableLabel.style.display = 'block';
-    clickableLabel.style.left = `${centerX - width / 2}px`;
-    clickableLabel.style.top = `${centerY - height / 2}px`;
-    clickableLabel.style.width = `${width}px`;
-    clickableLabel.style.height = `${height}px`;
+    clickableLabel.style.position = 'fixed';
+    clickableLabel.style.left = `${displayLeft}px`;
+    clickableLabel.style.top = `${displayTop}px`;
+    clickableLabel.style.width = `${displayWidth}px`;
+    clickableLabel.style.height = `${displayHeight}px`;
 
-    // --- YENİ EKLENEN KISIM ---
-    // Önce eski dinleyicileri temizle (garanti olsun diye)
-    window.removeEventListener('scroll', positionClickableLabel);
-    window.removeEventListener('resize', positionClickableLabel);
-    // Yeni dinleyicileri ekle
     window.addEventListener('scroll', positionClickableLabel);
     window.addEventListener('resize', positionClickableLabel);
   }
 
-  // 2. Şablon Yüklendiğinde Label'ı Konumlandırır
+  // 2. Kullanıcıya "Buraya Tıkla" Talimatını Gösterir
+  function showFaceClickInstruction() {
+    const oldBox = document.getElementById('faceClickInstruction');
+    if (oldBox) oldBox.remove();
+
+    const instructionLabel = document.createElement('label');
+    instructionLabel.id = 'faceClickInstruction';
+    instructionLabel.htmlFor = 'magicPhotoInput';
+
+    instructionLabel.innerHTML = `
+      <div class="instruction-icon">🖼️</div>
+      <div><strong>Click the glowing area</strong> to add your photo!</div>
+  `;
+    document.body.appendChild(instructionLabel);
+  }
+
+  // 3. Dosya Seçildiğinde Çalışır
+  function initializeMagicPhotoInput() {
+    const magicInput = document.getElementById('magicPhotoInput');
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    if (!magicInput || !clickableLabel) return;
+
+    magicInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        clickableLabel.style.display = 'none';
+        const instructionBox = document.getElementById('faceClickInstruction');
+        if (instructionBox) instructionBox.remove();
+
+        const objectURL = URL.createObjectURL(file);
+        userPhoto = new Image();
+        userPhoto.crossOrigin = "Anonymous";
+        userPhoto.onload = () => {
+          startCanvasEditing();
+          URL.revokeObjectURL(objectURL);
+        };
+        userPhoto.src = objectURL;
+      }
+      e.target.value = '';
+    });
+  }
+
+  // YENİ VE NİHAİ loadTemplateToCanvas (Tıklama Bekleyen)
   function loadTemplateToCanvas(templateKey) {
     currentTemplate = TEMPLATES_CONFIG[templateKey];
     const templateFile = selectedStyle === 'colored' ? currentTemplate.colored : currentTemplate.outline;
+    console.log('📋 Şablon canvasa yüklendi, yüz alanına tıklama bekleniyor...');
 
+    // ...
     templateImage.onload = () => {
       const canvas = document.getElementById('coloringCanvas');
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
 
-      drawFaceAreaIndicator(ctx);
-      positionClickableLabel(); // Yeni fonksiyonu çağır
-      showFaceClickInstruction();
+      // Şablon yüklendikten HEMEN SONRA, doğrudan dosya seçme penceresini aç.
+      // Artık "glowing area" göstermeye veya tıklama beklemeye gerek yok.
+      document.getElementById('magicPhotoInput').click();
     };
+    // ...
+    templateImage.onerror = () => alert(`Template could not be loaded: ${templateFile}`);
     templateImage.src = `template-images/${templateFile}`;
   }
 

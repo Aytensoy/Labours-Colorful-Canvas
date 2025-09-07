@@ -2547,11 +2547,16 @@ canvas.editing-mode:active {
 
 .magic-photos-clickable-area {
     display: none;
-    /* Başlangıçta gizli */
-    position: absolute;
+    position: fixed;
+    /* 'fixed' olduğundan emin olalım */
     border-radius: 50%;
     cursor: pointer;
-    z-index: 100;
-    /* Test için hafif sarı bir arka plan ekleyebiliriz: */
-    /* background-color: rgba(255, 215, 0, 0.5); */
+    z-index: 1000;
+    /* Z-index'i artıralım */
+
+    /* HATA AYIKLAMA İÇİN GEÇİCİ OLARAK GÖRÜNÜR YAP */
+    background-color: rgba(255, 215, 0, 0.5) !important;
+    /* Parlak sarı, yarı şeffaf */
+    border: 2px solid red !important;
+    /* Kırmızı çerçeve */
 }
