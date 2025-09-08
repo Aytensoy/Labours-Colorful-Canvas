@@ -1112,6 +1112,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. SON POZİSYONU GÜNCELLE
     [lastX, lastY] = [x, y];
   }
+
   function stopDrawing(e) {
     if (isDrawing && isDragging) {
       clearTimeout(window.saveStateTimeout);
@@ -1332,179 +1333,87 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('✅ Tüm oyun sistemleri başarıyla başlatıldı.');
 });
 // <--- Ana DOMContentLoaded bloğu burada biter
+
 // =========================================================================
-// ONARILMIŞ VE İYİLEŞTİRİLMİŞ MAGIC PHOTOS SİSTEMİ (v2)
-// Lütfen script_updated.js dosyanızdaki eski enhancedMagicPhotosSystemFixed
-// bloğunu bu yeni kodla tamamen değiştirin.
+// GÜNCELLEME: NİHAİ MAGIC PHOTOS SİSTEMİ (v4 - Tüm Hatalar Giderildi)
+// Önceki Magic Photos kod bloğunu tamamen bununla değiştirin.
 // =========================================================================
 
-(function enhancedMagicPhotosSystemFixed() {
-  console.log('🎨 Gelişmiş Canvas-tabanlı Magic Photos sistemi başlatılıyor...');
+(function enhancedMagicPhotosSystemFinal() {
+  console.log('🎨 Magic Photos sistemi (v4 Final) başlatılıyor...');
 
-  // Gerekli değişkenler
+  // --- Global Değişkenler ---
   let isEditingPhoto = false;
-  let userPhoto = new Image(); // Kullanıcının yüklediği fotoğrafı saklar
-  let templateImage = new Image(); // Seçilen şablonu saklar
-
-  let editingSettings = {
-    x: 0,
-    y: 0,
-    scale: 1,
-    isDragging: false,
-    startX: 0,
-    startY: 0
-  };
-
-  let initialPinchDistance = null; // <-- DEĞİŞKENİ BURAYA EKLEYİN
-
+  let userPhoto = new Image();
+  let templateImage = new Image();
   let currentTemplate = null;
   let selectedStyle = 'colored';
-
-  // --- YENİ VE KOORDİNATLARI DÜZELTİLMİŞ TEMPLATES_CONFIG (BUNUNLA DEĞİŞTİRİN) ---
+  let editingSettings = { x: 0, y: 0, scale: 1, isDragging: false, startX: 0, startY: 0, width: 0, height: 0 };
+  let initialPinchDistance = null;
 
   const TEMPLATES_CONFIG = {
-    princess: {
-      name: "Magical Princess", icon: "👑",
-      colored: "princess_colored_transparent.png", outline: "princess_outline_transparent.png",
-      colored_thumb: "princess_colored_thumb.png", outline_thumb: "princess_outline_thumb.png",
-      faceArea: { x: 400, y: 310, width: 200, height: 240 },
-    },
-    birthday: {
-      name: "Birthday Star", icon: "🎂",
-      colored: "birthday_colored_transparent.png", outline: "birthday_outline_transparent.png",
-      colored_thumb: "birthday_colored_thumb.png", outline_thumb: "birthday_outline_thumb.png",
-      faceArea: { x: 400, y: 300, width: 200, height: 240 },
-    },
-    firefighter: {
-      name: "Hero Firefighter", icon: "🚒",
-      colored: "firefighter_colored_transparent.png", outline: "firefighter_outline_transparent.png",
-      colored_thumb: "firefighter_colored_thumb.png", outline_thumb: "firefighter_outline_thumb.png",
-      faceArea: { x: 550, y: 240, width: 170, height: 210 },
-    },
-    pirate: {
-      name: "Adventure Pirate", icon: "🏴‍☠️",
-      colored: "pirate_colored_transparent.png", outline: "pirate_outline_transparent.png",
-      colored_thumb: "pirate_colored_thumb.png", outline_thumb: "pirate_outline_thumb.png",
-      faceArea: { x: 400, y: 280, width: 180, height: 220 },
-    },
-    safari: {
-      name: "Safari Explorer", icon: "🦁",
-      colored: "safari_colored_transparent.png", outline: "safari_outline_transparent.png",
-      colored_thumb: "safari_colored_thumb.png", outline_thumb: "safari_outline_thumb.png",
-      faceArea: { x: 400, y: 290, width: 180, height: 220 }, isPremium: true
-    },
-    space: {
-      name: "Space Explorer", icon: "🚀",
-      colored: "space_colored_transparent.png", outline: "space_outline_transparent.png",
-      colored_thumb: "space_colored_thumb.png", outline_thumb: "space_outline_thumb.png",
-      faceArea: { x: 400, y: 300, width: 200, height: 240 }, isPremium: true
-    },
-    superhero: {
-      name: "Super Hero", icon: "🦸‍♂️",
-      colored: "superhero_colored_transparent.png", outline: "superhero_outline_transparent.png",
-      colored_thumb: "superhero_colored_thumb.png", outline_thumb: "superhero_outline_thumb.png",
-      faceArea: { x: 400, y: 240, width: 160, height: 200 }, isPremium: true
-    },
-    underwater: {
-      name: "Underwater World", icon: "🐠",
-      colored: "underwater_colored_transparent.png", outline: "underwater_outline_transparent.png",
-      colored_thumb: "underwater_colored_thumb.png", outline_thumb: "underwater_outline_thumb.png",
-      faceArea: { x: 400, y: 290, width: 200, height: 240 }, isPremium: true
-    },
-    // --- DÜZELTİLMİŞ ŞABLONLAR ---
-    unicorn: {
-      name: "Unicorn Magic", icon: "🦄",
-      colored: "unicorn_colored_transparent.png", outline: "unicorn_outline_transparent.png",
-      colored_thumb: "unicorn_colored_thumb.png", outline_thumb: "unicorn_outline_thumb.png",
-      faceArea: { x: 360, y: 250, width: 200, height: 220 }, isPremium: true // Yüksekliği ayarlandı
-    },
-    unicorn_girl: {
-      name: "Unicorn Girl", icon: "👧🦄",
-      colored: "unicorn_girl_colored_transparent.png", outline: "unicorn_girl_outline_transparent.png",
-      colored_thumb: "unicorn_girl_colored_thumb.png", outline_thumb: "unicorn_girl_outline_thumb.png",
-      faceArea: { x: 450, y: 215, width: 190, height: 220 }, isPremium: true // Yüksekliği ve boyutu ayarlandı
-    },
-    wizzard: {
-      name: "Wizard Academy", icon: "🧙‍♂️",
-      colored: "wizzard_colored_transparent.png", outline: "wizzard_outline_transparent.png",
-      colored_thumb: "wizzard_colored_thumb.png", outline_thumb: "wizzard_outline_thumb.png",
-      faceArea: { x: 445, y: 295, width: 160, height: 200 }, isPremium: true // Konumu ve boyutu ayarlandı
-    }
+    princess: { name: "Magical Princess", icon: "👑", colored: "princess_colored_transparent.png", outline: "princess_outline_transparent.png", colored_thumb: "princess_colored_thumb.png", outline_thumb: "princess_outline_thumb.png", faceArea: { x: 400, y: 310, width: 200, height: 240 } },
+    birthday: { name: "Birthday Star", icon: "🎂", colored: "birthday_colored_transparent.png", outline: "birthday_outline_transparent.png", colored_thumb: "birthday_colored_thumb.png", outline_thumb: "birthday_outline_thumb.png", faceArea: { x: 400, y: 300, width: 200, height: 240 } },
+    firefighter: { name: "Hero Firefighter", icon: "🚒", colored: "firefighter_colored_transparent.png", outline: "firefighter_outline_transparent.png", colored_thumb: "firefighter_colored_thumb.png", outline_thumb: "firefighter_outline_thumb.png", faceArea: { x: 550, y: 240, width: 170, height: 210 } },
+    pirate: { name: "Adventure Pirate", icon: "🏴‍☠️", colored: "pirate_colored_transparent.png", outline: "pirate_outline_transparent.png", colored_thumb: "pirate_colored_thumb.png", outline_thumb: "pirate_outline_thumb.png", faceArea: { x: 400, y: 280, width: 180, height: 220 } },
+    safari: { name: "Safari Explorer", icon: "🦁", colored: "safari_colored_transparent.png", outline: "safari_outline_transparent.png", colored_thumb: "safari_colored_thumb.png", outline_thumb: "safari_outline_thumb.png", faceArea: { x: 400, y: 290, width: 180, height: 220 }, isPremium: true },
+    space: { name: "Space Explorer", icon: "🚀", colored: "space_colored_transparent.png", outline: "space_outline_transparent.png", colored_thumb: "space_colored_thumb.png", outline_thumb: "space_outline_thumb.png", faceArea: { x: 400, y: 300, width: 200, height: 240 }, isPremium: true },
+    superhero: { name: "Super Hero", icon: "🦸‍♂️", colored: "superhero_colored_transparent.png", outline: "superhero_outline_transparent.png", colored_thumb: "superhero_colored_thumb.png", outline_thumb: "superhero_outline_thumb.png", faceArea: { x: 400, y: 240, width: 160, height: 200 }, isPremium: true },
+    underwater: { name: "Underwater World", icon: "🐠", colored: "underwater_colored_transparent.png", outline: "underwater_outline_transparent.png", colored_thumb: "underwater_colored_thumb.png", outline_thumb: "underwater_outline_thumb.png", faceArea: { x: 400, y: 290, width: 200, height: 240 }, isPremium: true },
+    unicorn: { name: "Unicorn Magic", icon: "🦄", colored: "unicorn_colored_transparent.png", outline: "unicorn_outline_transparent.png", colored_thumb: "unicorn_colored_thumb.png", outline_thumb: "unicorn_outline_thumb.png", faceArea: { x: 360, y: 250, width: 200, height: 220 }, isPremium: true },
+    unicorn_girl: { name: "Unicorn Girl", icon: "👧🦄", colored: "unicorn_girl_colored_transparent.png", outline: "unicorn_girl_outline_transparent.png", colored_thumb: "unicorn_girl_colored_thumb.png", outline_thumb: "unicorn_girl_outline_thumb.png", faceArea: { x: 450, y: 215, width: 190, height: 220 }, isPremium: true },
+    wizzard: { name: "Wizard Academy", icon: "🧙‍♂️", colored: "wizzard_colored_transparent.png", outline: "wizzard_outline_transparent.png", colored_thumb: "wizzard_colored_thumb.png", outline_thumb: "wizzard_outline_thumb.png", faceArea: { x: 445, y: 295, width: 160, height: 200 }, isPremium: true }
   };
-  function start() {
-    createMainModal();
-    // Dinleyicileri, sadece label konumlandırıldığında ekleyeceğiz
-  }
 
-  function closeAllModals() {
-    document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
+  // --- Ana Kontrol Fonksiyonları ---
 
-    // Artık "glowing area" talimatı olmadığı için, onu da silmeye gerek yok.
-    // Sadece Magic Photos ana penceresini kapattığımızdan emin olalım.
-
-    const magicInput = document.getElementById('magicPhotoInput');
-    if (magicInput) {
-      magicInput.style.display = 'none';
+  function openMagicPhotosStudio() {
+    // KRİTİK DÜZELTME: Eğer başka bir düzenleme modu aktifse, önce onu iptal et.
+    if (isEditingPhoto) {
+      cancelEditing();
     }
+    createMainModal();
   }
-  // =======================================================
-  // NİHAİ VE TEMİZLENMİŞ createMainModal FONKSİYONU
-  // =======================================================
-  function createMainModal() {
-    closeAllModals(); // Önce varsa eski modal'ı kapat
 
+  function closeAllMagicPhotosUI() {
+    document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
+    hideClickableAreaAndInstruction();
+  }
+
+  // --- Modal ve Şablon Yönetimi ---
+
+  function createMainModal() {
+    closeAllMagicPhotosUI();
     const modal = document.createElement('div');
     modal.className = 'magic-photos-modal-container';
     modal.innerHTML = `
-    <div class="magic-photos-modal">
-        <div class="magic-photos-content">
-            <span class="magic-photos-close">×</span>
-            <h2 class="magic-photos-title">✨ Magic Photos Studio ✨</h2>
-            <p class="magic-photos-subtitle">Choose template → Upload photo → Edit on canvas</p>
-            <div class="magic-photos-style-selector">
-                <button id="mpColoredBtn" class="mp-style-btn active">🎨 Colored</button>
-                <button id="mpOutlineBtn" class="mp-style-btn">✏️ Outline</button>
-            </div>
-            <div class="magic-photos-grid"></div>
-        </div>
-    </div>`;
-
+          <div class="magic-photos-content">
+              <span class="magic-photos-close">×</span>
+              <h2 class="magic-photos-title">✨ Magic Photos Studio ✨</h2>
+              <p class="magic-photos-subtitle">Choose a template to begin!</p>
+              <div class="magic-photos-style-selector">
+                  <button id="mpColoredBtn" class="mp-style-btn active">🎨 Colored</button>
+                  <button id="mpOutlineBtn" class="mp-style-btn">✏️ Outline</button>
+              </div>
+              <div class="magic-photos-grid"></div>
+          </div>`;
     document.body.appendChild(modal);
 
-    // --- OLAY YÖNETİMİ (TEK VE DOĞRU YER) ---
-
-    // Kapatma butonuna tıklandığında ne olacağını tanımla
-    modal.querySelector('.magic-photos-close').onclick = closeAllModals;
-
-    // Sadece bu pencere açıkken, pencere yeniden boyutlandırıldığında label'ı tekrar konumlandır
-    window.addEventListener('resize', positionClickableLabel);
-
-    // Şablon listesi kaydırıldığında, alttaki talimat kutusunu kaldır
+    modal.querySelector('.magic-photos-close').onclick = closeAllMagicPhotosUI;
     const grid = modal.querySelector('.magic-photos-grid');
-    grid.addEventListener('scroll', () => {
-      const instructionBox = document.getElementById('faceClickInstruction');
-      if (instructionBox) {
-        instructionBox.remove();
-      }
-    });
 
-    // --- STİL SEÇİMİ ---
-    const coloredBtn = modal.querySelector('#mpColoredBtn');
-    const outlineBtn = modal.querySelector('#mpOutlineBtn');
-
-    function setStyle(style) {
+    const setStyle = (style) => {
       selectedStyle = style;
-      coloredBtn.classList.toggle('active', style === 'colored');
-      outlineBtn.classList.toggle('active', style === 'outline');
+      modal.querySelector('#mpColoredBtn').classList.toggle('active', style === 'colored');
+      modal.querySelector('#mpOutlineBtn').classList.toggle('active', style === 'outline');
       loadTemplates(grid);
-    }
+    };
 
-    coloredBtn.onclick = () => setStyle('colored');
-    outlineBtn.onclick = () => setStyle('outline');
+    modal.querySelector('#mpColoredBtn').onclick = () => setStyle('colored');
+    modal.querySelector('#mpOutlineBtn').onclick = () => setStyle('outline');
     setStyle('colored');
   }
 
-  // YENİ VE PRO SİSTEMİNE UYGUN loadTemplates FONKSİYONU
   function loadTemplates(grid) {
     grid.innerHTML = '';
     const isUserPremium = localStorage.getItem('isPremium') === 'true';
@@ -1512,65 +1421,144 @@ document.addEventListener('DOMContentLoaded', function () {
     for (const key in TEMPLATES_CONFIG) {
       const template = TEMPLATES_CONFIG[key];
       const isTemplatePremium = template.isPremium === true;
-
       const card = document.createElement('div');
       card.className = 'magic-template-card';
 
       const thumbnailFile = selectedStyle === 'colored' ? template.colored_thumb : template.outline_thumb;
       let cardHTML = `
-            <div class="magic-template-image-wrapper">
-                <img src="template-images/${thumbnailFile}" class="magic-template-thumb" alt="${template.name}">
-            </div>
-            <div class="magic-template-name">${template.icon} ${template.name}</div>
-        `;
+              <div class="magic-template-image-wrapper">
+                  <img src="template-images/${thumbnailFile}" class="magic-template-thumb" alt="${template.name}">
+              </div>
+              <div class="magic-template-name">${template.icon} ${template.name}</div>`;
 
-      // Eğer şablon Pro ise VE kullanıcı Pro değilse, kartı kilitle
       if (isTemplatePremium && !isUserPremium) {
         card.classList.add('locked');
-        // Tıklayınca Pro modal'ı aç
-        card.onclick = () => {
-          if (typeof showPremiumModal === 'function') {
-            showPremiumModal();
-          } else {
-            alert('This is a premium feature!');
-          }
-        };
-        // Kartın üzerine Pro rozeti ekle
+        card.onclick = () => { typeof showPremiumModal === 'function' && showPremiumModal(); };
         cardHTML += `<div class="magic-pro-badge">⭐ Pro</div>`;
       } else {
-        // Aksi halde, normal tıklama işlevini ata
         card.onclick = () => {
-          currentTemplate = { key, ...template };
           loadTemplateToCanvas(key);
-          closeAllModals();
+          closeAllMagicPhotosUI();
         };
       }
-
       card.innerHTML = cardHTML;
       grid.appendChild(card);
     }
   }
 
+  function loadTemplateToCanvas(templateKey) {
+    // KRİTİK DÜZELTME: Yeni bir şablon yüklemeden önce mevcut düzenlemeyi iptal et.
+    if (isEditingPhoto) {
+      cancelEditing();
+    }
+
+    currentTemplate = TEMPLATES_CONFIG[templateKey];
+    const templateFile = selectedStyle === 'colored' ? currentTemplate.colored : currentTemplate.outline;
+
+    templateImage = new Image();
+    templateImage.crossOrigin = "Anonymous";
+    templateImage.onload = () => {
+      const canvas = document.getElementById('coloringCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+      // Sadece ana şablonu çizdikten sonra geçmişi kaydet.
+      if (typeof saveDrawingState === 'function') {
+        drawingHistory = []; // Geçmişi temizle
+        currentStep = -1;
+        saveDrawingState();
+      }
+      showClickableAreaAndInstruction();
+    };
+    templateImage.src = `template-images/${templateFile}`;
+  }
+
+  // --- Tıklama Alanı Yönetimi ---
+
+  function showClickableAreaAndInstruction() {
+    positionClickableLabel();
+    const oldInstruction = document.getElementById('faceClickInstruction');
+    if (oldInstruction) oldInstruction.remove();
+
+    const instructionDiv = document.createElement('div');
+    instructionDiv.id = 'faceClickInstruction';
+    instructionDiv.innerHTML = `<div class="instruction-icon">🖼️</div><div><strong>Click the glowing area</strong> to add your photo!</div>`;
+    document.body.appendChild(instructionDiv);
+  }
+
+  function hideClickableAreaAndInstruction() {
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    if (clickableLabel) clickableLabel.style.display = 'none';
+
+    const instruction = document.getElementById('faceClickInstruction');
+    if (instruction) instruction.remove();
+  }
+
+  function positionClickableLabel() {
+    const clickableLabel = document.getElementById('magicPhotoLabel');
+    const canvas = document.getElementById('coloringCanvas');
+
+    if (!currentTemplate || isEditingPhoto || !clickableLabel || !canvas) {
+      if (clickableLabel) clickableLabel.style.display = 'none';
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const faceArea = currentTemplate.faceArea;
+    const scaleX = rect.width / canvas.width;
+    const scaleY = rect.height / canvas.height;
+
+    const displayWidth = faceArea.width * scaleX;
+    const displayHeight = faceArea.height * scaleY;
+    const displayCenterX = rect.left + faceArea.x * scaleX;
+    const displayCenterY = rect.top + faceArea.y * scaleY;
+    const displayLeft = displayCenterX - (displayWidth / 2);
+    const displayTop = displayCenterY - (displayHeight / 2);
+
+    clickableLabel.style.cssText = `
+          display: block;
+          position: fixed;
+          left: ${displayLeft}px;
+          top: ${displayTop}px;
+          width: ${displayWidth}px;
+          height: ${displayHeight}px;
+      `;
+  }
+
+  // --- Fotoğraf Yükleme ve Düzenleme ---
+
+  function handlePhotoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      hideClickableAreaAndInstruction();
+      const objectURL = URL.createObjectURL(file);
+      userPhoto = new Image();
+      userPhoto.crossOrigin = "Anonymous";
+      userPhoto.onload = () => {
+        startCanvasEditing();
+        URL.revokeObjectURL(objectURL);
+      };
+      userPhoto.src = objectURL;
+    }
+    event.target.value = '';
+  }
 
   function startCanvasEditing() {
-    const canvas = document.getElementById('coloringCanvas');
     isEditingPhoto = true;
-
-    // Fotoğrafı şablondaki yüz alanına ortala ve başlangıç boyutunu ayarla
+    const canvas = document.getElementById('coloringCanvas');
     const faceArea = currentTemplate.faceArea;
-    const canvasScaleX = canvas.width / 800; // Canvas'ın orijinal genişliğe oranı
-    const canvasScaleY = canvas.height / 600; // Canvas'ın orijinal yüksekliğe oranı
+    const canvasScaleX = canvas.width / 800;
+    const canvasScaleY = canvas.height / 600;
 
-    // Fotoğrafın en/boy oranını koruyarak sığdır
     const photoAspectRatio = userPhoto.width / userPhoto.height;
     const faceAreaAspectRatio = faceArea.width / faceArea.height;
     let photoWidth, photoHeight;
 
     if (photoAspectRatio > faceAreaAspectRatio) {
-      photoWidth = faceArea.width * 1.2 * canvasScaleX; // Biraz daha büyük başla
+      photoWidth = faceArea.width * 1.5 * canvasScaleX; // Biraz daha büyük başlasın
       photoHeight = photoWidth / photoAspectRatio;
     } else {
-      photoHeight = faceArea.height * 1.2 * canvasScaleY; // Biraz daha büyük başla
+      photoHeight = faceArea.height * 1.5 * canvasScaleY;
       photoWidth = photoHeight * photoAspectRatio;
     }
 
@@ -1579,232 +1567,181 @@ document.addEventListener('DOMContentLoaded', function () {
       y: faceArea.y * canvasScaleY,
       width: photoWidth,
       height: photoHeight,
-      scale: 1, // Ölçekleme artık genişlik/yükseklik ile yönetiliyor
       isDragging: false
     };
 
-    setupEventListeners();
+    setupEditingEventListeners();
     redrawCanvas();
-    showInstructions();
+    showEditingInstructions();
   }
 
   function redrawCanvas() {
-    if (!userPhoto.src || !templateImage.src) return;
-
+    if (!isEditingPhoto || !userPhoto.src || !templateImage.src) return;
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Canvas'ı temizle
+    // Önce temiz bir şablon çiz (bu, sürükleme sırasında "iz" kalmasını önler)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
 
-    // 1. ÖNCE KULLANICI FOTOĞRAFINI ÇİZ
-    // Fotoğrafı merkezinden tutup sürüklemek için x ve y'yi ayarla
+    // Şimdi kullanıcı fotoğrafını çiz
     const drawX = editingSettings.x - (editingSettings.width / 2);
     const drawY = editingSettings.y - (editingSettings.height / 2);
     ctx.drawImage(userPhoto, drawX, drawY, editingSettings.width, editingSettings.height);
 
-    // 2. SONRA ŞABLONU ÜZERİNE ÇİZ (Şeffaf alanlar fotoğrafı gösterecek)
+    // Son olarak şablonu tekrar üzerine çizerek yüz alanını maskele
     ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
   }
 
+  // YENİ VE EN ÖNEMLİ FONKSİYON (Layout Shift Sorunu Düzeltildi)
   function finishEditing() {
+    console.log("✅ Düzenleme bitiriliyor ve fotoğraf tuvale işleniyor...");
     isEditingPhoto = false;
+
     const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // 1. Canvas'ın o anki boyutlarını piksel olarak alıp sabitliyoruz.
+    // Bu, "layout shift" (kayma/küçülme) sorununu önler.
+    const rect = canvas.getBoundingClientRect();
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
+    // Fotoğrafı tuvale kalıcı olarak "işle" (bake).
+    redrawCanvas();
+
+    // Artık düzenleme bittiği için, olay dinleyicilerini ve UI elemanlarını kaldır.
     canvas.style.cursor = 'crosshair';
-    removeEventListeners(); // Bu fonksiyon hem mouse/touch hem de scroll/resize'ı temizlemeli
+    removeEditingEventListeners();
+
+    // 2. Butonları GÜVENLE kaldırıyoruz. Canvas artık bu işlemden etkilenmeyecek.
     const instructions = document.getElementById('editingInstructions');
-    if (instructions) instructions.remove();
+    if (instructions) {
+      instructions.remove();
+    }
+
+    // Bu son hali geçmişe kaydet.
     if (typeof saveDrawingState === 'function') {
       saveDrawingState();
     }
-    console.log('✅ Photo editing completed');
+
+    // Diğer şablonlara bulaşmaması için template ve userPhoto'yu sıfırla
+    currentTemplate = null;
+    userPhoto = new Image();
+
     showSuccessMessage();
+
+    // 3. Kısa bir gecikmeyle (tarayıcıya yerleşmesi için zaman tanır)
+    // inline stilleri temizleyip canvas'ı tekrar esnek (responsive) hale getiriyoruz.
+    setTimeout(() => {
+      canvas.style.width = '';
+      canvas.style.height = '';
+    }, 50); // 50 milisaniye yeterlidir.
   }
+
+
   function cancelEditing() {
+    console.log("❌ Düzenleme iptal edildi.");
     isEditingPhoto = false;
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');
+
+    // 1. "Layout shift" sorununu önlemek için canvas'ın boyutlarını sabitliyoruz.
+    const rect = canvas.getBoundingClientRect();
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
     canvas.style.cursor = 'crosshair';
 
-    // Sadece orijinal şablonu tekrar çiz
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+    // Düzenleme başlamadan önceki temiz durumu geri yükle.
+    if (drawingHistory.length > 0) {
+      ctx.putImageData(drawingHistory[0], 0, 0);
+      drawingHistory.splice(1);
+      currentStep = 0;
+    }
 
-    removeEventListeners();
+    removeEditingEventListeners();
+
+    // 2. Butonları GÜVENLE kaldırıyoruz.
     const instructions = document.getElementById('editingInstructions');
     if (instructions) instructions.remove();
 
-    console.log('❌ Photo editing cancelled');
+    // Değişkenleri sıfırla.
+    currentTemplate = null;
+    userPhoto = new Image();
+
+    // 3. Kısa bir gecikmeyle canvas'ı tekrar esnek (responsive) hale getiriyoruz.
+    setTimeout(() => {
+      canvas.style.width = '';
+      canvas.style.height = '';
+    }, 50);
   }
 
-  // --- DEĞİŞTİRİLEN VE İYİLEŞTİRİLEN BÖLÜM SONU ---
+  // --- Düzenleme Modu Olay Yöneticileri ---
 
-
-
-  function setupEventListeners() {
+  function setupEditingEventListeners() {
     const canvas = document.getElementById('coloringCanvas');
     canvas.style.cursor = 'move';
-
-    // Olay dinleyicilerini eklemeden önce temizle
-    removeEventListeners();
-
-    // Masaüstü için Fare Olayları
     canvas.addEventListener('mousedown', handleEditMouseDown);
     canvas.addEventListener('mousemove', handleEditMouseMove);
-    canvas.addEventListener('mouseup', handleEditMouseUp);
-    canvas.addEventListener('mouseleave', handleEditMouseUp);
+    window.addEventListener('mouseup', handleEditMouseUp);
     canvas.addEventListener('wheel', handleEditWheel, { passive: false });
-
-    // Mobil Cihazlar için Dokunmatik Olaylar (passive: false ile)
-    canvas.addEventListener('touchstart', handleEditMouseDown, { passive: false });
-    canvas.addEventListener('touchmove', handleEditMouseMove, { passive: false });
-    canvas.addEventListener('touchend', handleEditMouseUp, { passive: false });
-
-    // YENİ: İki Parmakla Yakınlaştırma için
-    canvas.addEventListener('touchstart', handlePinchStart, { passive: false });
-    canvas.addEventListener('touchmove', handlePinchMove, { passive: false });
-    canvas.addEventListener('touchend', handlePinchEnd, { passive: false });
+    canvas.addEventListener('touchstart', handleEditTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleEditTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleEditTouchEnd, { passive: false });
   }
 
-  function removeEventListeners() {
+  function removeEditingEventListeners() {
     const canvas = document.getElementById('coloringCanvas');
     canvas.removeEventListener('mousedown', handleEditMouseDown);
     canvas.removeEventListener('mousemove', handleEditMouseMove);
-    canvas.removeEventListener('mouseup', handleEditMouseUp);
-    canvas.removeEventListener('mouseleave', handleEditMouseUp);
+    window.removeEventListener('mouseup', handleEditMouseUp);
     canvas.removeEventListener('wheel', handleEditWheel);
-    canvas.removeEventListener('touchstart', handleEditMouseDown);
-    canvas.removeEventListener('touchmove', handleEditMouseMove);
-    canvas.removeEventListener('touchend', handleEditMouseUp);
-  }
-  function handlePinchStart(e) {
-    if (e.touches.length === 2) {
-      // İki parmak dokunduğunda, aralarındaki başlangıç mesafesini kaydet
-      initialPinchDistance = Math.hypot(
-        e.touches[0].pageX - e.touches[1].pageX,
-        e.touches[0].pageY - e.touches[1].pageY
-      );
-    }
+    canvas.removeEventListener('touchstart', handleEditTouchStart);
+    canvas.removeEventListener('touchmove', handleEditTouchMove);
+    canvas.removeEventListener('touchend', handleEditTouchEnd);
   }
 
-  function handlePinchMove(e) {
-    if (e.touches.length === 2 && initialPinchDistance) {
-      e.preventDefault(); // Sayfanın yakınlaşmasını engelle
-
-      // Parmaklar hareket ettikçe yeni mesafeyi hesapla
-      const newPinchDistance = Math.hypot(
-        e.touches[0].pageX - e.touches[1].pageX,
-        e.touches[0].pageY - e.touches[1].pageY
-      );
-
-      // Mesafedeki değişime göre ölçeği ayarla
-      const scaleFactor = newPinchDistance / initialPinchDistance;
-
-      editingSettings.width *= scaleFactor;
-      editingSettings.height *= scaleFactor;
-
-      // Bir sonraki hareket için mesafeyi güncelle
-      initialPinchDistance = newPinchDistance;
-
-      redrawCanvas();
-    }
-  }
-
-  function handlePinchEnd(e) {
-    // Parmaklardan biri kalktığında, pinch işlemini sıfırla
-    initialPinchDistance = null;
-  }
-  function getEventCoordinates(e) {
+  function getEventCoordinates(e, touchIndex = 0) {
     const canvas = document.getElementById('coloringCanvas');
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
-
-    // Önce dokunmatik olayları kontrol et
-    if (e.touches && e.touches.length > 0) {
-      // Dokunma devam ederken
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else if (e.changedTouches && e.changedTouches.length > 0) {
-      // Dokunma bittiğinde
-      clientX = e.changedTouches[0].clientX;
-      clientY = e.changedTouches[0].clientY;
+    if (e.touches && e.touches[touchIndex]) {
+      clientX = e.touches[touchIndex].clientX;
+      clientY = e.touches[touchIndex].clientY;
     } else {
-      // Fare olayı
       clientX = e.clientX;
       clientY = e.clientY;
     }
-
     return {
       x: (clientX - rect.left) * (canvas.width / rect.width),
       y: (clientY - rect.top) * (canvas.height / rect.height)
     };
   }
 
+  function handleEditMouseDown(e) { e.preventDefault(); editingSettings.isDragging = true; const coords = getEventCoordinates(e); editingSettings.startX = coords.x; editingSettings.startY = coords.y; }
+  function handleEditMouseUp() { editingSettings.isDragging = false; initialPinchDistance = null; }
+  function handleEditMouseMove(e) { if (!editingSettings.isDragging) return; e.preventDefault(); const coords = getEventCoordinates(e); const deltaX = coords.x - editingSettings.startX; const deltaY = coords.y - editingSettings.startY; editingSettings.x += deltaX; editingSettings.y += deltaY; editingSettings.startX = coords.x; editingSettings.startY = coords.y; redrawCanvas(); }
+  function handleEditWheel(e) { e.preventDefault(); const scaleFactor = e.deltaY > 0 ? 0.95 : 1.05; editingSettings.width *= scaleFactor; editingSettings.height *= scaleFactor; redrawCanvas(); }
 
-  function handleEditMouseDown(e) {
-    e.preventDefault();
-    if (!isEditingPhoto) return;
-    const coords = getEventCoordinates(e);
-    editingSettings.isDragging = true;
-    editingSettings.startX = coords.x;
-    editingSettings.startY = coords.y;
-  }
+  function handleEditTouchStart(e) { e.preventDefault(); if (e.touches.length === 1) { handleEditMouseDown(e); } else if (e.touches.length === 2) { editingSettings.isDragging = false; initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }
+  function handleEditTouchEnd(e) { e.preventDefault(); handleEditMouseUp(); }
+  function handleEditTouchMove(e) { e.preventDefault(); if (e.touches.length === 1 && editingSettings.isDragging) { handleEditMouseMove(e); } else if (e.touches.length === 2 && initialPinchDistance) { const newPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const scaleFactor = newPinchDistance / initialPinchDistance; editingSettings.width *= scaleFactor; editingSettings.height *= scaleFactor; initialPinchDistance = newPinchDistance; redrawCanvas(); } }
 
-  function handleEditMouseMove(e) {
-    // Sürükleme sırasında sayfanın kaymasını engelle
-    e.preventDefault();
+  // --- Yardımcı UI Fonksiyonları ---
 
-    if (!isEditingPhoto || !editingSettings.isDragging) return;
-
-    const coords = getEventCoordinates(e);
-    const deltaX = coords.x - editingSettings.startX;
-    const deltaY = coords.y - editingSettings.startY;
-
-    editingSettings.x += deltaX;
-    editingSettings.y += deltaY;
-
-    editingSettings.startX = coords.x;
-    editingSettings.startY = coords.y;
-
-    redrawCanvas();
-  }
-
-  function handleEditMouseUp(e) {
-    if (!isEditingPhoto) return;
-    editingSettings.isDragging = false;
-  }
-
-  function handleEditWheel(e) {
-    if (!isEditingPhoto) return;
-    e.preventDefault();
-    const scaleFactor = e.deltaY > 0 ? 0.95 : 1.05;
-
-    // Oranı koruyarak boyutlandır
-    editingSettings.width *= scaleFactor;
-    editingSettings.height *= scaleFactor;
-
-    redrawCanvas();
-  }
-
-  // Yardımcı fonksiyonlar (değişiklik yok)
-  function showInstructions() {
-    const existingInstructions = document.getElementById('editingInstructions');
-    if (existingInstructions) existingInstructions.remove();
+  function showEditingInstructions() {
+    const oldInstructions = document.getElementById('editingInstructions');
+    if (oldInstructions) oldInstructions.remove();
 
     const instructions = document.createElement('div');
     instructions.id = 'editingInstructions';
-    instructions.style.cssText = `
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8);
-            color: white; padding: 15px; border-radius: 10px; z-index: 10001; text-align: center; border: 2px solid #FFD700;
-        `;
+    // Yeni CSS sınıfını kullanıyoruz
+    instructions.className = 'mp-editor-actions';
     instructions.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 10px;">✨ PHOTO EDITING MODE ✨</div>
-            <div>🖱️ <strong>Drag</strong> to move photo | 🔄 <strong>Scroll</strong> to resize</div>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
-                <button id="finishEditingBtn" style="background: #4CAF50; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold;">✅ Finish</button>
-                <button id="cancelEditingBtn" style="background: #f44336; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;">❌ Cancel</button>
-            </div>
-        `;
+          <button id="finishEditingBtn" class="mp-confirm-btn">✅ Finish</button>
+          <button id="cancelEditingBtn" class="mp-cancel-btn">❌ Cancel</button>
+      `;
     document.body.appendChild(instructions);
     document.getElementById('finishEditingBtn').onclick = finishEditing;
     document.getElementById('cancelEditingBtn').onclick = cancelEditing;
@@ -1812,186 +1749,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function showSuccessMessage() {
     const msg = document.createElement('div');
-    msg.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #4CAF50;
-            color: white; padding: 20px 35px; border-radius: 12px; font-size: 1.2em; font-weight: bold;
-            z-index: 10002; border: 2px solid white;
-        `;
+    msg.className = 'magic-success-message';
     msg.textContent = '🎉 Magic Photo Applied Successfully!';
     document.body.appendChild(msg);
     setTimeout(() => msg.remove(), 2500);
   }
-  // =======================================================
-  // MAGIC PHOTOS - MOBİL UYUMLULUK İÇİN NİHAİ DÜZELTME
-  // (FileReader yerine createObjectURL kullanır)
-  // =======================================================
 
-  function connectToMagicPhotosButton() {
-    let attempts = 0;
-    const maxAttempts = 10;
-    const intervalId = setInterval(() => {
-      attempts++;
-      const button = document.getElementById('magicPhotoBtn');
-      if (button) {
-        console.log('✅ Magic Photos butonu bulundu ve düzenleyici bağlandı.');
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
-        newButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          start();
-        });
-        clearInterval(intervalId);
-      } else if (attempts >= maxAttempts) {
-        console.error('❌ Magic Photos butonu bulunamadı.');
-        clearInterval(intervalId);
-      }
-    }, 500);
-  }
-
-  // Başlat
-  window.addEventListener('load', () => {
-    connectToMagicPhotosButton();
-    initializeMagicPhotoInput();
-  });
-  // =======================================================
-  // NİHAİ MAGIC PHOTOS SİSTEMİ (LABEL TEKNİĞİ)
-  // =======================================================
-  // =======================================================
-  // YENİDEN AKTİVE EDİLEN TIKLAMA FONKSİYONLARI
-  // =======================================================
-
-  // =======================================================
-  // NİHAİ VE BASİTLEŞTİRİLMİŞ positionClickableLabel
-  // =======================================================
-  function positionClickableLabel() {
-    const clickableLabel = document.getElementById('magicPhotoLabel');
-
-    // Eğer bir şablon seçilmemişse, düzenleme modundaysak veya label bulunamıyorsa,
-    // label'ı gizle ve işlemi durdur.
-    if (!currentTemplate || isEditingPhoto || !clickableLabel) {
-      if (clickableLabel) {
-        clickableLabel.style.display = 'none';
-      }
-      return;
+  // --- Başlatma ---
+  function initialize() {
+    const button = document.getElementById('magicPhotoBtn');
+    if (button) {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        openMagicPhotosStudio();
+      });
     }
 
-    // Gerekli elementleri ve bilgileri al
-    const canvas = document.getElementById('coloringCanvas');
-    const rect = canvas.getBoundingClientRect(); // Canvas'ın ekrandaki güncel konumu
-    const faceArea = currentTemplate.faceArea;
-
-    // Oranları hesapla
-    const scaleX = rect.width / canvas.width;
-    const scaleY = rect.height / canvas.height;
-
-    // Label'ın ekrandaki nihai boyutlarını ve konumunu hesapla
-    const displayWidth = faceArea.width * scaleX;
-    const displayHeight = faceArea.height * scaleY;
-    const displayTop = rect.top + (faceArea.y * scaleY) - (displayHeight / 2);
-    const displayLeft = rect.left + (faceArea.x * scaleX) - (displayWidth / 2);
-
-    // Label'ı görünür yap ve doğru konuma yerleştir
-    clickableLabel.style.display = 'block';
-    clickableLabel.style.position = 'fixed';
-    clickableLabel.style.left = `${displayLeft}px`;
-    clickableLabel.style.top = `${displayTop}px`;
-    clickableLabel.style.width = `${displayWidth}px`;
-    clickableLabel.style.height = `${displayHeight}px`;
-  }
-
-  // Kullanıcıya Talimatı Gösteren Fonksiyon
-  // YENİ VE DOĞRU showFaceClickInstruction (Artık tıklanabilir DEĞİL)
-  function showFaceClickInstruction() {
-    const oldBox = document.getElementById('faceClickInstruction');
-    if (oldBox) oldBox.remove();
-
-    // Tıklanamaz bir DIV elementi oluşturuyoruz
-    const instructionDiv = document.createElement('div');
-    instructionDiv.id = 'faceClickInstruction';
-    // Artık 'htmlFor' özelliği yok
-
-    instructionDiv.innerHTML = `
-      <div class="instruction-icon">🖼️</div>
-      <div><strong>Click the glowing area</strong> to add your photo!</div>
-  `;
-    document.body.appendChild(instructionDiv);
-  }
-
-  // 3. Dosya Seçildiğinde Çalışır
-  function initializeMagicPhotoInput() {
     const magicInput = document.getElementById('magicPhotoInput');
-    const clickableLabel = document.getElementById('magicPhotoLabel');
-    if (!magicInput || !clickableLabel) return;
+    if (magicInput) {
+      magicInput.addEventListener('change', handlePhotoUpload);
+    }
 
-    magicInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
-        clickableLabel.style.display = 'none';
-        const instructionBox = document.getElementById('faceClickInstruction');
-        if (instructionBox) instructionBox.remove();
-
-        const objectURL = URL.createObjectURL(file);
-        userPhoto = new Image();
-        userPhoto.crossOrigin = "Anonymous";
-        userPhoto.onload = () => {
-          startCanvasEditing();
-          URL.revokeObjectURL(objectURL);
-        };
-        userPhoto.src = objectURL;
-      }
-      e.target.value = '';
-    });
+    window.addEventListener('resize', positionClickableLabel);
+    window.addEventListener('scroll', positionClickableLabel, true);
   }
 
-  // NİHAİ loadTemplateToCanvas (Tıklama Bekleyen)
-  function loadTemplateToCanvas(templateKey) {
-    currentTemplate = TEMPLATES_CONFIG[templateKey];
-    const templateFile = selectedStyle === 'colored' ? currentTemplate.colored : currentTemplate.outline;
-    console.log('📋 Şablon canvasa yüklendi, yüz alanına tıklama bekleniyor...');
+  window.addEventListener('DOMContentLoaded', initialize);
 
-    templateImage.onload = () => {
-      const canvas = document.getElementById('coloringCanvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
-
-      // Bu iki fonksiyon, tıklama sistemini başlatır.
-      positionClickableLabel();
-      showFaceClickInstruction();
-    };
-    templateImage.onerror = () => alert(`Template could not be loaded: ${templateFile}`);
-    templateImage.src = `template-images/${templateFile}`;
-  }
-
-  // 3. Dosya Seçildiğinde Ne Olacağını Yönetir
-  function initializeMagicPhotoInput() {
-    const magicInput = document.getElementById('magicPhotoInput');
-    const clickableLabel = document.getElementById('magicPhotoLabel');
-    if (!magicInput || !clickableLabel) return;
-
-    magicInput.addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (file) {
-        // Fotoğraf seçildiğinde, tıklanabilir alanı ve talimatları gizle
-        clickableLabel.style.display = 'none';
-        const instructionBox = document.getElementById('faceClickInstruction');
-        if (instructionBox) instructionBox.remove();
-
-        // createObjectURL ile dosyayı işle (en uyumlu yöntem)
-        const objectURL = URL.createObjectURL(file);
-        userPhoto = new Image();
-        userPhoto.crossOrigin = "Anonymous";
-        userPhoto.onload = () => {
-          startCanvasEditing();
-          URL.revokeObjectURL(objectURL);
-        };
-        userPhoto.src = objectURL;
-      }
-      e.target.value = '';
-    });
-  }
 })();
+
 // --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
 
 function setupGiftingSystem() {

@@ -2565,11 +2565,12 @@ canvas.editing-mode:active {
    MAGIC PHOTOS MOBİL UI VE DÜZENLEME BUTONLARI İÇİN DÜZELTMELER
    ================================================== */
 
-/* Düzenleme Modu Butonlarını Saran Kapsayıcı (Animasyon Kontrolü için Güncellendi) */
+/* Düzenleme Modu Butonlarını Saran Kapsayıcı */
 .mp-editor-actions {
     position: fixed;
     bottom: 20px;
     left: 50%;
+    transform: translateX(-50%);
     z-index: 10001;
     background: rgba(44, 62, 80, 0.9);
     padding: 10px;
@@ -2578,21 +2579,19 @@ canvas.editing-mode:active {
     gap: 10px;
     border: 2px solid #FFD700;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-
-    /* Başlangıç durumu: Gizli ve ekranın altında */
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, 100px);
-    /* Başlangıçta aşağıda */
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    animation: slideInUp 0.3s ease-out;
 }
 
-/* JavaScript ile eklenecek 'görünür' durumu */
-.mp-editor-actions.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, 0);
-    /* Normal pozisyonuna kaydır */
+@keyframes slideInUp {
+    from {
+        transform: translate(-50%, 100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
 }
 
 
