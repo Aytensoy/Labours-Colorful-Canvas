@@ -1610,35 +1610,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function finishEditing() {
-    console.log("✅ Düzenleme bitiriliyor ve fotoğraf tuvale son kez işleniyor...");
+    console.log("✅ Düzenleme bitiriliyor...");
 
-    // Zıplamayı önle.
-    const bodyHeight = document.body.clientHeight;
-    document.body.style.height = `${bodyHeight}px`;
-    document.body.style.overflow = 'hidden';
+    redrawCanvas(); // Son pozu tuvale işle
 
-    // Fotoğrafı tuvale kalıcı olarak işle.
-    redrawCanvas();
-
-    // Son hali geçmişe kaydet.
     if (typeof saveDrawingState === 'function') {
       saveDrawingState();
     }
 
-    // Başarı mesajını göster.
     showSuccessMessage();
 
     // Her şeyi temizle ve durumu sıfırla.
     _resetMagicPhotosState();
   }
-
   function cancelEditing() {
-    console.log("❌ Düzenleme iptal edildi ve durum temizleniyor.");
-
-    // Zıplamayı önle.
-    const bodyHeight = document.body.clientHeight;
-    document.body.style.height = `${bodyHeight}px`;
-    document.body.style.overflow = 'hidden';
+    console.log("❌ Düzenleme iptal edildi.");
 
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');

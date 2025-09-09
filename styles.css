@@ -1,20 +1,27 @@
-body,
+/* NİHAİ DÜZELTME v7: Zıplamayı ve mobil sorunları önleyen yapı */
 html {
+    height: 100%;
+    overflow: hidden;
+    /* Sadece html'de, body'de değil */
+}
+
+body {
+    height: 100%;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
     font-family: 'Poppins', sans-serif;
     background-image: url('Background1.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow-y: auto;
+    /* Dikey kaydırmaya izin ver */
+    overflow-x: hidden;
+    /* Yatay kaydırmayı engelle */
 }
 
+/* NİHAİ DÜZELTME v7: Zıplamayı önlemek için dikey ortalamayı kaldır */
 .container {
-    /* Bu satırı ekle */
     background-color: rgba(252, 252, 252, 0.586);
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
@@ -22,12 +29,8 @@ html {
     text-align: center;
     width: 95%;
     max-width: 1200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    overflow-y: auto;
-    max-height: 95vh;
+    margin: 20px auto;
+    /* Dikey ortalama yerine üstten boşluk */
 }
 
 h1 {
