@@ -1382,42 +1382,50 @@ link[rel="apple-touch-icon"] {
     }
 }
 
-/* ==========================================
-   İSİM YAZMA SİSTEMİ - CSS STİLLERİ
-   styles.css dosyasının sonuna ekleyin
-   ========================================== */
-
-/* Name Tools Container */
+/* NİHAİ DÜZELTME v8: Write Message / Signature Bloğu (Mobil Uyumlu) */
 .name-tools {
     display: flex;
-    gap: 5px;
-    margin: 5px;
-    padding: 5px;
-    background: rgba(255, 182, 193, 0.2);
-    border-radius: 10px;
-    border: 2px solid #FF69B4;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 10px auto 15px auto;
+    padding: 8px;
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(255, 182, 193, 0.3));
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+    max-width: 90%;
+    /* Ekran küçüldüğünde taşmasını engeller */
 }
 
-/* Name Tool Buttons */
-.name-btn {
-    background: linear-gradient(45deg, #FF69B4, #FFB6C1) !important;
+.name-tools button {
+    background: linear-gradient(45deg, #FF69B4, #FF1493);
     color: white !important;
+    border: none;
+    padding: 8px 16px;
+    /* Mobilde daha kompakt */
+    border-radius: 30px;
     font-weight: bold;
+    font-size: 14px;
+    /* Mobilde daha okunaklı */
+    cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+    /* Yazıların alt satıra kaymasını engeller */
 }
 
-.name-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
-    background: linear-gradient(45deg, #FFB6C1, #FF69B4) !important;
+.name-tools button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 20, 147, 0.5);
 }
 
-.name-btn.active {
-    background: linear-gradient(45deg, #FF1493, #FF69B4) !important;
-    transform: scale(1.1);
+.name-tools button.active {
+    transform: scale(1.05) translateY(-2px);
     box-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
 }
+
 
 /* Name cursor for canvas */
 canvas.text-mode {
@@ -2548,21 +2556,6 @@ canvas.editing-mode:active {
     /* YouTube'un ikonik kırmızı rengi */
 }
 
-.magic-photos-clickable-area {
-    display: none;
-    position: fixed;
-    /* 'fixed' olduğundan emin olalım */
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 1000;
-    /* Z-index'i artıralım */
-
-    /* HATA AYIKLAMA İÇİN GEÇİCİ OLARAK GÖRÜNÜR YAP */
-    background-color: rgba(255, 215, 0, 0.5) !important;
-    /* Parlak sarı, yarı şeffaf */
-    border: 2px solid red !important;
-    /* Kırmızı çerçeve */
-}
 
 /* ==================================================
    MAGIC PHOTOS MOBİL UI VE DÜZENLEME BUTONLARI İÇİN DÜZELTMELER

@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="preload" href="icons/splash-logo.png" as="image" type="image/png">
-
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
@@ -24,6 +24,7 @@
                 });
         }
     </script>
+
 
     <script>
         // Splash screen'i gizle ve ana içeriği göster
@@ -96,7 +97,7 @@
                 <button id="nameBtn" onclick="activateNameWriting()">
                     💌 Write Message
                 </button>
-                <button id="quickNameBtn" onclick="quickAddName()">
+                <button id="quickNameBtn" onclick="activateSignatureMode()">
                     ✍️ Signature
                 </button>
             </div>
@@ -594,6 +595,9 @@
                     <input id="EMAIL" name="EMAIL" class="brevo-input" type="email" placeholder="your@email.com"
                         required autocomplete="email">
 
+                    <!-- Cloudflare Turnstile Widget -->
+                    <div class="cf-turnstile" data-sitekey="0x4AAAAAAB0VZe67kYxh88x-"></div>
+
                     <button class="brevo-button" type="submit">SUBSCRIBE</button>
                 </form>
             </div>
@@ -601,10 +605,6 @@
 
         <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
 
-        <!-- MAGIC PHOTOS İÇİN GİZLİ DOSYA YÜKLEME INPUT'U -->
-        <input type="file" id="magicPhotoInput" accept="image/*" style="display: none;">
-        <!-- TIKLANABİLİR ALAN (LABEL) -->
-        <label for="magicPhotoInput" id="magicPhotoLabel" class="magic-photos-clickable-area"></label>
         <script src="script.js"></script>
 </body>
 
