@@ -1286,29 +1286,29 @@ document.addEventListener('DOMContentLoaded', function () {
    * Belirtilen bir boyama sayfasını yükler, canvas'ı temizler ve çizer.
    * @param {string} pageName - Yüklenecek resmin adı (uzantısız).
    */
-  // =============================================
-  // NİHAİ NEWSLETTER POPUP YÖNETİMİ
-  // =============================================
-  const modal = document.getElementById('newsletterModal');
-  const triggerBtn = document.getElementById('newsletterTrigger');
-  const closeBtn = document.getElementById('newsletterCloseBtn');
+  // --- NİHAİ NEWSLETTER MODAL KONTROLÜ ---
+  const newsletterModal = document.getElementById('newsletterModal');
+  const newsletterTrigger = document.getElementById('newsletterTrigger');
+  const newsletterCloseBtn = document.getElementById('newsletterCloseBtn');
 
-  if (modal && triggerBtn && closeBtn) {
-    const openModal = () => modal.style.display = 'flex';
-    const closeModal = () => modal.style.display = 'none';
+  if (newsletterModal && newsletterTrigger && newsletterCloseBtn) {
+    const openModal = () => {
+      newsletterModal.style.display = 'flex';
+    };
+    const closeModal = () => {
+      newsletterModal.style.display = 'none';
+    };
 
-    triggerBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
+    newsletterTrigger.addEventListener('click', openModal);
+    newsletterCloseBtn.addEventListener('click', closeModal);
 
+    // Dışarı tıklayınca kapatma
     window.addEventListener('click', (event) => {
-      if (event.target === modal) {
+      if (event.target === newsletterModal) {
         closeModal();
       }
     });
-  } else {
-    console.warn('Newsletter için gerekli elementlerden biri (modal, trigger, veya close button) bulunamadı.');
   }
-
   // 6. BAŞLANGIÇ AYARLARI
   loadAndDrawImage('image.png');
   setTool('pencil');

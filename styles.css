@@ -956,7 +956,9 @@ link[rel="apple-touch-icon"] {
 }
 
 
-/* Newsletter Modal */
+/* ============================================= */
+/* NİHAİ NEWSLETTER MODAL STİLLERİ             */
+/* ============================================= */
 .newsletter-modal {
     position: fixed;
     top: 0;
@@ -964,63 +966,82 @@ link[rel="apple-touch-icon"] {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
-    display: flex;
+    display: none;
+    /* Başlangıçta gizli */
     justify-content: center;
     align-items: center;
     z-index: 10000;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
 }
 
 .newsletter-content {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    padding: 40px;
+    padding: 30px 25px;
     border-radius: 20px;
     max-width: 400px;
     width: 90%;
     text-align: center;
     box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
     position: relative;
+    animation: popIn 0.3s ease;
 }
 
 .newsletter-close {
     position: absolute;
-    top: 15px;
-    right: 20px;
+    top: 10px;
+    right: 15px;
     font-size: 30px;
     cursor: pointer;
     color: white;
+    transition: transform 0.2s;
 }
 
 .newsletter-close:hover {
-    color: #FFD700;
+    transform: scale(1.2);
 }
 
-.newsletter-content h2 {
-    color: #FFD700;
-    margin-bottom: 15px;
-    font-size: 1.8em;
-}
-
-.newsletter-content p {
-    margin-bottom: 20px;
-    font-size: 1.1em;
-}
-
-#newsletterForm {
+/* ============================================= */
+/* BREVO FORMUNUN TEMİZ STİLLERİ              */
+/* ============================================= */
+.newsletter-content .brevo-form {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-#newsletterForm input {
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1em;
-    outline: none;
+.newsletter-content .brevo-form h2 {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #FFD700;
+    margin: 0;
 }
 
-#subscribeBtn {
+.newsletter-content .brevo-form p {
+    color: white;
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+}
+
+.newsletter-content .brevo-input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    outline: none;
+    text-align: center;
+    box-sizing: border-box;
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.newsletter-content .brevo-input:focus {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.newsletter-content .brevo-button {
     background: linear-gradient(45deg, #FFD700, #FFA500);
     color: #2c3e50;
     border: none;
@@ -1029,23 +1050,16 @@ link[rel="apple-touch-icon"] {
     font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.2s;
 }
 
-#subscribeBtn:hover {
+.newsletter-content .brevo-button:hover {
     transform: scale(1.05);
 }
 
-#subscribeBtn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.newsletter-note {
-    font-size: 0.9em;
-    opacity: 0.8;
-    margin-top: 15px;
+.sib-captcha {
+    margin: 0 auto;
+    /* Captcha'yı ortala */
 }
 
 /* Newsletter Trigger Button */
@@ -2493,62 +2507,6 @@ canvas.editing-mode:active {
     transform: scale(1.05);
 }
 
-/* ============================================= */
-/* BREVO FORMUNUN TEMİZ STİLLERİ              */
-/* ============================================= */
-.newsletter-content .brevo-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    text-align: center;
-}
-
-.newsletter-content .brevo-form h2 {
-    font-size: 24px;
-    font-weight: bold;
-    color: #FFD700;
-    margin: 0;
-}
-
-.newsletter-content .brevo-form p {
-    color: white;
-    margin: 0;
-}
-
-.newsletter-content .brevo-label {
-    display: none;
-    /* Etiketi gizli tutuyoruz, placeholder yeterli */
-}
-
-.newsletter-content .brevo-input {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    outline: none;
-    text-align: center;
-    box-sizing: border-box;
-    color: #333333;
-    background-color: #FFFFFF;
-}
-
-.newsletter-content .brevo-button {
-    background: linear-gradient(45deg, #FFD700, #FFA500);
-    color: #2c3e50;
-    border: none;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.newsletter-content .brevo-button:hover {
-    transform: scale(1.05);
-}
 
 /* YouTube sosyal medya butonu için stil */
 .social-button.youtube {

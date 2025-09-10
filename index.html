@@ -12,7 +12,8 @@
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="preload" href="icons/splash-logo.png" as="image" type="image/png">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <!-- Service Worker kaydı ARTIK DOĞRU <script> etiketleri içinde -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
@@ -24,7 +25,6 @@
                 });
         }
     </script>
-
 
     <script>
         // Splash screen'i gizle ve ana içeriği göster
@@ -579,31 +579,56 @@
         </script>
 
         <!-- ============================================= -->
-        <!-- NİHAİ, BASİT VE ÇALIŞAN NEWSLETTER YAPISI    -->
+        <!-- NİHAİ VE TEMİZ NEWSLETTER MODAL YAPISI      -->
         <!-- ============================================= -->
         <div id="newsletterModal" class="newsletter-modal" style="display: none;">
             <div class="newsletter-content">
                 <span id="newsletterCloseBtn" class="newsletter-close">&times;</span>
-                <form method="POST"
-                    action="https://e048313f.sibforms.com/serve/MUIFAHgTkA3S-TtS6nJ3UjMTDwt-BHk8ObiymC9rpl_tGFsdYQUY7KHRjTUoY2lUTLP4s66EV64BvpEUcu-l5jKoEkeeBVIbblMhKsWnqBi6bCxvhbRMmipuzT90UCBb_AffX5PdA4vtJiWEDGAkpZ-b1PD0Qfo6ZvSfEI_2BI0u_CAuNVDNg-3gBb0uuUP1t1tQPXFkGgzeKB2a"
-                    target=" _blank" class="brevo-form">
 
-                    <h2>Newsletter</h2>
-                    <p>Subscribe to our newsletter and stay updated.</p>
+                <!-- Brevo'nun SADECE GEREKLİ KISIMLARINI BURAYA ALIYORUZ -->
+                <form id="sib-form" method="POST"
+                    action="https://e048313f.sibforms.com/serve/MUIFAPsWQh9qvMBNG3VCG9m6IPNb-TCwIi47Jvqxc0pMh3Ns1_rJPuCfb5Zh8h2vVCZDDcihyHiABn2C0gunbXzy30qDNJFis7dG0PGwlbW-cXWtbDS7XyDSVvZZIsF6GM1uIq9KSQlP2YiZKoNb09gEkB_cT3ng-N6jpvdB-JZ9C9FmaxtI_xPSBz4oDbLltE-5_v68sRs9ZHcT"
+                    data-type="subscription" class="brevo-form">
+                    <h2>Get Updates!</h2>
+                    <p>Subscribe to our newsletter for new pages and features.</p>
 
-                    <!-- DEĞİŞİKLİK: ID ve NAME özellikleri eklendi -->
-                    <input id="EMAIL" name="EMAIL" class="brevo-input" type="email" placeholder="your@email.com"
-                        required autocomplete="email">
+                    <div class="sib-input">
+                        <input class="brevo-input" type="email" id="EMAIL" name="EMAIL" placeholder="your@email.com"
+                            data-required="true" required>
+                    </div>
 
-                    <!-- Cloudflare Turnstile Widget -->
-                    <div class="cf-turnstile" data-sitekey="0x4AAAAAAB0VZe67kYxh88x-"></div>
+                    <!-- Cloudflare Turnstile CAPTCHA -->
+                    <div class="sib-captcha">
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAB0VZe67kYxh88x-"
+                            data-callback="handleCaptchaResponse"></div>
+                    </div>
 
                     <button class="brevo-button" type="submit">SUBSCRIBE</button>
+
+                    <input type="text" name="email_address_check" value="" class="input--hidden" style="display:none;">
+                    <input type="hidden" name="locale" value="en">
                 </form>
+                <!-- Brevo Formu Bitişi -->
+
             </div>
         </div>
 
+        <!-- Bu buton zaten sizde var, yerinde kalacak -->
         <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
+
+        <!-- Cloudflare Script'i (formun dışında, body sonunda olmalı) -->
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script>
+            // Turnstile'ın Brevo ile konuşmasını sağlayan yardımcı fonksiyon
+            function handleCaptchaResponse() {
+                var event = new Event('captchaChange');
+                var captchaContainer = document.querySelector('.sib-captcha');
+                if (captchaContainer) captchaContainer.dispatchEvent(event);
+            }
+        </script>
+
+        <!-- NİHAİ ÇÖZÜM v10: Merkezi ve her zaman var olan dosya input'u -->
+        <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
         <script src="script.js"></script>
 </body>
