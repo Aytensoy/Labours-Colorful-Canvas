@@ -237,6 +237,15 @@ function resizeCanvas() {
   canvas.style.width = newWidth + "px";
   canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
 }
+// NİHAİ ÇÖZÜM v13: Doğrudan HTML'den çağrılacak merkezi upload fonksiyonu
+function triggerMainUpload() {
+  console.log("⬆️ Upload Image tıklandı! Input hazırlanıyor...");
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.onchange = (event) => handleFileUpload(event);
+  fileInput.click();
+}
 
 // NİHAİ handleFileUpload (createImageBitmap ile)
 function handleFileUpload(event) {
@@ -1649,17 +1658,6 @@ document.addEventListener('DOMContentLoaded', function () {
       magicButton.addEventListener('click', (e) => {
         e.preventDefault();
         openMagicPhotosStudio();
-      });
-    }
-
-    const uploadBtn = document.getElementById('uploadBtn');
-    if (uploadBtn) {
-      uploadBtn.addEventListener('click', () => {
-        console.log("⬆️ Upload Image tıklandı! Merkezi input hazırlanıyor...");
-        const fileInput = document.getElementById('globalFileInput');
-        fileInput.onchange = null;
-        fileInput.onchange = (event) => handleFileUpload(event);
-        fileInput.click();
       });
     }
 

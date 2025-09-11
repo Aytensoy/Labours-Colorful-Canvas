@@ -70,7 +70,8 @@
                     <button id="redeemGiftBtn" class="btn premium-btn">
                         🎁 Redeem Gift Code
                     </button>
-                    <button id="uploadBtn" class="btn" aria-label="Upload Image">📁 Upload Image</button>
+                    <button id="uploadBtn" class="btn" aria-label="Upload Image" onclick="handleUploadClick()">📁 Upload
+                        Image</button>
 
                     <!-- İkinci Sıra -->
                     <button id="newPageBtn" class="btn" aria-label="New Page">📄 Drawing Page</button>
@@ -579,13 +580,12 @@
         </script>
 
         <!-- ============================================= -->
-        <!-- NİHAİ VE TEMİZ NEWSLETTER MODAL YAPISI      -->
+        <!-- NİHAİ ve CSP UYUMLU NEWSLETTER MODAL YAPISI -->
         <!-- ============================================= -->
         <div id="newsletterModal" class="newsletter-modal" style="display: none;">
             <div class="newsletter-content">
                 <span id="newsletterCloseBtn" class="newsletter-close">&times;</span>
 
-                <!-- Brevo'nun SADECE GEREKLİ KISIMLARINI BURAYA ALIYORUZ -->
                 <form id="sib-form" method="POST"
                     action="https://e048313f.sibforms.com/serve/MUIFAPsWQh9qvMBNG3VCG9m6IPNb-TCwIi47Jvqxc0pMh3Ns1_rJPuCfb5Zh8h2vVCZDDcihyHiABn2C0gunbXzy30qDNJFis7dG0PGwlbW-cXWtbDS7XyDSVvZZIsF6GM1uIq9KSQlP2YiZKoNb09gEkB_cT3ng-N6jpvdB-JZ9C9FmaxtI_xPSBz4oDbLltE-5_v68sRs9ZHcT"
                     data-type="subscription" class="brevo-form">
@@ -593,8 +593,9 @@
                     <p>Subscribe to our newsletter for new pages and features.</p>
 
                     <div class="sib-input">
+                        <!-- DEĞİŞİKLİK: ID ve NAME özellikleri eklendi -->
                         <input class="brevo-input" type="email" id="EMAIL" name="EMAIL" placeholder="your@email.com"
-                            data-required="true" required>
+                            data-required="true" required autocomplete="email">
                     </div>
 
                     <!-- Cloudflare Turnstile CAPTCHA -->
@@ -608,18 +609,16 @@
                     <input type="text" name="email_address_check" value="" class="input--hidden" style="display:none;">
                     <input type="hidden" name="locale" value="en">
                 </form>
-                <!-- Brevo Formu Bitişi -->
-
             </div>
         </div>
 
-        <!-- Bu buton zaten sizde var, yerinde kalacak -->
         <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
 
-        <!-- Cloudflare Script'i (formun dışında, body sonunda olmalı) -->
+        <!-- Cloudflare Script'i -->
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+        <!-- YARDIMCI FONKSİYON -->
         <script>
-            // Turnstile'ın Brevo ile konuşmasını sağlayan yardımcı fonksiyon
             function handleCaptchaResponse() {
                 var event = new Event('captchaChange');
                 var captchaContainer = document.querySelector('.sib-captcha');
