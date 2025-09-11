@@ -6,6 +6,8 @@
 
 console.log('🚀 Magical Coloring Game Ana Script Yükleniyor...');
 
+let hasInitialized = false; // Bu bayrak, initialize fonksiyonunun sadece bir kere çalışmasını garantiler.
+
 // --- BÖLÜM 1: GLOBAL DEĞİŞKENLER VE TEMEL AYARLAR ---
 
 let isPremiumUser = localStorage.getItem('isPremium') === 'true';
@@ -1632,9 +1634,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initialize() {
-    // --- Olay dinleyicilerini SADECE BİR KERE ata ---
+    // NİHAİ ÇÖZÜM v11: Bu fonksiyonun SADECE BİR KERE çalışmasını garantile.
+    if (hasInitialized) {
+      return; // Eğer daha önce çalıştıysa, hemen çık.
+    }
+    hasInitialized = true; // Bayrağı kaldır, bir daha çalışmasın.
 
-    // Magic Photos butonu
+    console.log("🚀 Uygulama başlatılıyor... Olay dinleyicileri SADECE BİR KERE atanacak.");
+
+    // --- Olay dinleyicileri ---
+
     const magicButton = document.getElementById('magicPhotoBtn');
     if (magicButton) {
       magicButton.addEventListener('click', (e) => {
@@ -1643,15 +1652,12 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Upload Image butonu
     const uploadBtn = document.getElementById('uploadBtn');
     if (uploadBtn) {
       uploadBtn.addEventListener('click', () => {
-        console.log("⬆️ Upload Image tıklandı! Input hazırlanıyor...");
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        // ÖNEMLİ: handleFileUpload'un event nesnesini almasını sağla
+        console.log("⬆️ Upload Image tıklandı! Merkezi input hazırlanıyor...");
+        const fileInput = document.getElementById('globalFileInput');
+        fileInput.onchange = null;
         fileInput.onchange = (event) => handleFileUpload(event);
         fileInput.click();
       });
@@ -1659,7 +1665,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Sayfa başında SADECE BİR KERE oluşturulacak elementler ---
 
-    // Finish/Cancel butonları kutusu
     if (!document.getElementById('editingInstructions')) {
       let instructions = document.createElement('div');
       instructions.id = 'editingInstructions';
@@ -1670,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.getElementById('cancelEditingBtn').onclick = cancelEditing;
     }
 
-    // --- Sadece pencere olaylarını dinleyecekler ---
+    // --- Pencere olayları ---
 
     window.addEventListener('resize', () => {
       const instruction = document.getElementById('faceClickInstruction');
