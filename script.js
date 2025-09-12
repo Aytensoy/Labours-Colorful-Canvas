@@ -18,6 +18,10 @@ let lastX = 0;
 let lastY = 0;
 let characterImage = new Image();
 let lastDraggableTextPosition = { x: 0, y: 0 }; // Sürüklenen yazının son pozisyonunu saklar
+// YENİ
+let touchStartX = 0;
+let touchStartY = 0;
+let isScrolling = false;
 // Araç boyutları
 let pencilSize = 2,
   brushSize = 10,
@@ -1019,7 +1023,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // =... switch (currentTool) ...
 
-
       // ... switch (currentTool) { ...
 
       case 'marker':
@@ -1140,41 +1143,63 @@ document.addEventListener('DOMContentLoaded', function () {
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseleave', () => { isDrawing = false; isDragging = false; }); // Sadece durumu sıfırla
 
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); }, { passive: false });
+  // 1. DOKUNMA BAŞLANGICI
+  canvas.addEventListener('touchstart', (e) => {
+    isScrolling = false; // Her dokunmada durumu sıfırla
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    startDrawing(touch); // Normal çizim başlangıcını çağır
+  }, { passive: true }); // ÖNEMLİ: Tarayıcının kaydırmayı hemen başlatmasına izin ver
+
+  // 2. DOKUNARAK HAREKET
   canvas.addEventListener('touchmove', (e) => {
-    // SADECE 'isDrawing' durumu aktifken varsayılan davranışı (kaydırmayı) engelle.
-    if (isDrawing) {
-      e.preventDefault();
-      draw(e.touches[0]);
-    }
-  }, { passive: false });
+    // Çizim başlamadıysa veya bu bir kaydırma eylemi olarak belirlendiyse, hiçbir şey yapma
+    if (!isDrawing || isScrolling) return;
 
-  // DOKUNMA BİTTİĞİNDE (MOBİL)
-  canvas.addEventListener('touchend', (e) => {
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartX);
+    const deltaY = Math.abs(touch.clientY - touchStartY);
+
+    // Kullanıcı parmağını yeterince hareket ettirdiyse niyetini anla
+    if (deltaY > 5 && deltaY > deltaX) {
+      // Dikey hareket daha fazlaysa, bu bir kaydırmadır.
+      isScrolling = true;
+      // Çizim durumunu anında iptal et, böylece istenmeyen nokta kalmaz
+      isDrawing = false;
+      return;
+    }
+
+    // Eğer buraya geldiyse, bu bir çizimdir. Kaydırmayı engelle ve çiz.
     e.preventDefault();
-
-    // Sürüklenip sürüklenmediğini kontrol etmek için bir kopya al
-    const wasDragging = isDragging;
-
-    // Önce normal çizim bitirme fonksiyonunu çağır (bu, isDragging'i sıfırlar)
-    stopDrawing(e.changedTouches[0]);
-
-    // Şimdi, eğer bu bir sürükleme DEĞİLSE,
-    // bu dokunmanın bir "click" olduğunu simüle et.
-    if (!wasDragging) {
-      console.log("📱 Mobile tap detected, simulating a click event.");
-
-      // Gerçek bir click olayı oluştur
-      const clickEvent = new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        clientX: e.changedTouches[0].clientX,
-        clientY: e.changedTouches[0].clientY
-      });
-      // Oluşturduğun bu olayı canvas'a gönder
-      e.target.dispatchEvent(clickEvent);
-    }
+    draw(touch);
   }, { passive: false });
+
+
+  // 3. DOKUNMA SONU
+  canvas.addEventListener('touchend', (e) => {
+    const wasDragging = isDragging; // Sürükleme durumunu kontrol et
+
+    if (!isScrolling) {
+      // Eğer bu bir kaydırma DEĞİLSE, normal bitirme işlemlerini yap
+      stopDrawing(e.changedTouches[0]);
+
+      if (!wasDragging) {
+        // Eğer sürükleme de değilse, bu bir tıklamadır. Fill aracı için önemli.
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          clientX: e.changedTouches[0].clientX,
+          clientY: e.changedTouches[0].clientY
+        });
+        e.target.dispatchEvent(clickEvent);
+      }
+    }
+
+    // Her durumda durumları temizle
+    isDrawing = false;
+    isScrolling = false;
+  });
 
   // =======================================================
   // GÖREV 24 DÜZELTMESİ: NİHAİ TIKLAMA OLAY YÖNETİCİSİ

@@ -6,6 +6,8 @@
 
 console.log('🚀 Magical Coloring Game Ana Script Yükleniyor...');
 
+let hasInitialized = false; // Bu bayrak, initialize fonksiyonunun sadece bir kere çalışmasını garantiler.
+
 // --- BÖLÜM 1: GLOBAL DEĞİŞKENLER VE TEMEL AYARLAR ---
 
 let isPremiumUser = localStorage.getItem('isPremium') === 'true';
@@ -234,6 +236,15 @@ function resizeCanvas() {
 
   canvas.style.width = newWidth + "px";
   canvas.style.height = (newWidth * (600 / 800)) + "px"; // Oranı koru
+}
+// NİHAİ ÇÖZÜM v13: Doğrudan HTML'den çağrılacak merkezi upload fonksiyonu
+function triggerMainUpload() {
+  console.log("⬆️ Upload Image tıklandı! Input hazırlanıyor...");
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.onchange = (event) => handleFileUpload(event);
+  fileInput.click();
 }
 
 // NİHAİ handleFileUpload (createImageBitmap ile)
@@ -1130,8 +1141,14 @@ document.addEventListener('DOMContentLoaded', function () {
   canvas.addEventListener('mouseleave', () => { isDrawing = false; isDragging = false; }); // Sadece durumu sıfırla
 
   canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); }, { passive: false });
-  canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
-  // DOKUNMA BİTTİĞİNDE (MOBİL)
+  canvas.addEventListener('touchmove', (e) => {
+    // SADECE 'isDrawing' durumu aktifken varsayılan davranışı (kaydırmayı) engelle.
+    if (isDrawing) {
+      e.preventDefault();
+      draw(e.touches[0]);
+    }
+  }, { passive: false });
+
   // DOKUNMA BİTTİĞİNDE (MOBİL)
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
@@ -1219,23 +1236,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ...
   document.getElementById('uploadBtn').addEventListener('click', function () {
-    console.log('📁 Upload Image tıklandı! Input hazırlanıyor...');
+    console.log('📁 Upload Image tıklandı! Global input hazırlanıyor...');
 
-    // Geçici bir input elementi oluştur
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
+    // HTML'deki gizli input elementini seç
+    const globalFileInput = document.getElementById('globalFileInput');
 
-    // Input'a taze bir olay dinleyicisi ata
-    fileInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        handleFileUpload(e); // Mevcut, çalışan handleFileUpload'u çağır
-      }
-    };
+    // Bu butona özel 'onchange' olayını ata
+    // Dosya seçildiğinde 'handleFileUpload' fonksiyonu çalışacak
+    globalFileInput.onchange = handleFileUpload;
 
-    // Şimdi input'a tıkla
-    fileInput.click();
+    // Gizli input'un tıklanmasını tetikle
+    globalFileInput.click();
   });
   // --- YENİ EKLENEN BUTON BAĞLANTILARI ---
   document.getElementById('pencilBtn').addEventListener('click', () => setTool('pencil'));
@@ -1286,29 +1297,29 @@ document.addEventListener('DOMContentLoaded', function () {
    * Belirtilen bir boyama sayfasını yükler, canvas'ı temizler ve çizer.
    * @param {string} pageName - Yüklenecek resmin adı (uzantısız).
    */
-  // =============================================
-  // NİHAİ NEWSLETTER POPUP YÖNETİMİ
-  // =============================================
-  const modal = document.getElementById('newsletterModal');
-  const triggerBtn = document.getElementById('newsletterTrigger');
-  const closeBtn = document.getElementById('newsletterCloseBtn');
+  // --- NİHAİ NEWSLETTER MODAL KONTROLÜ ---
+  const newsletterModal = document.getElementById('newsletterModal');
+  const newsletterTrigger = document.getElementById('newsletterTrigger');
+  const newsletterCloseBtn = document.getElementById('newsletterCloseBtn');
 
-  if (modal && triggerBtn && closeBtn) {
-    const openModal = () => modal.style.display = 'flex';
-    const closeModal = () => modal.style.display = 'none';
+  if (newsletterModal && newsletterTrigger && newsletterCloseBtn) {
+    const openModal = () => {
+      newsletterModal.style.display = 'flex';
+    };
+    const closeModal = () => {
+      newsletterModal.style.display = 'none';
+    };
 
-    triggerBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
+    newsletterTrigger.addEventListener('click', openModal);
+    newsletterCloseBtn.addEventListener('click', closeModal);
 
+    // Dışarı tıklayınca kapatma
     window.addEventListener('click', (event) => {
-      if (event.target === modal) {
+      if (event.target === newsletterModal) {
         closeModal();
       }
     });
-  } else {
-    console.warn('Newsletter için gerekli elementlerden biri (modal, trigger, veya close button) bulunamadı.');
   }
-
   // 6. BAŞLANGIÇ AYARLARI
   loadAndDrawImage('image.png');
   setTool('pencil');
@@ -1335,12 +1346,11 @@ document.addEventListener('DOMContentLoaded', function () {
 // <--- Ana DOMContentLoaded bloğu burada biter
 
 // =========================================================================
-// GÜNCELLEME: NİHAİ MAGIC PHOTOS SİSTEMİ (v4 - Tüm Hatalar Giderildi)
-// Önceki Magic Photos kod bloğunu tamamen bununla değiştirin.
+// NİHAİ VE KURŞUN GEÇİRMEZ MAGIC PHOTOS SİSTEMİ (v6 - Tüm Hatalar Giderildi)
 // =========================================================================
 
 (function enhancedMagicPhotosSystemFinal() {
-  console.log('🎨 Magic Photos sistemi (v4 Final) başlatılıyor...');
+  console.log('🎨 Magic Photos sistemi (v6 Final) başlatılıyor...');
 
   // --- Global Değişkenler ---
   let isEditingPhoto = false;
@@ -1365,22 +1375,39 @@ document.addEventListener('DOMContentLoaded', function () {
     wizzard: { name: "Wizard Academy", icon: "🧙‍♂️", colored: "wizzard_colored_transparent.png", outline: "wizzard_outline_transparent.png", colored_thumb: "wizzard_colored_thumb.png", outline_thumb: "wizzard_outline_thumb.png", faceArea: { x: 445, y: 295, width: 160, height: 200 }, isPremium: true }
   };
 
-  // --- Ana Kontrol Fonksiyonları ---
+  // --- NİHAİ ÇÖZÜM v9: Merkezi Temizlik Fonksiyonu ---
+  function _resetMagicPhotosState() {
+    console.log("🧹 Tüm Magic Photos durumu temizleniyor...");
+    isEditingPhoto = false;
+
+    const canvas = document.getElementById('coloringCanvas');
+    if (canvas) {
+      canvas.style.cursor = 'crosshair';
+      removeEditingEventListeners();
+    }
+
+    const instructions = document.getElementById('editingInstructions');
+    if (instructions) instructions.classList.remove('visible');
+
+    const faceInstruction = document.getElementById('faceClickInstruction');
+    if (faceInstruction) faceInstruction.remove();
+
+    document.body.style.height = '';
+    document.body.style.overflow = '';
+
+    currentTemplate = null;
+    userPhoto = new Image();
+    templateImage = new Image();
+  }
 
   function openMagicPhotosStudio() {
-    // KRİTİK DÜZELTME: Eğer başka bir düzenleme modu aktifse, önce onu iptal et.
-    if (isEditingPhoto) {
-      cancelEditing();
-    }
+    _resetMagicPhotosState();
     createMainModal();
   }
 
   function closeAllMagicPhotosUI() {
     document.querySelectorAll('.magic-photos-modal-container').forEach(modal => modal.remove());
-    hideClickableAreaAndInstruction();
   }
-
-  // --- Modal ve Şablon Yönetimi ---
 
   function createMainModal() {
     closeAllMagicPhotosUI();
@@ -1417,20 +1444,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadTemplates(grid) {
     grid.innerHTML = '';
     const isUserPremium = localStorage.getItem('isPremium') === 'true';
-
     for (const key in TEMPLATES_CONFIG) {
       const template = TEMPLATES_CONFIG[key];
       const isTemplatePremium = template.isPremium === true;
       const card = document.createElement('div');
       card.className = 'magic-template-card';
-
       const thumbnailFile = selectedStyle === 'colored' ? template.colored_thumb : template.outline_thumb;
-      let cardHTML = `
-              <div class="magic-template-image-wrapper">
-                  <img src="template-images/${thumbnailFile}" class="magic-template-thumb" alt="${template.name}">
-              </div>
-              <div class="magic-template-name">${template.icon} ${template.name}</div>`;
-
+      let cardHTML = `<div class="magic-template-image-wrapper"><img src="template-images/${thumbnailFile}" class="magic-template-thumb" alt="${template.name}"></div><div class="magic-template-name">${template.icon} ${template.name}</div>`;
       if (isTemplatePremium && !isUserPremium) {
         card.classList.add('locked');
         card.onclick = () => { typeof showPremiumModal === 'function' && showPremiumModal(); };
@@ -1447,14 +1467,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadTemplateToCanvas(templateKey) {
-    // KRİTİK DÜZELTME: Yeni bir şablon yüklemeden önce mevcut düzenlemeyi iptal et.
-    if (isEditingPhoto) {
-      cancelEditing();
-    }
-
+    _resetMagicPhotosState();
     currentTemplate = TEMPLATES_CONFIG[templateKey];
     const templateFile = selectedStyle === 'colored' ? currentTemplate.colored : currentTemplate.outline;
-
     templateImage = new Image();
     templateImage.crossOrigin = "Anonymous";
     templateImage.onload = () => {
@@ -1462,85 +1477,56 @@ document.addEventListener('DOMContentLoaded', function () {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
-      // Sadece ana şablonu çizdikten sonra geçmişi kaydet.
       if (typeof saveDrawingState === 'function') {
-        drawingHistory = []; // Geçmişi temizle
-        currentStep = -1;
-        saveDrawingState();
+        drawingHistory = []; currentStep = -1; saveDrawingState();
       }
-      showClickableAreaAndInstruction();
+      showClickableInstruction(); // Artık sadece talimat kutusunu gösteriyoruz
     };
     templateImage.src = `template-images/${templateFile}`;
   }
 
-  // --- Tıklama Alanı Yönetimi ---
-
-  function showClickableAreaAndInstruction() {
-    positionClickableLabel();
+  // NİHAİ ÇÖZÜM v9: Basitleştirilmiş talimat ve tıklama mantığı
+  function showClickableInstruction() {
     const oldInstruction = document.getElementById('faceClickInstruction');
     if (oldInstruction) oldInstruction.remove();
 
     const instructionDiv = document.createElement('div');
     instructionDiv.id = 'faceClickInstruction';
-    instructionDiv.innerHTML = `<div class="instruction-icon">🖼️</div><div><strong>Click the glowing area</strong> to add your photo!</div>`;
+    instructionDiv.innerHTML = `<div class="instruction-icon">🖼️</div><div><strong>Click HERE</strong> to add your photo!</div>`;
+    instructionDiv.style.cursor = 'pointer'; // Tıklanabilir olduğunu belirt
+
+    // TIKLAMA OLAYINI DOĞRUDAN BU KUTUYA ATA
+    instructionDiv.onclick = () => {
+      instructionDiv.remove(); // Tıklandıktan sonra kendini kaldır
+      triggerPhotoUpload();   // Dosya yüklemeyi tetikle
+    };
+
     document.body.appendChild(instructionDiv);
   }
 
-  function hideClickableAreaAndInstruction() {
-    const clickableLabel = document.getElementById('magicPhotoLabel');
-    if (clickableLabel) clickableLabel.style.display = 'none';
+  function triggerPhotoUpload() {
+    console.log('✨ Magic Photos için resim yükleme tetiklendi! Global input hazırlanıyor...');
 
-    const instruction = document.getElementById('faceClickInstruction');
-    if (instruction) instruction.remove();
-  }
+    // HTML'deki gizli input elementini seç
+    const globalFileInput = document.getElementById('globalFileInput');
 
-  function positionClickableLabel() {
-    const clickableLabel = document.getElementById('magicPhotoLabel');
-    const canvas = document.getElementById('coloringCanvas');
+    // Magic Photos'a özel 'onchange' olayını ata
+    globalFileInput.onchange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const objectURL = URL.createObjectURL(file);
+        userPhoto = new Image();
+        userPhoto.crossOrigin = "Anonymous";
+        userPhoto.onload = () => {
+          startCanvasEditing();
+          URL.revokeObjectURL(objectURL); // Bellek sızıntısını önlemek için önemli
+        };
+        userPhoto.src = objectURL;
+      }
+    };
 
-    if (!currentTemplate || isEditingPhoto || !clickableLabel || !canvas) {
-      if (clickableLabel) clickableLabel.style.display = 'none';
-      return;
-    }
-
-    const rect = canvas.getBoundingClientRect();
-    const faceArea = currentTemplate.faceArea;
-    const scaleX = rect.width / canvas.width;
-    const scaleY = rect.height / canvas.height;
-
-    const displayWidth = faceArea.width * scaleX;
-    const displayHeight = faceArea.height * scaleY;
-    const displayCenterX = rect.left + faceArea.x * scaleX;
-    const displayCenterY = rect.top + faceArea.y * scaleY;
-    const displayLeft = displayCenterX - (displayWidth / 2);
-    const displayTop = displayCenterY - (displayHeight / 2);
-
-    clickableLabel.style.cssText = `
-          display: block;
-          position: fixed;
-          left: ${displayLeft}px;
-          top: ${displayTop}px;
-          width: ${displayWidth}px;
-          height: ${displayHeight}px;
-      `;
-  }
-
-  // --- Fotoğraf Yükleme ve Düzenleme ---
-
-  function handlePhotoUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-      hideClickableAreaAndInstruction();
-      const objectURL = URL.createObjectURL(file);
-      userPhoto = new Image();
-      userPhoto.crossOrigin = "Anonymous";
-      userPhoto.onload = () => {
-        startCanvasEditing();
-        URL.revokeObjectURL(objectURL);
-      };
-      userPhoto.src = objectURL;
-    }
-    event.target.value = '';
+    // Gizli input'un tıklanmasını tetikle
+    globalFileInput.click();
   }
 
   function startCanvasEditing() {
@@ -1549,135 +1535,60 @@ document.addEventListener('DOMContentLoaded', function () {
     const faceArea = currentTemplate.faceArea;
     const canvasScaleX = canvas.width / 800;
     const canvasScaleY = canvas.height / 600;
-
     const photoAspectRatio = userPhoto.width / userPhoto.height;
     const faceAreaAspectRatio = faceArea.width / faceArea.height;
     let photoWidth, photoHeight;
-
     if (photoAspectRatio > faceAreaAspectRatio) {
-      photoWidth = faceArea.width * 1.5 * canvasScaleX; // Biraz daha büyük başlasın
+      photoWidth = faceArea.width * 1.5 * canvasScaleX;
       photoHeight = photoWidth / photoAspectRatio;
     } else {
       photoHeight = faceArea.height * 1.5 * canvasScaleY;
       photoWidth = photoHeight * photoAspectRatio;
     }
-
-    editingSettings = {
-      x: faceArea.x * canvasScaleX,
-      y: faceArea.y * canvasScaleY,
-      width: photoWidth,
-      height: photoHeight,
-      isDragging: false
-    };
-
+    editingSettings = { x: faceArea.x * canvasScaleX, y: faceArea.y * canvasScaleY, width: photoWidth, height: photoHeight, isDragging: false };
     setupEditingEventListeners();
     redrawCanvas();
-    showEditingInstructions();
+    const instructions = document.getElementById('editingInstructions');
+    if (instructions) {
+      setTimeout(() => { instructions.classList.add('visible'); }, 10);
+    }
   }
 
   function redrawCanvas() {
-    if (!isEditingPhoto || !userPhoto.src || !templateImage.src) return;
+    if (!userPhoto.src || !templateImage.src) return;
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');
-
-    // Önce temiz bir şablon çiz (bu, sürükleme sırasında "iz" kalmasını önler)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
-
-    // Şimdi kullanıcı fotoğrafını çiz
     const drawX = editingSettings.x - (editingSettings.width / 2);
     const drawY = editingSettings.y - (editingSettings.height / 2);
     ctx.drawImage(userPhoto, drawX, drawY, editingSettings.width, editingSettings.height);
-
-    // Son olarak şablonu tekrar üzerine çizerek yüz alanını maskele
     ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
   }
 
-  // YENİ VE EN ÖNEMLİ FONKSİYON (Layout Shift Sorunu Düzeltildi)
   function finishEditing() {
-    console.log("✅ Düzenleme bitiriliyor ve fotoğraf tuvale işleniyor...");
-    isEditingPhoto = false;
-
-    const canvas = document.getElementById('coloringCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // 1. Canvas'ın o anki boyutlarını piksel olarak alıp sabitliyoruz.
-    // Bu, "layout shift" (kayma/küçülme) sorununu önler.
-    const rect = canvas.getBoundingClientRect();
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    // Fotoğrafı tuvale kalıcı olarak "işle" (bake).
+    const bodyHeight = document.body.clientHeight;
+    document.body.style.height = `${bodyHeight}px`;
+    document.body.style.overflow = 'hidden';
     redrawCanvas();
-
-    // Artık düzenleme bittiği için, olay dinleyicilerini ve UI elemanlarını kaldır.
-    canvas.style.cursor = 'crosshair';
-    removeEditingEventListeners();
-
-    // 2. Butonları GÜVENLE kaldırıyoruz. Canvas artık bu işlemden etkilenmeyecek.
-    const instructions = document.getElementById('editingInstructions');
-    if (instructions) {
-      instructions.remove();
-    }
-
-    // Bu son hali geçmişe kaydet.
-    if (typeof saveDrawingState === 'function') {
-      saveDrawingState();
-    }
-
-    // Diğer şablonlara bulaşmaması için template ve userPhoto'yu sıfırla
-    currentTemplate = null;
-    userPhoto = new Image();
-
+    if (typeof saveDrawingState === 'function') saveDrawingState();
     showSuccessMessage();
-
-    // 3. Kısa bir gecikmeyle (tarayıcıya yerleşmesi için zaman tanır)
-    // inline stilleri temizleyip canvas'ı tekrar esnek (responsive) hale getiriyoruz.
-    setTimeout(() => {
-      canvas.style.width = '';
-      canvas.style.height = '';
-    }, 50); // 50 milisaniye yeterlidir.
+    _resetMagicPhotosState();
   }
 
-
   function cancelEditing() {
-    console.log("❌ Düzenleme iptal edildi.");
-    isEditingPhoto = false;
+    const bodyHeight = document.body.clientHeight;
+    document.body.style.height = `${bodyHeight}px`;
+    document.body.style.overflow = 'hidden';
     const canvas = document.getElementById('coloringCanvas');
     const ctx = canvas.getContext('2d');
-
-    // 1. "Layout shift" sorununu önlemek için canvas'ın boyutlarını sabitliyoruz.
-    const rect = canvas.getBoundingClientRect();
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    canvas.style.cursor = 'crosshair';
-
-    // Düzenleme başlamadan önceki temiz durumu geri yükle.
     if (drawingHistory.length > 0) {
       ctx.putImageData(drawingHistory[0], 0, 0);
       drawingHistory.splice(1);
       currentStep = 0;
     }
-
-    removeEditingEventListeners();
-
-    // 2. Butonları GÜVENLE kaldırıyoruz.
-    const instructions = document.getElementById('editingInstructions');
-    if (instructions) instructions.remove();
-
-    // Değişkenleri sıfırla.
-    currentTemplate = null;
-    userPhoto = new Image();
-
-    // 3. Kısa bir gecikmeyle canvas'ı tekrar esnek (responsive) hale getiriyoruz.
-    setTimeout(() => {
-      canvas.style.width = '';
-      canvas.style.height = '';
-    }, 50);
+    _resetMagicPhotosState();
   }
-
-  // --- Düzenleme Modu Olay Yöneticileri ---
 
   function setupEditingEventListeners() {
     const canvas = document.getElementById('coloringCanvas');
@@ -1693,6 +1604,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function removeEditingEventListeners() {
     const canvas = document.getElementById('coloringCanvas');
+    if (!canvas) return;
     canvas.removeEventListener('mousedown', handleEditMouseDown);
     canvas.removeEventListener('mousemove', handleEditMouseMove);
     window.removeEventListener('mouseup', handleEditMouseUp);
@@ -1721,31 +1633,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function handleEditMouseDown(e) { e.preventDefault(); editingSettings.isDragging = true; const coords = getEventCoordinates(e); editingSettings.startX = coords.x; editingSettings.startY = coords.y; }
   function handleEditMouseUp() { editingSettings.isDragging = false; initialPinchDistance = null; }
-  function handleEditMouseMove(e) { if (!editingSettings.isDragging) return; e.preventDefault(); const coords = getEventCoordinates(e); const deltaX = coords.x - editingSettings.startX; const deltaY = coords.y - editingSettings.startY; editingSettings.x += deltaX; editingSettings.y += deltaY; editingSettings.startX = coords.x; editingSettings.startY = coords.y; redrawCanvas(); }
-  function handleEditWheel(e) { e.preventDefault(); const scaleFactor = e.deltaY > 0 ? 0.95 : 1.05; editingSettings.width *= scaleFactor; editingSettings.height *= scaleFactor; redrawCanvas(); }
-
+  function handleEditMouseMove(e) { if (!isEditingPhoto || !editingSettings.isDragging) return; e.preventDefault(); const coords = getEventCoordinates(e); const deltaX = coords.x - editingSettings.startX; const deltaY = coords.y - editingSettings.startY; editingSettings.x += deltaX; editingSettings.y += deltaY; editingSettings.startX = coords.x; editingSettings.startY = coords.y; redrawCanvas(); }
+  function handleEditWheel(e) { if (!isEditingPhoto) return; e.preventDefault(); const scaleFactor = e.deltaY > 0 ? 0.95 : 1.05; editingSettings.width *= scaleFactor; editingSettings.height *= scaleFactor; redrawCanvas(); }
   function handleEditTouchStart(e) { e.preventDefault(); if (e.touches.length === 1) { handleEditMouseDown(e); } else if (e.touches.length === 2) { editingSettings.isDragging = false; initialPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); } }
   function handleEditTouchEnd(e) { e.preventDefault(); handleEditMouseUp(); }
   function handleEditTouchMove(e) { e.preventDefault(); if (e.touches.length === 1 && editingSettings.isDragging) { handleEditMouseMove(e); } else if (e.touches.length === 2 && initialPinchDistance) { const newPinchDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); const scaleFactor = newPinchDistance / initialPinchDistance; editingSettings.width *= scaleFactor; editingSettings.height *= scaleFactor; initialPinchDistance = newPinchDistance; redrawCanvas(); } }
-
-  // --- Yardımcı UI Fonksiyonları ---
-
-  function showEditingInstructions() {
-    const oldInstructions = document.getElementById('editingInstructions');
-    if (oldInstructions) oldInstructions.remove();
-
-    const instructions = document.createElement('div');
-    instructions.id = 'editingInstructions';
-    // Yeni CSS sınıfını kullanıyoruz
-    instructions.className = 'mp-editor-actions';
-    instructions.innerHTML = `
-          <button id="finishEditingBtn" class="mp-confirm-btn">✅ Finish</button>
-          <button id="cancelEditingBtn" class="mp-cancel-btn">❌ Cancel</button>
-      `;
-    document.body.appendChild(instructions);
-    document.getElementById('finishEditingBtn').onclick = finishEditing;
-    document.getElementById('cancelEditingBtn').onclick = cancelEditing;
-  }
 
   function showSuccessMessage() {
     const msg = document.createElement('div');
@@ -1755,29 +1647,56 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => msg.remove(), 2500);
   }
 
-  // --- Başlatma ---
   function initialize() {
-    const button = document.getElementById('magicPhotoBtn');
-    if (button) {
-      button.addEventListener('click', (e) => {
+    // NİHAİ ÇÖZÜM v11: Bu fonksiyonun SADECE BİR KERE çalışmasını garantile.
+    if (hasInitialized) {
+      return; // Eğer daha önce çalıştıysa, hemen çık.
+    }
+    hasInitialized = true; // Bayrağı kaldır, bir daha çalışmasın.
+
+    console.log("🚀 Uygulama başlatılıyor... Olay dinleyicileri SADECE BİR KERE atanacak.");
+
+    // --- Olay dinleyicileri ---
+
+    const magicButton = document.getElementById('magicPhotoBtn');
+    if (magicButton) {
+      magicButton.addEventListener('click', (e) => {
         e.preventDefault();
         openMagicPhotosStudio();
       });
     }
 
-    const magicInput = document.getElementById('magicPhotoInput');
-    if (magicInput) {
-      magicInput.addEventListener('change', handlePhotoUpload);
+    // --- Sayfa başında SADECE BİR KERE oluşturulacak elementler ---
+
+    if (!document.getElementById('editingInstructions')) {
+      let instructions = document.createElement('div');
+      instructions.id = 'editingInstructions';
+      instructions.className = 'mp-editor-actions';
+      instructions.innerHTML = `<button id="finishEditingBtn" class="mp-confirm-btn">✅ Finish</button><button id="cancelEditingBtn" class="mp-cancel-btn">❌ Cancel</button>`;
+      document.body.appendChild(instructions);
+      document.getElementById('finishEditingBtn').onclick = finishEditing;
+      document.getElementById('cancelEditingBtn').onclick = cancelEditing;
     }
 
-    window.addEventListener('resize', positionClickableLabel);
-    window.addEventListener('scroll', positionClickableLabel, true);
+    // --- Pencere olayları ---
+
+    // BU SATIRI SİLİN VEYA YORUM SATIRI HALİNE GETİRİN
+    /*
+    window.addEventListener('resize', () => {
+      const instruction = document.getElementById('faceClickInstruction');
+      if (instruction) instruction.remove();
+    });
+    */
+
+    // YUKARIDAKİ KODU KALDIRIN
   }
 
+  // NİHAİ ÇÖZÜM v9.1: Olayı doğru zamanda dinle
+  // DOMContentLoaded, tüm HTML'in yüklendiğini ama resimlerin beklenmediğini garantiler.
+  // Bu, butonların var olduğundan emin olmak için en doğru zamandır.
   window.addEventListener('DOMContentLoaded', initialize);
 
 })();
-
 // --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
 
 function setupGiftingSystem() {
