@@ -98,6 +98,14 @@ h1 {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     background-color: #FFFFFF;
     /* Beyaz renk */
+    /* --- YENİ KODU BURAYA EKLEYİN --- */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .color-palette {
@@ -606,15 +614,6 @@ h1 {
     }
 }
 
-#coloringCanvas {
-    touch-action: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
 
 /* Icon styles */
 link[rel="icon"],

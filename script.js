@@ -1674,10 +1674,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Pencere olayları ---
 
+    // BU SATIRI SİLİN VEYA YORUM SATIRI HALİNE GETİRİN
+    /*
     window.addEventListener('resize', () => {
       const instruction = document.getElementById('faceClickInstruction');
       if (instruction) instruction.remove();
     });
+    */
+
+    // YUKARIDAKİ KODU KALDIRIN
   }
 
   // NİHAİ ÇÖZÜM v9.1: Olayı doğru zamanda dinle
