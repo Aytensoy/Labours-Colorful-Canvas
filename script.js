@@ -1141,8 +1141,14 @@ document.addEventListener('DOMContentLoaded', function () {
   canvas.addEventListener('mouseleave', () => { isDrawing = false; isDragging = false; }); // Sadece durumu sıfırla
 
   canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); }, { passive: false });
-  canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, { passive: false });
-  // DOKUNMA BİTTİĞİNDE (MOBİL)
+  canvas.addEventListener('touchmove', (e) => {
+    // SADECE 'isDrawing' durumu aktifken varsayılan davranışı (kaydırmayı) engelle.
+    if (isDrawing) {
+      e.preventDefault();
+      draw(e.touches[0]);
+    }
+  }, { passive: false });
+
   // DOKUNMA BİTTİĞİNDE (MOBİL)
   canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
