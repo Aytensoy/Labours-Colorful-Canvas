@@ -99,7 +99,8 @@ h1 {
     background-color: #FFFFFF;
     /* Beyaz renk */
     /* --- YENİ KODU BURAYA EKLEYİN --- */
-    touch-action: none;
+    touch-action: none !important;
+    /* Test için !important ekleyin */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
