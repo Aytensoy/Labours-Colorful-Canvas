@@ -1230,23 +1230,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ...
   document.getElementById('uploadBtn').addEventListener('click', function () {
-    console.log('📁 Upload Image tıklandı! Input hazırlanıyor...');
+    console.log('📁 Upload Image tıklandı! Global input hazırlanıyor...');
 
-    // Geçici bir input elementi oluştur
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
+    // HTML'deki gizli input elementini seç
+    const globalFileInput = document.getElementById('globalFileInput');
 
-    // Input'a taze bir olay dinleyicisi ata
-    fileInput.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        handleFileUpload(e); // Mevcut, çalışan handleFileUpload'u çağır
-      }
-    };
+    // Bu butona özel 'onchange' olayını ata
+    // Dosya seçildiğinde 'handleFileUpload' fonksiyonu çalışacak
+    globalFileInput.onchange = handleFileUpload;
 
-    // Şimdi input'a tıkla
-    fileInput.click();
+    // Gizli input'un tıklanmasını tetikle
+    globalFileInput.click();
   });
   // --- YENİ EKLENEN BUTON BAĞLANTILARI ---
   document.getElementById('pencilBtn').addEventListener('click', () => setTool('pencil'));
@@ -1505,10 +1499,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function triggerPhotoUpload() {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = (event) => {
+    console.log('✨ Magic Photos için resim yükleme tetiklendi! Global input hazırlanıyor...');
+
+    // HTML'deki gizli input elementini seç
+    const globalFileInput = document.getElementById('globalFileInput');
+
+    // Magic Photos'a özel 'onchange' olayını ata
+    globalFileInput.onchange = (event) => {
       const file = event.target.files[0];
       if (file) {
         const objectURL = URL.createObjectURL(file);
@@ -1516,12 +1513,14 @@ document.addEventListener('DOMContentLoaded', function () {
         userPhoto.crossOrigin = "Anonymous";
         userPhoto.onload = () => {
           startCanvasEditing();
-          URL.revokeObjectURL(objectURL);
+          URL.revokeObjectURL(objectURL); // Bellek sızıntısını önlemek için önemli
         };
         userPhoto.src = objectURL;
       }
     };
-    fileInput.click();
+
+    // Gizli input'un tıklanmasını tetikle
+    globalFileInput.click();
   }
 
   function startCanvasEditing() {
