@@ -18,10 +18,6 @@ let lastX = 0;
 let lastY = 0;
 let characterImage = new Image();
 let lastDraggableTextPosition = { x: 0, y: 0 }; // Sürüklenen yazının son pozisyonunu saklar
-// YENİ
-let touchStartX = 0;
-let touchStartY = 0;
-let isScrolling = false;
 // Araç boyutları
 let pencilSize = 2,
   brushSize = 10,
@@ -815,6 +811,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   const ctx = canvas.getContext('2d', {
     willReadFrequently: true
+
+
   });
 
   // 1. RENK PALETİNİ OLUŞTUR
@@ -1023,6 +1021,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // =... switch (currentTool) ...
 
+
       // ... switch (currentTool) { ...
 
       case 'marker':
@@ -1143,63 +1142,41 @@ document.addEventListener('DOMContentLoaded', function () {
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('mouseleave', () => { isDrawing = false; isDragging = false; }); // Sadece durumu sıfırla
 
-  // 1. DOKUNMA BAŞLANGICI
-  canvas.addEventListener('touchstart', (e) => {
-    isScrolling = false; // Her dokunmada durumu sıfırla
-    const touch = e.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-    startDrawing(touch); // Normal çizim başlangıcını çağır
-  }, { passive: true }); // ÖNEMLİ: Tarayıcının kaydırmayı hemen başlatmasına izin ver
-
-  // 2. DOKUNARAK HAREKET
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); }, { passive: false });
   canvas.addEventListener('touchmove', (e) => {
-    // Çizim başlamadıysa veya bu bir kaydırma eylemi olarak belirlendiyse, hiçbir şey yapma
-    if (!isDrawing || isScrolling) return;
-
-    const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchStartX);
-    const deltaY = Math.abs(touch.clientY - touchStartY);
-
-    // Kullanıcı parmağını yeterince hareket ettirdiyse niyetini anla
-    if (deltaY > 5 && deltaY > deltaX) {
-      // Dikey hareket daha fazlaysa, bu bir kaydırmadır.
-      isScrolling = true;
-      // Çizim durumunu anında iptal et, böylece istenmeyen nokta kalmaz
-      isDrawing = false;
-      return;
+    // SADECE 'isDrawing' durumu aktifken varsayılan davranışı (kaydırmayı) engelle.
+    if (isDrawing) {
+      e.preventDefault();
+      draw(e.touches[0]);
     }
-
-    // Eğer buraya geldiyse, bu bir çizimdir. Kaydırmayı engelle ve çiz.
-    e.preventDefault();
-    draw(touch);
   }, { passive: false });
 
-
-  // 3. DOKUNMA SONU
+  // DOKUNMA BİTTİĞİNDE (MOBİL)
   canvas.addEventListener('touchend', (e) => {
-    const wasDragging = isDragging; // Sürükleme durumunu kontrol et
+    e.preventDefault();
 
-    if (!isScrolling) {
-      // Eğer bu bir kaydırma DEĞİLSE, normal bitirme işlemlerini yap
-      stopDrawing(e.changedTouches[0]);
+    // Sürüklenip sürüklenmediğini kontrol etmek için bir kopya al
+    const wasDragging = isDragging;
 
-      if (!wasDragging) {
-        // Eğer sürükleme de değilse, bu bir tıklamadır. Fill aracı için önemli.
-        const clickEvent = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          clientX: e.changedTouches[0].clientX,
-          clientY: e.changedTouches[0].clientY
-        });
-        e.target.dispatchEvent(clickEvent);
-      }
+    // Önce normal çizim bitirme fonksiyonunu çağır (bu, isDragging'i sıfırlar)
+    stopDrawing(e.changedTouches[0]);
+
+    // Şimdi, eğer bu bir sürükleme DEĞİLSE,
+    // bu dokunmanın bir "click" olduğunu simüle et.
+    if (!wasDragging) {
+      console.log("📱 Mobile tap detected, simulating a click event.");
+
+      // Gerçek bir click olayı oluştur
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        clientX: e.changedTouches[0].clientX,
+        clientY: e.changedTouches[0].clientY
+      });
+      // Oluşturduğun bu olayı canvas'a gönder
+      e.target.dispatchEvent(clickEvent);
     }
-
-    // Her durumda durumları temizle
-    isDrawing = false;
-    isScrolling = false;
-  });
+  }, { passive: false });
 
   // =======================================================
   // GÖREV 24 DÜZELTMESİ: NİHAİ TIKLAMA OLAY YÖNETİCİSİ
@@ -1937,6 +1914,41 @@ document.addEventListener('DOMContentLoaded', () => {
   if (downloadBtn) {
     downloadBtn.addEventListener('click', initiateOfflineDownload);
   }
+  // --- NAZİK İPUCU SİSTEMİ (DÜZELTİLMİŞ VERSİYON) ---
+  const canvasForHint = document.getElementById('coloringCanvas');
+  const scrollHintKey = 'hasSeenScrollHint'; // Tarayıcı hafızası için anahtar
+
+  const showScrollHint = () => {
+    // Eğer kullanıcı ipucunu daha önce görmüşse, olay dinleyiciyi kaldır ve çık.
+    if (localStorage.getItem(scrollHintKey)) {
+      canvasForHint.removeEventListener('touchstart', showScrollHint);
+      return;
+    }
+
+    // İpucu kutusunu oluştur
+    const hintBox = document.createElement('div');
+    hintBox.id = 'scrollHint';
+    hintBox.innerHTML = '✨ <strong>İpucu:</strong> Please use areas outside the canvas to scroll the page.';
+    document.body.appendChild(hintBox);
+
+    // 4 saniye sonra ipucunu yavaşça kaldır
+    setTimeout(() => {
+      hintBox.style.opacity = '0';
+      // Solma animasyonu bittikten SONRA (600ms sonra) DOM'dan kaldır.
+      setTimeout(() => {
+        hintBox.remove();
+      }, 600);
+    }, 4000);
+
+    // Kullanıcının ipucunu gördüğünü kaydet.
+    localStorage.setItem(scrollHintKey, 'true');
+
+    // Olay dinleyiciyi artık gereksiz olduğu için kaldır.
+    canvasForHint.removeEventListener('touchstart', showScrollHint);
+  };
+
+  // Kullanıcı canvas'a İLK KEZ dokunduğunda ipucunu göster.
+  canvasForHint.addEventListener('touchstart', showScrollHint, { once: true });
 });
 // ==================================================
 // PREMIUM MODAL SİSTEMİ

@@ -99,8 +99,7 @@ h1 {
     background-color: #FFFFFF;
     /* Beyaz renk */
     /* --- YENİ KODU BURAYA EKLEYİN --- */
-    touch-action: none !important;
-    /* Test için !important ekleyin */
+    touch-action: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -2642,4 +2641,26 @@ canvas.editing-mode:active {
     font-size: 13px;
     text-align: center;
     color: #FFD700;
+}
+
+/* styles.css dosyasının en sonuna ekleyin */
+
+#scrollHint {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    z-index: 10001;
+    font-size: 14px;
+    text-align: center;
+    max-width: 90%;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
 }
