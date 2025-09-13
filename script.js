@@ -1996,7 +1996,7 @@ function showPremiumModal() {
   closeBtn.onclick = closeModal;
   buyBtn.onclick = () => {
     // Kullanıcıyı yeni bir sekmede Gumroad ürün sayfanıza yönlendir
-    window.open('https://magicalcoloringgame.gumroad.com/l/skdwom', '_blank');
+    window.open('https://magicalcoloringgame.gumroad.com/l/premium', '_blank');
     closeModal();
   };
 
