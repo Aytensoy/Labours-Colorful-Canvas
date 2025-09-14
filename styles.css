@@ -863,6 +863,8 @@ link[rel="apple-touch-icon"] {
 /* Premium Tools Container */
 .premium-tools {
     display: inline-flex;
+    justify-content: center;
+    /* <<< BU SATIRI EKLEYİN */
     gap: 5px;
     margin-left: 10px;
     padding: 5px;
