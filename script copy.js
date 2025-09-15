@@ -811,6 +811,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   const ctx = canvas.getContext('2d', {
     willReadFrequently: true
+
+
   });
 
   // 1. RENK PALETİNİ OLUŞTUR
@@ -1912,6 +1914,41 @@ document.addEventListener('DOMContentLoaded', () => {
   if (downloadBtn) {
     downloadBtn.addEventListener('click', initiateOfflineDownload);
   }
+  // --- NAZİK İPUCU SİSTEMİ (DÜZELTİLMİŞ VERSİYON) ---
+  const canvasForHint = document.getElementById('coloringCanvas');
+  const scrollHintKey = 'hasSeenScrollHint'; // Tarayıcı hafızası için anahtar
+
+  const showScrollHint = () => {
+    // Eğer kullanıcı ipucunu daha önce görmüşse, olay dinleyiciyi kaldır ve çık.
+    if (localStorage.getItem(scrollHintKey)) {
+      canvasForHint.removeEventListener('touchstart', showScrollHint);
+      return;
+    }
+
+    // İpucu kutusunu oluştur
+    const hintBox = document.createElement('div');
+    hintBox.id = 'scrollHint';
+    hintBox.innerHTML = '✨ <strong>İpucu:</strong> Please use areas outside the canvas to scroll the page.';
+    document.body.appendChild(hintBox);
+
+    // 4 saniye sonra ipucunu yavaşça kaldır
+    setTimeout(() => {
+      hintBox.style.opacity = '0';
+      // Solma animasyonu bittikten SONRA (600ms sonra) DOM'dan kaldır.
+      setTimeout(() => {
+        hintBox.remove();
+      }, 600);
+    }, 4000);
+
+    // Kullanıcının ipucunu gördüğünü kaydet.
+    localStorage.setItem(scrollHintKey, 'true');
+
+    // Olay dinleyiciyi artık gereksiz olduğu için kaldır.
+    canvasForHint.removeEventListener('touchstart', showScrollHint);
+  };
+
+  // Kullanıcı canvas'a İLK KEZ dokunduğunda ipucunu göster.
+  canvasForHint.addEventListener('touchstart', showScrollHint, { once: true });
 });
 // ==================================================
 // PREMIUM MODAL SİSTEMİ
@@ -1959,7 +1996,7 @@ function showPremiumModal() {
   closeBtn.onclick = closeModal;
   buyBtn.onclick = () => {
     // Kullanıcıyı yeni bir sekmede Gumroad ürün sayfanıza yönlendir
-    window.open('https://magicalcoloringgame.gumroad.com/l/skdwom', '_blank');
+    window.open('https://magicalcoloringgame.gumroad.com/l/premium', '_blank');
     closeModal();
   };
 
@@ -1977,4 +2014,30 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // Teklifi daha sonra kullanmak üzere sakla
   deferredPrompt = e;
   console.log('beforeinstallprompt olayı yakalandı ve teklif saklandı.');
+});
+// =======================================================
+// MAGIC PHOTOS "AYNI DOSYAYI SEÇME" SORUNU İÇİN NİHAİ DÜZELTME
+// =======================================================
+// Bu kod, sayfa tamamen yüklendiğinde SADECE BİR KERE çalışır.
+document.addEventListener('DOMContentLoaded', function () {
+  // Magic Photos tarafından kullanılan kalıcı input elementini bul
+  const magicInput = document.getElementById('magicPhotoInput');
+
+  // Eğer bu element varsa...
+  if (magicInput) {
+    // ...üzerine bir 'change' (dosya seçildi) olayı dinleyicisi ekle.
+    magicInput.addEventListener('change', function (event) {
+
+      // DİKKAT: Bu dinleyicinin TEK GÖREVİ, dosya seçildikten sonra
+      // input'un değerini sıfırlamaktır. Mevcut dosya yükleme
+      // mantığınıza HİÇ KARIŞMAZ.
+
+      // Küçük bir gecikme, diğer 'change' olaylarının
+      // (yani asıl dosya yükleme işleminin) önce tamamlanmasını garanti eder.
+      setTimeout(() => {
+        event.target.value = '';
+        console.log('Magic Photo input hafızası sıfırlandı.');
+      }, 100);
+    });
+  }
 });

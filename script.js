@@ -2015,3 +2015,22 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   console.log('beforeinstallprompt olayı yakalandı ve teklif saklandı.');
 });
+// =======================================================
+// MAGIC PHOTOS "AYNI DOSYAYI SEÇME" SORUNU İÇİN NİHAİ DÜZELTME
+// =======================================================
+// Bu kod, sayfa tamamen yüklendiğinde SADECE BİR KERE çalışır.
+document.addEventListener('DOMContentLoaded', function () {
+  // Magic Photos ve diğer yüklemeler tarafından kullanılan genel input elementini bul
+  const fileInput = document.getElementById('globalFileInput');
+
+  // Eğer bu element varsa...
+  if (fileInput) {
+    // ...üzerine bir 'change' (dosya seçildi) olayı dinleyicisi ekle.
+    fileInput.addEventListener('click', function (event) {
+      // Tıklanma eylemi gerçekleştiğinde, dosya seçilmeden hemen önce değeri sıfırla.
+      // Bu, aynı dosyanın tekrar seçilmesi durumunda 'change' olayının tetiklenmesini sağlar.
+      event.target.value = '';
+      console.log('Dosya input hafızası sıfırlandı.');
+    });
+  }
+});
