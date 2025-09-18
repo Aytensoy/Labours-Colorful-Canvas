@@ -1997,12 +1997,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function setupGiftingSystem() {
 
-  // Kod listemiz artık çok basit.
-  // Bu kodlar, oyununuzu ziyaret eden herkes tarafından görülebilir,
-  // ancak sadece satın alanlar bu kodların "premium açtığını" bilecektir.
-  // Bu, küçük ve yeni başlayan bir işletme için yeterli bir güvenlik seviyesidir.
   const validGiftCodes = new Set([
-    // Arkadaşlarınıza verdiğiniz eski kodlar:
+
     "MAGIC-GIFT-2025",
     "COLOR-FUN-123",
     "PREMIUM-KID-789",
@@ -2069,14 +2065,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. "Why Go Premium?" bölümünü gizle.
     const premiumSection = document.getElementById('premium-benefits-section');
     if (premiumSection) {
-      premiumSection.style.display = 'none';
+      premiumSection.style.cssText = 'display: none !important;';
       console.log('"Why Go Premium" bölümü gizlendi.');
     }
 
     // 2. E-posta bülteni aboneliği butonunu gizle.
     const newsletterTrigger = document.getElementById('newsletterTrigger');
     if (newsletterTrigger) {
-      newsletterTrigger.style.display = 'none';
+      newsletterTrigger.style.cssText = 'display: none !important;';
       console.log('Bülten aboneliği butonu gizlendi.');
     }
 
@@ -2092,7 +2088,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (premiumModal) {
             const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
             if (premiumBuyButton) {
-              premiumBuyButton.style.display = 'none'; // SATIN AL BUTONUNU GİZLE!
+              premiumBuyButton.style.cssText = 'display: none !important;';// SATIN AL BUTONUNU GİZLE!
               console.log('Premium modal içindeki satın alma butonu başarıyla gizlendi.');
               observer.disconnect(); // Görev tamamlandı, casusu devreden çıkar.
             }

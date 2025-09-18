@@ -1,8 +1,8 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A23)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A24)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-A23';
+const CACHE_NAME = 'magical-coloring-A24';
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
