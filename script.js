@@ -1992,23 +1992,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // =======================================================
-// BASİT VE OTOMATİK HEDİYE KODU SİSTEMİ (v4 - Final)
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (v5 - Final)
+// Bu blok, hem Hediye Sistemini hem de Etsy Güvenliğini yönetir.
 // =======================================================
 
+// Önce Hediye Sistemi fonksiyonunu tanımlıyoruz.
 function setupGiftingSystem() {
-
   const validGiftCodes = new Set([
-
     "MAGIC-GIFT-2025",
     "COLOR-FUN-123",
     "PREMIUM-KID-789",
     "BIRTHDAY-SPECIAL",
-
-    // Etsy'deki TÜM müşterilerinize vereceğiniz TEK kod:
     "ETSYMAGIC2025"
   ]);
 
-  const redeemButton = document.getElementById('redeemBtn');
+  const redeemButton = document.getElementById('redeemGiftBtn');
   if (!redeemButton) {
     console.error("Hediye kodu butonu bulunamadı!");
     return;
@@ -2020,84 +2018,61 @@ function setupGiftingSystem() {
 
     const formattedUserCode = userCode.trim().toUpperCase();
 
-    // Girilen kod, listemizde var mı diye kontrol et.
     if (validGiftCodes.has(formattedUserCode)) {
-
-      // KODUN DAHA ÖNCE KULLANILIP KULLANILMADIĞINI KONTROL ET
       let usedCodes = JSON.parse(localStorage.getItem('usedGiftCodes')) || [];
       if (usedCodes.includes(formattedUserCode)) {
         alert("This gift code has already been used on this device. Premium features should already be active.");
         return;
       }
 
-      // Kod geçerli ve daha önce kullanılmamış.
       alert("Congratulations! 🎉 Premium features have been activated. The page will now reload.");
       localStorage.setItem('isPremium', 'true');
 
-      // Kodu "kullanıldı" olarak işaretle.
       usedCodes.push(formattedUserCode);
       localStorage.setItem('usedGiftCodes', JSON.stringify(usedCodes));
 
       location.reload();
-
     } else {
       alert("Sorry, that gift code is not valid. Please check and try again.");
     }
   });
 }
 
-// Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır.
-document.addEventListener('DOMContentLoaded', setupGiftingSystem);
-// =======================================================
-// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v4 - CSS Sınıfı Metodu)
-// =======================================================
+// Şimdi, sayfa tamamen yüklendiğinde çalışacak TEK BİR ana olay dinleyici oluşturuyoruz.
 document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
 
+  // GÖREV 1: Hediye sistemini çalıştır.
+  setupGiftingSystem();
+  console.log('Hediye kodu sistemi başarıyla kuruldu.');
+
+  // GÖREV 2: Etsy güvenlik kontrolünü yap.
+  const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('source') === 'etsy') {
     console.log("Etsy ziyaretçisi algılandı. Gizleme sınıfı (.etsy-hidden) eklenecek.");
 
-    // --- STATİK ELEMENTLERİ GİZLE ---
-
-    // 1. "Why Go Premium?" bölümünü gizle.
+    // Statik elementleri gizle
     const premiumSection = document.getElementById('premium-benefits-section');
     if (premiumSection) {
       premiumSection.classList.add('etsy-hidden');
       console.log('"Why Go Premium" bölümüne gizleme sınıfı eklendi.');
     }
-
-    // 2. E-posta bülteni aboneliği butonunu gizle.
     const newsletterTrigger = document.getElementById('newsletterTrigger');
     if (newsletterTrigger) {
       newsletterTrigger.classList.add('etsy-hidden');
       console.log('Bülten aboneliği butonuna gizleme sınıfı eklendi.');
     }
 
-    // --- DİNAMİK ELEMENTLERİ İZLE VE GİZLE ---
+    // Dinamik (sonradan oluşan) Premium Penceresini izle ve gizle
+    const observer = new MutationObserver(() => {
+      const premiumModal = document.getElementById('premiumModal');
+      if (premiumModal) {
+        const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
+        const pricingSection = premiumModal.querySelector('.launch-pricing');
 
-    const observer = new MutationObserver((mutationsList, observer) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-          const premiumModal = document.getElementById('premiumModal');
-          if (premiumModal) {
-            const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
-            // Butonun HEMEN KENDİSİNİ değil, onu içeren daha büyük bir bölümü gizlemek daha garantidir.
-            // Örneğin, fiyatlandırma bölümünü gizleyelim.
-            const pricingSection = premiumModal.querySelector('.launch-pricing');
-
-            if (premiumBuyButton) {
-              premiumBuyButton.classList.add('etsy-hidden');
-              console.log('Premium modal içindeki satın alma butonuna gizleme sınıfı eklendi.');
-            }
-            if (pricingSection) {
-              pricingSection.classList.add('etsy-hidden');
-              console.log('Premium modal içindeki fiyatlandırma bölümüne gizleme sınıfı eklendi.');
-            }
-          }
-        }
+        if (premiumBuyButton) premiumBuyButton.classList.add('etsy-hidden');
+        if (pricingSection) pricingSection.classList.add('etsy-hidden');
       }
     });
-
     observer.observe(document.body, { childList: true, subtree: true });
   }
 });
