@@ -2049,55 +2049,55 @@ function setupGiftingSystem() {
 // Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır.
 document.addEventListener('DOMContentLoaded', setupGiftingSystem);
 // =======================================================
-// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v3 - En Sağlam Versiyon)
+// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v4 - CSS Sınıfı Metodu)
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Ziyaretçinin geldiği web adresini kontrol et
   const urlParams = new URLSearchParams(window.location.search);
 
-  // Eğer adresin içinde "?source=etsy" notu varsa...
   if (urlParams.get('source') === 'etsy') {
-    console.log("Etsy ziyaretçisi algılandı. Satışla ilgili tüm unsurlar gizlenecek.");
+    console.log("Etsy ziyaretçisi algılandı. Gizleme sınıfı (.etsy-hidden) eklenecek.");
 
     // --- STATİK ELEMENTLERİ GİZLE ---
-    // Bu elementler sayfa yüklendiğinde zaten var olduğu için hemen gizleyebiliriz.
 
     // 1. "Why Go Premium?" bölümünü gizle.
     const premiumSection = document.getElementById('premium-benefits-section');
     if (premiumSection) {
-      premiumSection.style.cssText = 'display: none !important;';
-      console.log('"Why Go Premium" bölümü gizlendi.');
+      premiumSection.classList.add('etsy-hidden');
+      console.log('"Why Go Premium" bölümüne gizleme sınıfı eklendi.');
     }
 
     // 2. E-posta bülteni aboneliği butonunu gizle.
     const newsletterTrigger = document.getElementById('newsletterTrigger');
     if (newsletterTrigger) {
-      newsletterTrigger.style.cssText = 'display: none !important;';
-      console.log('Bülten aboneliği butonu gizlendi.');
+      newsletterTrigger.classList.add('etsy-hidden');
+      console.log('Bülten aboneliği butonuna gizleme sınıfı eklendi.');
     }
 
-    // --- DİNAMİK ELEMENTLERİ İZLE VE GİZLE (EN SAĞLAM YÖNTEM) ---
-    // Bu kod, sayfaya sonradan eklenen Premium Penceresini "izler".
+    // --- DİNAMİK ELEMENTLERİ İZLE VE GİZLE ---
 
     const observer = new MutationObserver((mutationsList, observer) => {
-      // Sayfada bir değişiklik olduğunda bu kod çalışır.
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
-          // Sayfaya yeni bir element eklendi mi diye kontrol et.
           const premiumModal = document.getElementById('premiumModal');
           if (premiumModal) {
             const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
+            // Butonun HEMEN KENDİSİNİ değil, onu içeren daha büyük bir bölümü gizlemek daha garantidir.
+            // Örneğin, fiyatlandırma bölümünü gizleyelim.
+            const pricingSection = premiumModal.querySelector('.launch-pricing');
+
             if (premiumBuyButton) {
-              premiumBuyButton.style.cssText = 'display: none !important;';// SATIN AL BUTONUNU GİZLE!
-              console.log('Premium modal içindeki satın alma butonu başarıyla gizlendi.');
-              observer.disconnect(); // Görev tamamlandı, casusu devreden çıkar.
+              premiumBuyButton.classList.add('etsy-hidden');
+              console.log('Premium modal içindeki satın alma butonuna gizleme sınıfı eklendi.');
+            }
+            if (pricingSection) {
+              pricingSection.classList.add('etsy-hidden');
+              console.log('Premium modal içindeki fiyatlandırma bölümüne gizleme sınıfı eklendi.');
             }
           }
         }
       }
     });
 
-    // Casusumuza, sayfanın body'sini ve tüm alt elementlerini izlemesini söyle.
     observer.observe(document.body, { childList: true, subtree: true });
   }
 });
