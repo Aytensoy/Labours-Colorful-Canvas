@@ -1992,7 +1992,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // =======================================================
-// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v2 - Final)
+// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v3 - En Sağlam Versiyon)
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
   // Ziyaretçinin geldiği web adresini kontrol et
@@ -2000,37 +2000,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Eğer adresin içinde "?source=etsy" notu varsa...
   if (urlParams.get('source') === 'etsy') {
-    console.log("Etsy'den gelen ziyaretçi algılandı. Satışla ilgili tüm unsurlar gizleniyor.");
+    console.log("Etsy ziyaretçisi algılandı. Satışla ilgili tüm unsurlar gizlenecek.");
 
-    // 1. Premium Modal'ın içindeki ana SATIN ALMA butonunu bul ve gizle.
-    // Bu buton, showPremiumModal() fonksiyonu içinde dinamik olarak oluşturuluyor.
-    // Biz de o fonksiyonu, butonu gizleyecek şekilde güncelleyelim.
-    const originalShowPremiumModal = window.showPremiumModal;
-    window.showPremiumModal = function () {
-      // Orijinal fonksiyonu çağırarak modal'ı oluştur.
-      originalShowPremiumModal();
+    // --- STATİK ELEMENTLERİ GİZLE ---
+    // Bu elementler sayfa yüklendiğinde zaten var olduğu için hemen gizleyebiliriz.
 
-      // Modal oluştuktan HEMEN SONRA, içindeki satın alma butonunu bul.
-      const premiumBuyButton = document.querySelector('#premiumModal .buy-premium-btn');
-      if (premiumBuyButton) {
-        premiumBuyButton.style.display = 'none'; // Butonu gizle!
-        console.log('Premium modal içindeki satın alma butonu gizlendi.');
-      }
-    };
-
-    // 2. "Why Go Premium?" ve altındaki faydaları içeren bölümü gizle.
-    // (Adım 2'de bu bölüme ID vermiştik)
+    // 1. "Why Go Premium?" bölümünü gizle.
     const premiumSection = document.getElementById('premium-benefits-section');
     if (premiumSection) {
       premiumSection.style.display = 'none';
       console.log('"Why Go Premium" bölümü gizlendi.');
     }
 
-    // 3. E-posta bülteni aboneliği butonunu gizle.
+    // 2. E-posta bülteni aboneliği butonunu gizle.
     const newsletterTrigger = document.getElementById('newsletterTrigger');
     if (newsletterTrigger) {
       newsletterTrigger.style.display = 'none';
       console.log('Bülten aboneliği butonu gizlendi.');
     }
+
+    // --- DİNAMİK ELEMENTLERİ İZLE VE GİZLE (EN SAĞLAM YÖNTEM) ---
+    // Bu kod, sayfaya sonradan eklenen Premium Penceresini "izler".
+
+    const observer = new MutationObserver((mutationsList, observer) => {
+      // Sayfada bir değişiklik olduğunda bu kod çalışır.
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          // Sayfaya yeni bir element eklendi mi diye kontrol et.
+          const premiumModal = document.getElementById('premiumModal');
+          if (premiumModal) {
+            const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
+            if (premiumBuyButton) {
+              premiumBuyButton.style.display = 'none'; // SATIN AL BUTONUNU GİZLE!
+              console.log('Premium modal içindeki satın alma butonu başarıyla gizlendi.');
+              observer.disconnect(); // Görev tamamlandı, casusu devreden çıkar.
+            }
+          }
+        }
+      }
+    });
+
+    // Casusumuza, sayfanın body'sini ve tüm alt elementlerini izlemesini söyle.
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 });
