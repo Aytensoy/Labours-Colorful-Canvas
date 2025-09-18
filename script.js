@@ -1699,49 +1699,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('DOMContentLoaded', initialize);
 
 })();
-// =======================================================
-// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v2 - Final)
-// =======================================================
-document.addEventListener('DOMContentLoaded', () => {
-  // Ziyaretçinin geldiği web adresini kontrol et
-  const urlParams = new URLSearchParams(window.location.search);
 
-  // Eğer adresin içinde "?source=etsy" notu varsa...
-  if (urlParams.get('source') === 'etsy') {
-    console.log("Etsy'den gelen ziyaretçi algılandı. Satışla ilgili tüm unsurlar gizleniyor.");
-
-    // 1. Premium Modal'ın içindeki ana SATIN ALMA butonunu bul ve gizle.
-    // Bu buton, showPremiumModal() fonksiyonu içinde dinamik olarak oluşturuluyor.
-    // Biz de o fonksiyonu, butonu gizleyecek şekilde güncelleyelim.
-    const originalShowPremiumModal = window.showPremiumModal;
-    window.showPremiumModal = function () {
-      // Orijinal fonksiyonu çağırarak modal'ı oluştur.
-      originalShowPremiumModal();
-
-      // Modal oluştuktan HEMEN SONRA, içindeki satın alma butonunu bul.
-      const premiumBuyButton = document.querySelector('#premiumModal .buy-premium-btn');
-      if (premiumBuyButton) {
-        premiumBuyButton.style.display = 'none'; // Butonu gizle!
-        console.log('Premium modal içindeki satın alma butonu gizlendi.');
-      }
-    };
-
-    // 2. "Why Go Premium?" ve altındaki faydaları içeren bölümü gizle.
-    // (Adım 2'de bu bölüme ID vermiştik)
-    const premiumSection = document.getElementById('premium-benefits-section');
-    if (premiumSection) {
-      premiumSection.style.display = 'none';
-      console.log('"Why Go Premium" bölümü gizlendi.');
-    }
-
-    // 3. E-posta bülteni aboneliği butonunu gizle.
-    const newsletterTrigger = document.getElementById('newsletterTrigger');
-    if (newsletterTrigger) {
-      newsletterTrigger.style.display = 'none';
-      console.log('Bülten aboneliği butonu gizlendi.');
-    }
-  }
-});
 // --- YENİ VE GELİŞTİRİLMİŞ CANVAS YAZDIRMA FONKSİYONU ---
 function printCanvas() {
   const canvas = document.getElementById('coloringCanvas');
@@ -2031,5 +1989,48 @@ document.addEventListener('DOMContentLoaded', function () {
       event.target.value = '';
       console.log('Dosya input hafızası sıfırlandı.');
     });
+  }
+});
+// =======================================================
+// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v2 - Final)
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Ziyaretçinin geldiği web adresini kontrol et
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // Eğer adresin içinde "?source=etsy" notu varsa...
+  if (urlParams.get('source') === 'etsy') {
+    console.log("Etsy'den gelen ziyaretçi algılandı. Satışla ilgili tüm unsurlar gizleniyor.");
+
+    // 1. Premium Modal'ın içindeki ana SATIN ALMA butonunu bul ve gizle.
+    // Bu buton, showPremiumModal() fonksiyonu içinde dinamik olarak oluşturuluyor.
+    // Biz de o fonksiyonu, butonu gizleyecek şekilde güncelleyelim.
+    const originalShowPremiumModal = window.showPremiumModal;
+    window.showPremiumModal = function () {
+      // Orijinal fonksiyonu çağırarak modal'ı oluştur.
+      originalShowPremiumModal();
+
+      // Modal oluştuktan HEMEN SONRA, içindeki satın alma butonunu bul.
+      const premiumBuyButton = document.querySelector('#premiumModal .buy-premium-btn');
+      if (premiumBuyButton) {
+        premiumBuyButton.style.display = 'none'; // Butonu gizle!
+        console.log('Premium modal içindeki satın alma butonu gizlendi.');
+      }
+    };
+
+    // 2. "Why Go Premium?" ve altındaki faydaları içeren bölümü gizle.
+    // (Adım 2'de bu bölüme ID vermiştik)
+    const premiumSection = document.getElementById('premium-benefits-section');
+    if (premiumSection) {
+      premiumSection.style.display = 'none';
+      console.log('"Why Go Premium" bölümü gizlendi.');
+    }
+
+    // 3. E-posta bülteni aboneliği butonunu gizle.
+    const newsletterTrigger = document.getElementById('newsletterTrigger');
+    if (newsletterTrigger) {
+      newsletterTrigger.style.display = 'none';
+      console.log('Bülten aboneliği butonu gizlendi.');
+    }
   }
 });
