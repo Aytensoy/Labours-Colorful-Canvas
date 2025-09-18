@@ -1992,6 +1992,67 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // =======================================================
+// BASİT VE OTOMATİK HEDİYE KODU SİSTEMİ (v4 - Final)
+// =======================================================
+
+function setupGiftingSystem() {
+
+  // Kod listemiz artık çok basit.
+  // Bu kodlar, oyununuzu ziyaret eden herkes tarafından görülebilir,
+  // ancak sadece satın alanlar bu kodların "premium açtığını" bilecektir.
+  // Bu, küçük ve yeni başlayan bir işletme için yeterli bir güvenlik seviyesidir.
+  const validGiftCodes = new Set([
+    // Arkadaşlarınıza verdiğiniz eski kodlar:
+    "MAGIC-GIFT-2025",
+    "COLOR-FUN-123",
+    "PREMIUM-KID-789",
+    "BIRTHDAY-SPECIAL",
+
+    // Etsy'deki TÜM müşterilerinize vereceğiniz TEK kod:
+    "ETSYMAGIC2025"
+  ]);
+
+  const redeemButton = document.getElementById('redeemBtn');
+  if (!redeemButton) {
+    console.error("Hediye kodu butonu bulunamadı!");
+    return;
+  }
+
+  redeemButton.addEventListener('click', () => {
+    const userCode = prompt("Please enter your gift code:", "");
+    if (!userCode || userCode.trim() === "") return;
+
+    const formattedUserCode = userCode.trim().toUpperCase();
+
+    // Girilen kod, listemizde var mı diye kontrol et.
+    if (validGiftCodes.has(formattedUserCode)) {
+
+      // KODUN DAHA ÖNCE KULLANILIP KULLANILMADIĞINI KONTROL ET
+      let usedCodes = JSON.parse(localStorage.getItem('usedGiftCodes')) || [];
+      if (usedCodes.includes(formattedUserCode)) {
+        alert("This gift code has already been used on this device. Premium features should already be active.");
+        return;
+      }
+
+      // Kod geçerli ve daha önce kullanılmamış.
+      alert("Congratulations! 🎉 Premium features have been activated. The page will now reload.");
+      localStorage.setItem('isPremium', 'true');
+
+      // Kodu "kullanıldı" olarak işaretle.
+      usedCodes.push(formattedUserCode);
+      localStorage.setItem('usedGiftCodes', JSON.stringify(usedCodes));
+
+      location.reload();
+
+    } else {
+      alert("Sorry, that gift code is not valid. Please check and try again.");
+    }
+  });
+}
+
+// Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır.
+document.addEventListener('DOMContentLoaded', setupGiftingSystem);
+// =======================================================
 // ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v3 - En Sağlam Versiyon)
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
