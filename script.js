@@ -1699,50 +1699,49 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('DOMContentLoaded', initialize);
 
 })();
-// --- YENİ HEDİYE KODU SİSTEMİ (DOSYANIN EN SONUNA EKLEYİN) ---
+// =======================================================
+// ETSY'YE ÖZEL GÜVENLİK KONTROLÜ (v2 - Final)
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Ziyaretçinin geldiği web adresini kontrol et
+  const urlParams = new URLSearchParams(window.location.search);
 
-function setupGiftingSystem() {
-  // Buraya istediğiniz kadar hediye kodu ekleyebilirsiniz
-  const validGiftCodes = [
-    "MAGIC-GIFT-2025",
-    "COLOR-FUN-123",
-    "PREMIUM-KID-789",
-    "BIRTHDAY-SPECIAL"
-  ];
+  // Eğer adresin içinde "?source=etsy" notu varsa...
+  if (urlParams.get('source') === 'etsy') {
+    console.log("Etsy'den gelen ziyaretçi algılandı. Satışla ilgili tüm unsurlar gizleniyor.");
 
-  const redeemButton = document.getElementById('redeemGiftBtn');
-  if (!redeemButton) {
-    console.error("Hediye kodu butonu bulunamadı!");
-    return;
+    // 1. Premium Modal'ın içindeki ana SATIN ALMA butonunu bul ve gizle.
+    // Bu buton, showPremiumModal() fonksiyonu içinde dinamik olarak oluşturuluyor.
+    // Biz de o fonksiyonu, butonu gizleyecek şekilde güncelleyelim.
+    const originalShowPremiumModal = window.showPremiumModal;
+    window.showPremiumModal = function () {
+      // Orijinal fonksiyonu çağırarak modal'ı oluştur.
+      originalShowPremiumModal();
+
+      // Modal oluştuktan HEMEN SONRA, içindeki satın alma butonunu bul.
+      const premiumBuyButton = document.querySelector('#premiumModal .buy-premium-btn');
+      if (premiumBuyButton) {
+        premiumBuyButton.style.display = 'none'; // Butonu gizle!
+        console.log('Premium modal içindeki satın alma butonu gizlendi.');
+      }
+    };
+
+    // 2. "Why Go Premium?" ve altındaki faydaları içeren bölümü gizle.
+    // (Adım 2'de bu bölüme ID vermiştik)
+    const premiumSection = document.getElementById('premium-benefits-section');
+    if (premiumSection) {
+      premiumSection.style.display = 'none';
+      console.log('"Why Go Premium" bölümü gizlendi.');
+    }
+
+    // 3. E-posta bülteni aboneliği butonunu gizle.
+    const newsletterTrigger = document.getElementById('newsletterTrigger');
+    if (newsletterTrigger) {
+      newsletterTrigger.style.display = 'none';
+      console.log('Bülten aboneliği butonu gizlendi.');
+    }
   }
-
-  redeemButton.addEventListener('click', () => {
-    const userCode = prompt("Please enter your gift code:", "");
-
-    if (userCode === null || userCode.trim() === "") {
-      // Kullanıcı iptal etti veya boş bıraktı
-      return;
-    }
-
-    // Kodu büyük/küçük harfe duyarsız hale getir ve boşlukları temizle
-    const formattedUserCode = userCode.trim().toUpperCase();
-
-    if (validGiftCodes.includes(formattedUserCode)) {
-      // Kod geçerli!
-      alert("Congratulations! 🎉 Premium features have been activated. The page will now reload.");
-      localStorage.setItem('isPremium', 'true');
-      location.reload();
-    } else {
-      // Kod geçersiz
-      alert("Sorry, that gift code is not valid. Please check and try again.");
-    }
-  });
-}
-
-// Sayfa yüklendiğinde hediye sistemi fonksiyonunu çağır
-document.addEventListener('DOMContentLoaded', setupGiftingSystem);
-
-
+});
 // --- YENİ VE GELİŞTİRİLMİŞ CANVAS YAZDIRMA FONKSİYONU ---
 function printCanvas() {
   const canvas = document.getElementById('coloringCanvas');
