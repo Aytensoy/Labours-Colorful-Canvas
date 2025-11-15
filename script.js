@@ -1931,10 +1931,15 @@ function showPremiumModal() {
                   <li>🖍️ <strong>Unique Creative Tools:</strong> Master your art with the new Marker & Pastel!</li>
               </ul>
 
+              <!-- ========================================== -->
+              <!--   YENİ VE DOĞRU FİYATLANDIRMA BÖLÜMÜ      -->
+              <!-- ========================================== -->
               <div class="launch-pricing">
-                  <p class="regular-price">Regular Price: <span class="crossed">$19.99</span></p>
+                  <p class="regular-price">Regular Price: <span class="crossed">$24.99</span></p>
                   <p class="sale-price">🚀 Launch Price: $14.99</p>
-                  <p class="savings">You Save $5 • Limited Time Offer!</p>
+                  <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1em; margin-top: 5px;">
+                      You Save $10 • Limited Time Offer!
+                  </p>
               </div>
 
               <button class="buy-premium-btn">🎨 Get Premium Now</button>
@@ -1951,9 +1956,10 @@ function showPremiumModal() {
   const closeModal = () => modal.remove();
 
   closeBtn.onclick = closeModal;
+
+  // EN ÖNEMLİ DÜZELTME: Buton artık premium.html'e yönlendiriyor!
   buyBtn.onclick = () => {
-    // Kullanıcıyı yeni bir sekmede Gumroad ürün sayfanıza yönlendir
-    window.open('https://magicalcoloringgame.gumroad.com/l/premium', '_blank');
+    window.location.href = 'premium.html';
     closeModal();
   };
 
