@@ -2674,3 +2674,77 @@ canvas.editing-mode:active {
     display: none !important;
     visibility: hidden !important;
 }
+
+/* ==================================================
+   ANA SAYFA - GİRİŞ BÖLÜMÜ STİLLERİ
+   ================================================== */
+.game-introduction,
+.why-premium-section {
+    background-color: rgba(255, 255, 255, 0.567);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px 40px;
+    text-align: left;
+    max-width: 800px;
+    margin: 40px auto;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.game-introduction h2 {
+    text-align: center;
+    /* Başlığı ortala */
+    font-size: 2.2em;
+    /* Başlığı büyüt */
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.game-introduction h3 {
+    font-size: 1.5em;
+    color: #34495e;
+    margin-top: 30px;
+}
+
+.game-introduction>ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.game-introduction>ul>li {
+    font-size: 1.1em;
+    padding-left: 35px;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.game-introduction>ul>li::before {
+    content: '✨';
+    /* Varsayılan ikonu belirle */
+    position: absolute;
+    left: 0;
+    top: 2px;
+    font-size: 1.2em;
+}
+
+/* İkonları özelleştirme */
+.game-introduction>ul>li:nth-of-type(1)::before {
+    content: '💾';
+}
+
+.game-introduction>ul>li:nth-of-type(2)::before {
+    content: '🎨';
+}
+
+.game-introduction>ul>li:nth-of-type(3)::before {
+    content: '🖌️';
+}
+
+.game-introduction>ul>li:nth-of-type(7)::before {
+    content: '⬆️';
+}
+
+.game-introduction ul ul {
+    list-style-type: '-';
+    padding-left: 20px;
+    margin-top: 10px;
+}
