@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Magical Coloring Game</title>
+    <!-- Sitenizin ana stil dosyasını ve Font Awesome'ı bağlıyoruz -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            /* Sayfa arkaplanı */
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.587);
+            /* %92 opaklıkta beyaz */
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .contact-container h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .contact-details {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+            text-align: left;
+            /* Detayları sola hizala */
+            display: inline-block;
+            /* Ortalamak için */
+        }
+
+        .contact-details li {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-details i {
+            color: #ff69b4;
+            /* İkon rengi */
+            font-size: 1.5em;
+            margin-right: 15px;
+            width: 30px;
+            /* İkonların hizalı durması için */
+        }
+
+        .contact-details a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .contact-details a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="contact-container">
+        <h1>Get In Touch</h1>
+        <p>We'd love to hear from you! If you have any questions, feedback, or just want to say hello, feel free to
+            reach out to us.</p>
+
+        <ul class="contact-details">
+            <li>
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <strong>Email Us:</strong><br>
+                    <a href="mailto:hello@magicalcoloringgame.com">hello@magicalcoloringgame.com</a>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                    <strong>Mailing Address:</strong><br>
+                    PK 1, 16860 İznik/Bursa, Türkiye
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</body>
+
+</html>
