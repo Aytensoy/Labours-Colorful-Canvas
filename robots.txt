@@ -1,0 +1,6 @@
+# Google gibi tüm arama motorlarına sitenin her yerini tarama izni ver.
+User-agent: *
+Allow: /
+
+# Google'a site haritasının nerede olduğunu bildir.
+Sitemap: https://www.magicalcoloringgame.com/sitemap.xml

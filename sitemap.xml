@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   
+   <!-- 1. Ana Sayfa (En Yüksek Öncelik) -->
+   <url>
+      <loc>https://www.magicalcoloringgame.com/</loc>
+      <lastmod>2025-11-16</lastmod>
+      <priority>1.00</priority>
+   </url>
+   
+   <!-- 2. Premium Sayfası (Satın Alma Sayfası Olduğu İçin Yüksek Öncelik) -->
+   <url>
+      <loc>https://www.magicalcoloringgame.com/premium.html</loc>
+      <lastmod>2025-11-16</lastmod>
+      <priority>0.90</priority>
+   </url>
+   
+   <!-- 3. Hakkımızda Sayfası (Güven ve Hikaye İçin Çok Önemli) -->
+   <url>
+      <loc>https://www.magicalcoloringgame.com/about.html</loc>
+      <lastmod>2025-11-16</lastmod>
+      <priority>0.80</priority>
+   </url>
+   
+   <!-- 4. İletişim Sayfası (Ulaşılabilirlik İçin Önemli) -->
+   <url>
+      <loc>https://www.magicalcoloringgame.com/contact.html</loc>
+      <lastmod>2025-11-16</lastmod>
+      <priority>0.80</priority>
+   </url>
+   
+   <!-- 5. Diğer Yasal Sayfalar -->
+   <url>
+      <loc>https://www.magicalcoloringgame.com/privacy.html</loc>
+      <lastmod>2025-11-15</lastmod>
+      <priority>0.70</priority>
+   </url>
+    <url>
+      <loc>https://www.magicalcoloringgame.com/terms.html</loc>
+      <lastmod>2025-11-15</lastmod>
+      <priority>0.70</priority>
+   </url>
+   <url>
+      <loc>https://www.magicalcoloringgame.com/refund.html</loc>
+      <lastmod>2025-11-15</lastmod>
+      <priority>0.70</priority>
+   </url>
+</urlset>
