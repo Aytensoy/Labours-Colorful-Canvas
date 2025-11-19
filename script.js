@@ -2009,7 +2009,8 @@ function setupGiftingSystem() {
     "COLOR-FUN-123",
     "PREMIUM-KID-789",
     "BIRTHDAY-SPECIAL",
-    "ETSYMAGIC2025"
+    "ETSYMAGIC2025",
+    "IZNIK-BARIS"
   ]);
 
   const redeemButton = document.getElementById('redeemGiftBtn');

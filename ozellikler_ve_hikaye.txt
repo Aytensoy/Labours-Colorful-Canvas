@@ -1,0 +1,37 @@
+Magical Coloring Game - Özellikler ve Kurucu Hikayesi
+
+--- KURUCUNUN HİKAYESİ ---
+
+Benim adım Ayten, 61 yaşında, İstanbul'da yaşayan ve öğrenmeye hayatı boyunca tutkuyla bağlı bir babaanneyim.
+
+Bu oyun, basit bir ilhamla başladı: 2 yaşındaki torunum. Onun için %100 güvenli, yaratıcı ve neşe dolu bir dijital oyun alanı yaratmak istedim.
+
+Bir yazılımcı ekibim yoktu, ama güçlü bir fikrim ve öğrenme azmim vardı. Bu yüzden, bulabileceğim en modern yaratıcı ortakla, yani Yapay Zeka ile bir ekip oldum. Gündüzleri torunuma bakıp ev işleriyle ilgilenirken, geceleri Yapay Zeka benim yorulmak bilmeyen kodlama asistanım oldu. Bu bir yıllık süreçte, bir babaannenin sevgisini işlevsel ve güzel bir koda dönüştürmeme yardımcı oldu.
+
+Ama şunu netleştireyim: Bu oyundaki her fikir, her renk seçimi, her sihirli özellik ve oyunun tüm ruhu benim kalbimden çıktı. Yapay Zeka bir araçtı, ama bu projenin mimarı sevgiydi.
+
+Kişisel bir proje olarak başlayan bu macera, şimdi tüm ailelerle paylaşmaktan heyecan duyduğum bir hayale dönüştü. Burada olduğunuz için teşekkür ederim. Her satın alım, hayal kurmaya cesaret eden bir babaanneyi destekliyor ve sevgiyle doğru araçlar birleştiğinde her şeyin mümkün olduğunu gösteriyor.
+
+--- ANA ÖZELLİKLER (Tüm Kullanıcılar İçin ÜCRETSİZ) ---
+
+- Kendi Boyama Sayfanı Yükle: Kullanıcılar kendi çizimlerini veya istedikleri herhangi bir boyama sayfasını oyuna yükleyip boyayabilirler.
+- Geniş Araç Seti: Kurşun kalem, fırça, marker, sulu boya, pastel ve sprey boya gibi birçok farklı araç.
+- Sihirli Araçlar:
+  - Star Wand (Yıldız Asa): Tuvale anında parlayan yıldızlar ekler.
+  - Flower Wand (Çiçek Asa): Tuvale anında sevimli çiçekler ekler.
+- Color Animate (Renk Animasyonu): Boyanmış bir resimdeki renklerin sihirli bir şekilde değiştiği bir animasyon efekti yaratır. Bu özellik, çizimi HAREKET ETTİRMEZ, sadece renkleri canlandırır.
+- Kişiselleştirme:
+  - Write Message (Mesaj Yaz): Kullanıcılar boyadıkları resimlerin üzerine kendi kişisel mesajlarını yazabilirler.
+  - Signature (İmza): Kullanıcılar eserlerine kendi imzalarını atabilirler.
+- Magic Photos: Kullanıcılar kendi fotoğraflarını eğlenceli şablonlara (prenses, itfaici vb.) yerleştirerek kişiselleştirilmiş boyama sayfaları oluşturabilir.
+- 50'den Fazla Ücretsiz Boyama Sayfası: 5 farklı kategoride geniş bir boyama sayfası arşivi.
+
+--- PREMIUM ÖZELLİKLER (Tek Seferlik Satın Alım İle) ---
+
+- Çevrimdışı Oynama (Download & Play Offline): Oyunu bir kere indirin ve internet bağlantısı olmadan, yolculukta veya her yerde oynayın.
+- Sınırsız HD Kaydetme (Unlimited HD Saves): Oluşturduğunuz sanat eserlerini yüksek çözünürlükte ve sınırsız sayıda kaydedin.
+- Özel Premium Fırçalar:
+  - Glitter (Simli Fırça)
+  - Rainbow (Gökkuşağı Fırçası)
+  - Glow (Parlayan Fırça)
+- Tamamen Reklamsız Deneyim.
