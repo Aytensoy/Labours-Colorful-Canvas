@@ -508,55 +508,39 @@ function resetCanvasState() {
 // =======================================================
 // GÖREV 23: ANİMASYON FONKSİYONU
 // =======================================================
+// =======================================================
+// ADIM 1: ANİMASYON MENÜSÜNÜ AÇAN ANA FONKSİYON
+// =======================================================
+let animationFrameId = null; // Animasyonu durdurmak için global değişken
+
 function animateCharacter() {
-  console.log("✨ Animation started!");
-  const canvas = document.getElementById('coloringCanvas');
-  const ctx = canvas.getContext('2d');
+  console.log("✨ Canlı Animasyon menüsü açılıyor...");
 
-  // Animasyondan önce o anki çizimi kaydet
-  const originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-  let frame = 0;
-  const totalFrames = 120; // Animasyonun uzunluğu (saniye cinsinden yaklaşık 4 saniye)
-
-  function addSparkles() {
-    // Parıltı efekti için rastgele noktalar çiz
-    for (let i = 0; i < 15; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      ctx.beginPath();
-      ctx.arc(x, y, Math.random() * 2, 0, Math.PI * 2);
-      const sparkleColor = `hsl(${Math.random() * 360}, 100%, 85%)`; // Daha parlak parıltılar
-      ctx.fillStyle = sparkleColor;
-      ctx.fill();
-    }
+  // Eğer zaten animasyon varsa durdur
+  if (animationFrameId) {
+    stopAnimation();
+    return;
   }
 
-  const magicAnimation = setInterval(() => {
-    frame++;
+  showAnimationSelectionModal();
+}
 
-    // Her frame'de orijinal resmi geri yükle
-    ctx.putImageData(originalImage, 0, 0);
+function stopAnimation() {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
 
-    // Renk değiştiren bir katman uygula
-    const hue = frame * 3; // Renk tonunu zamanla değiştir
-    ctx.globalCompositeOperation = 'hue';
-    ctx.fillStyle = `hsl(${hue}, 50%, 50%)`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Parıltı efekti ekle
-    ctx.globalCompositeOperation = 'lighter';
-    addSparkles();
-
-    // Animasyon bittiğinde temizle
-    if (frame >= totalFrames) {
-      clearInterval(magicAnimation);
-      // Her şeyi orijinal haline geri döndür
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.putImageData(originalImage, 0, 0);
-      console.log("✨ Animation finished!");
+    // Canvas'ı orijinal haline (Undo geçmişindeki son hale) döndür
+    const canvas = document.getElementById('coloringCanvas');
+    const ctx = canvas.getContext('2d');
+    if (typeof drawingHistory !== 'undefined' && drawingHistory.length > 0 && currentStep >= 0) {
+      ctx.putImageData(drawingHistory[currentStep], 0, 0);
     }
-  }, 1000 / 30); // Saniyede 30 frame
+
+    // Buton yazısını düzelt
+    const btn = document.getElementById('animateBtn');
+    if (btn) btn.innerHTML = '✨ Animate Color!';
+  }
 }
 // =================================================================
 // GÖREV 28 NİHAİ VE SON ÇÖZÜM (v17 - SAF DOKUNMATİK KOORDİNATLARI)
@@ -2083,3 +2067,117 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(document.body, { childList: true, subtree: true });
   }
 });
+// =======================================================
+// ADIM 2: GELİŞMİŞ ORGANİK ANİMASYON MOTORU
+// =======================================================
+
+function showAnimationSelectionModal() {
+  const oldModal = document.getElementById('animationModal');
+  if (oldModal) oldModal.remove();
+
+  const modalHTML = `
+    <div id="animationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+      <div style="background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); padding: 25px; border-radius: 25px; max-width: 450px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 4px solid white;">
+        <h2 style="color: #333; margin-bottom: 20px; font-family: 'Poppins', sans-serif;">✨ Make it Alive! ✨</h2>
+        <p style="color: #555; margin-bottom: 20px; font-size: 14px;">Choose how your drawing moves:</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+          <button onclick="startOrganicAnimation('breathe')" class="magic-anim-btn">🫁 Breathe</button>
+          <button onclick="startOrganicAnimation('float')" class="magic-anim-btn">☁️ Float</button>
+          <button onclick="startOrganicAnimation('wave')" class="magic-anim-btn">🌊 Wave</button>
+          <button onclick="startOrganicAnimation('jelly')" class="magic-anim-btn">🍮 Jelly</button>
+        </div>
+        
+        <button onclick="document.getElementById('animationModal').remove()" style="width: 100%; padding: 12px; background: white; color: #FF69B4; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px;">Cancel</button>
+      </div>
+    </div>
+    <style>
+        .magic-anim-btn { padding: 15px; border: none; border-radius: 15px; background: rgba(255,255,255,0.6); font-size: 18px; cursor: pointer; transition: 0.2s; font-weight: bold; color: #444; }
+        .magic-anim-btn:hover { background: white; transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,105,180,0.3); }
+    </style>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function startOrganicAnimation(type) {
+  document.getElementById('animationModal').remove();
+  const btn = document.getElementById('animateBtn');
+  if (btn) btn.innerHTML = '⏹ Stop Animation';
+
+  const canvas = document.getElementById('coloringCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // O anki çizimin kopyasını al (Performans için offscreen canvas)
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.drawImage(canvas, 0, 0);
+
+  let time = 0;
+
+  function loop() {
+    time += 0.05;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. NEFES ALMA EFEKTİ (Karakter canlı gibi şişip iner)
+    if (type === 'breathe') {
+      const scale = 1 + Math.sin(time) * 0.03; // %3 büyü/küçül
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(scale, scale);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      ctx.drawImage(tempCanvas, 0, 0);
+      ctx.restore();
+    }
+
+    // 2. SÜZÜLME EFEKTİ (Uçan kuş, gemi, hayalet için)
+    else if (type === 'float') {
+      const yOffset = Math.sin(time) * 15; // Yukarı aşağı süzülme
+      const rotate = Math.sin(time * 0.5) * 0.02; // Hafif yalpalanma
+
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(rotate);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      ctx.drawImage(tempCanvas, 0, yOffset);
+      ctx.restore();
+    }
+
+    // 3. DALGALANMA EFEKTİ (Deniz kızı, bayrak, su altı)
+    // Bu en gelişmiş olanıdır. Resmi dilimleyip kaydırır.
+    else if (type === 'wave') {
+      const amplitude = 5; // Dalga büyüklüğü
+      const frequency = 0.02; // Dalga sıklığı
+
+      // Resmi dikey dilimler halinde çiz
+      for (let y = 0; y < canvas.height; y += 2) {
+        // Her satırı biraz sağa/sola kaydır
+        const xOffset = Math.sin(y * frequency + time) * amplitude;
+
+        ctx.drawImage(
+          tempCanvas,
+          0, y, canvas.width, 2, // Kaynaktan 2px'lik şerit al
+          xOffset, y, canvas.width, 2 // Hedefe kaydırarak çiz
+        );
+      }
+    }
+
+    // 4. JÖLE EFEKTİ (Komik zıplama)
+    else if (type === 'jelly') {
+      const scaleX = 1 + Math.sin(time * 2) * 0.05;
+      const scaleY = 1 + Math.cos(time * 2) * 0.05;
+
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(scaleX, scaleY);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+      ctx.drawImage(tempCanvas, 0, 0);
+      ctx.restore();
+    }
+
+    animationFrameId = requestAnimationFrame(loop);
+  }
+
+  loop();
+}
