@@ -1,5 +1,5 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A26)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A27)
 // =================================================================
 
 const CACHE_NAME = 'magical-coloring-A26';
