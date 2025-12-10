@@ -1,13 +1,18 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A28)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A29)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-A28';
+const CACHE_NAME = 'magical-coloring-A29';
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
     './',
     './index.html',
+    './about.html',      // <--- YENİ
+    './privacy.html',    // <--- YENİ
+    './terms.html',      // <--- YENİ
+    './refund.html',     // <--- YENİ
+    './contact.html',    // <--- YENİ
     './styles.css',
     './script.js',
     './manifest.json',

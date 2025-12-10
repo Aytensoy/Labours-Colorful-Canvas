@@ -539,7 +539,7 @@ function stopAnimation() {
 
     // Buton yazısını düzelt
     const btn = document.getElementById('animateBtn');
-    if (btn) btn.innerHTML = '✨ Animate Color!';
+    if (btn) btn.innerHTML = '✨ Animate!';
   }
 }
 // =================================================================
@@ -2086,6 +2086,17 @@ function showAnimationSelectionModal() {
           <button onclick="startOrganicAnimation('float')" class="magic-anim-btn">☁️ Float</button>
           <button onclick="startOrganicAnimation('wave')" class="magic-anim-btn">🌊 Wave</button>
           <button onclick="startOrganicAnimation('jelly')" class="magic-anim-btn">🍮 Jelly</button>
+          
+          <!-- GÜNCELLENEN BUTON BURADA -->
+          <!-- Canlı Gökkuşağı Gradyanı: Kırmızı -> Sarı -> Mavi -> Mor -->
+          <button onclick="startOrganicAnimation('color')" class="magic-anim-btn" style="
+              grid-column: span 2; 
+              background: linear-gradient(90deg, #FF6B6B, #FECA57, #48DBFB, #FF9FF3); 
+              color: white; 
+              text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+              font-size: 19px;
+              border: 2px solid white;
+          ">🌈 Rainbow Party</button>
         </div>
         
         <button onclick="document.getElementById('animationModal').remove()" style="width: 100%; padding: 12px; background: white; color: #FF69B4; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px;">Cancel</button>
@@ -2100,14 +2111,18 @@ function showAnimationSelectionModal() {
 }
 
 function startOrganicAnimation(type) {
-  document.getElementById('animationModal').remove();
+  // Modalı kapat
+  const modal = document.getElementById('animationModal');
+  if (modal) modal.remove();
+
+  // Buton yazısını değiştir
   const btn = document.getElementById('animateBtn');
   if (btn) btn.innerHTML = '⏹ Stop Animation';
 
   const canvas = document.getElementById('coloringCanvas');
   const ctx = canvas.getContext('2d');
 
-  // O anki çizimin kopyasını al (Performans için offscreen canvas)
+  // O anki çizimin kopyasını al (Performans için)
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = canvas.width;
   tempCanvas.height = canvas.height;
@@ -2115,64 +2130,83 @@ function startOrganicAnimation(type) {
   tempCtx.drawImage(canvas, 0, 0);
 
   let time = 0;
+  let frameCount = 0; // Renk animasyonu için sayaç
 
   function loop() {
     time += 0.05;
+    frameCount++;
+
+    // Ekranı temizle
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. NEFES ALMA EFEKTİ (Karakter canlı gibi şişip iner)
-    if (type === 'breathe') {
-      const scale = 1 + Math.sin(time) * 0.03; // %3 büyü/küçül
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.scale(scale, scale);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    // --- YENİ EKLENEN: ESKİ RENK ANİMASYONU ---
+    if (type === 'color') {
+      // 1. Orijinal resmi çiz
       ctx.drawImage(tempCanvas, 0, 0);
-      ctx.restore();
-    }
 
-    // 2. SÜZÜLME EFEKTİ (Uçan kuş, gemi, hayalet için)
-    else if (type === 'float') {
-      const yOffset = Math.sin(time) * 15; // Yukarı aşağı süzülme
-      const rotate = Math.sin(time * 0.5) * 0.02; // Hafif yalpalanma
+      // 2. Renk Değiştiren Katman (Hue Rotate)
+      // Senin eski kodundaki mantık: hue = frame * 3
+      const hue = (frameCount * 2) % 360;
 
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(rotate);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
-      ctx.drawImage(tempCanvas, 0, yOffset);
-      ctx.restore();
-    }
+      ctx.globalCompositeOperation = 'hue'; // Renk tonunu değiştir
+      ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. DALGALANMA EFEKTİ (Deniz kızı, bayrak, su altı)
-    // Bu en gelişmiş olanıdır. Resmi dilimleyip kaydırır.
-    else if (type === 'wave') {
-      const amplitude = 5; // Dalga büyüklüğü
-      const frequency = 0.02; // Dalga sıklığı
+      // 3. Parıltı Efekti (Sparkles)
+      ctx.globalCompositeOperation = 'lighter'; // Parlaklık modu
 
-      // Resmi dikey dilimler halinde çiz
-      for (let y = 0; y < canvas.height; y += 2) {
-        // Her satırı biraz sağa/sola kaydır
-        const xOffset = Math.sin(y * frequency + time) * amplitude;
+      // Her karede 10 tane rastgele yıldız at
+      for (let i = 0; i < 10; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 3;
 
-        ctx.drawImage(
-          tempCanvas,
-          0, y, canvas.width, 2, // Kaynaktan 2px'lik şerit al
-          xOffset, y, canvas.width, 2 // Hedefe kaydırarak çiz
-        );
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 80%)`;
+        ctx.fill();
       }
+
+      // Modu normale döndür (Çok önemli, yoksa sonraki çizimler bozulur)
+      ctx.globalCompositeOperation = 'source-over';
     }
 
-    // 4. JÖLE EFEKTİ (Komik zıplama)
-    else if (type === 'jelly') {
-      const scaleX = 1 + Math.sin(time * 2) * 0.05;
-      const scaleY = 1 + Math.cos(time * 2) * 0.05;
-
+    // --- DİĞER ORGANİK ANİMASYONLAR ---
+    else {
+      // Diğerlerinde composite moda gerek yok, direkt çiziyoruz
       ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.scale(scaleX, scaleY);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
-      ctx.drawImage(tempCanvas, 0, 0);
+
+      if (type === 'breathe') {
+        const scale = 1 + Math.sin(time) * 0.03;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(scale, scale);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        ctx.drawImage(tempCanvas, 0, 0);
+      }
+      else if (type === 'float') {
+        const yOffset = Math.sin(time) * 15;
+        const rotate = Math.sin(time * 0.5) * 0.02;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rotate);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        ctx.drawImage(tempCanvas, 0, yOffset);
+      }
+      else if (type === 'wave') {
+        // Wave özel olduğu için save/restore dışında döngüyle çizilir
+        for (let y = 0; y < canvas.height; y += 2) {
+          const xOffset = Math.sin(y * 0.02 + time) * 5;
+          ctx.drawImage(tempCanvas, 0, y, canvas.width, 2, xOffset, y, canvas.width, 2);
+        }
+      }
+      else if (type === 'jelly') {
+        const scaleX = 1 + Math.sin(time * 2) * 0.05;
+        const scaleY = 1 + Math.cos(time * 2) * 0.05;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.scale(scaleX, scaleY);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+        ctx.drawImage(tempCanvas, 0, 0);
+      }
+
       ctx.restore();
     }
 
