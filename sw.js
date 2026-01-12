@@ -1,18 +1,18 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A31)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A32 - Scratch Update)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-A31';
+const CACHE_NAME = 'magical-coloring-A32'; // Versiyonu A32 yaptık
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
     './',
     './index.html',
-    './about.html',      // <--- YENİ
-    './privacy.html',    // <--- YENİ
-    './terms.html',      // <--- YENİ
-    './refund.html',     // <--- YENİ
-    './contact.html',    // <--- YENİ
+    './about.html',
+    './privacy.html',
+    './terms.html',
+    './refund.html',
+    './contact.html',
     './styles.css',
     './script.js',
     './manifest.json',
@@ -24,9 +24,16 @@ const FILES_TO_CACHE = [
     './Background1.jpg',
     './image.png',
 
-    // Harici FontAwesome (İkonlar için)
+    // Harici FontAwesome
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css',
 
+    // --- SCRATCH CITY GÖRSELLERİ (YENİ EKLENDİ) ---
+    './assets/scratch/paris_back.jpg', './assets/scratch/paris_front.jpg',
+    './assets/scratch/ny_back.jpg', './assets/scratch/ny_front.jpg',
+    './assets/scratch/rome_back.jpg', './assets/scratch/rome_front.jpg',
+    './assets/scratch/venice_back.jpg', './assets/scratch/venice_front.jpg',
+    './assets/scratch/istanbul_galata_back.jpg', './assets/scratch/istanbul_galata_front.jpg',
+    './assets/scratch/tokyo_back.jpg', './assets/scratch/tokyo_front.jpg',
 
     // --- Boyama Sayfaları ---
     './coloring-pages-png/image.png',
@@ -115,6 +122,7 @@ const FILES_TO_CACHE = [
     './thumbnails-png/boy_with_glasses.png',
     './thumbnails-png/kawaii_twin_girls.png',
     './thumbnails-png/dancing_bean_character.png',
+
     // --- Magic Photos Şablonları ---
     './template-images/birthday_colored_transparent.png', './template-images/birthday_outline_transparent.png',
     './template-images/firefighter_colored_transparent.png', './template-images/firefighter_outline_transparent.png',

@@ -13,7 +13,7 @@
 
     <!-- 2. Google Arama Sonuçlarında Başlığın Altında Görünecek Açıklama (Özellik Odaklı ve Çekici) -->
     <meta name="description"
-        content="Color anything with Magical Coloring Adventure! Upload your own pages, create Magic Photos, add messages & signatures. The ultimate creative game for the whole family, with premium offline play for travel.">
+        content="Play the Magical Coloring Game! Now with 'Scratch City' art reveal mode and Magic Photos. Color, draw, and create offline. The best ad-free creative game for families.">
 
     <!-- 3. Sosyal Medyada Paylaşım için Open Graph Etiketleri (Güncellenmiş Başlık ve Açıklama ile) -->
     <meta property="og:title" content="Magical Coloring Game | Upload & Color Pages Online - For All Ages" />
@@ -73,6 +73,24 @@
         gtag('config', 'G-SYKV47JJ61');
     </script>
     <meta name="p:domain_verify" content="f9f089eeeea07fb75e82a4ab3611daea" />
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Magical Coloring Game",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web",
+  "url": "https://www.magicalcoloringgame.com/",
+  "description": "Magical Coloring Game is a free browser-based coloring game for kids, toddlers, and families. Color online, upload your own images, animate drawings, and play safely on any device.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
 </head>
 
 <body>
@@ -85,387 +103,448 @@
         <div class="container">
             <h1>Magical Coloring Game</h1>
             <div class="coloring-area">
+
+                <!-- ================================================== -->
+                <!-- YENİ BİRLEŞTİRİLMİŞ TOOLBAR (DÜZELTİLMİŞ VERSİYON) -->
+                <!-- ================================================== -->
                 <div class="toolbar">
-                    <!-- İlk Sıra -->
-                    <button id="homeBtn" class="btn" aria-label="Home">🏠 Home</button>
 
-                    <div class="tooltip-container">
-                        <button id="downloadAppBtn" class="btn premium-btn" aria-label="Download & Play Offline Pro">
-                            📱 Download & Play Offline Pro
+                    <!-- 1. SATIR: ÜST MENÜ -->
+                    <div class="toolbar-row top-row">
+                        <button id="homeBtn" class="btn icon-btn" title="Home">🏠</button>
+                        <div class="tooltip-container">
+                            <button id="downloadAppBtn" class="btn premium-btn small-btn">📱 Offline App</button>
+                            <span class="tooltip">No internet needed!</span>
+                        </div>
+                        <!-- DÜZELTME 1: "Redeem" yazısı eklendi -->
+                        <button id="redeemGiftBtn" class="btn premium-btn small-btn">🎁 Redeem Gift Code</button>
+                        <button id="uploadBtn" class="btn small-btn">📁 Upload</button>
+                        <button id="newPageBtn" class="btn small-btn">📄 New Page</button>
+                    </div>
+
+                    <!-- 2. SATIR: OYUN MODLARI -->
+                    <div class="toolbar-row modes-row">
+                        <button id="magicPhotoBtn" class="btn action-btn">
+                            <i class="fas fa-magic"></i> Magic Photos
                         </button>
-                        <span class="tooltip">Install once, play anytime - no internet needed!</span>
+
+                        <button id="scratchModeBtn" class="btn action-btn scratch-btn-glow"
+                            onclick="openScratchGallery()">
+                            🌃 Scratch City
+                        </button>
                     </div>
-                    <button id="magicPhotoBtn" class="btn magic-photo-btn action-btn">
-                        <i class="fas fa-magic"></i>
-                        Magic Photos
-                    </button>
-                    <button id="redeemGiftBtn" class="btn premium-btn">
-                        🎁 Redeem Gift Code
-                    </button>
-                    <button id="uploadBtn" class="btn" aria-label="Upload Image">📁 Upload Image</button>
 
-                    <!-- İkinci Sıra -->
-                    <button id="newPageBtn" class="btn" aria-label="New Page">📄 Drawing Page</button>
-                    <button id="fillBtn" class="btn tool-btn" aria-label="Fill">🪣 Fill</button>
-                    <button id="pencilBtn" class="btn tool-btn">✏️ Pencil</button>
-                    <button id="brushBtn" class="btn tool-btn">🖌️ Brush</button>
-                    <button id="markerBtn" class="btn tool-btn">🖊️ Marker</button> <!-- DOĞRU ID -->
-                    <button id="watercolorBtn" class="btn tool-btn">💧 Watercolor</button>
-                    <button id="pastelBtn" class="btn tool-btn">🖍️ Pastel</button> <!-- DOĞRU ID -->
-                    <button id="sprayBtn" class="btn tool-btn">🎨 Spray</button>
-                    <button id="undoBtn" class="btn" aria-label="Undo">↩️ Undo</button>
-                    <button id="eraseBtn" class="btn tool-btn">🧽 Erase</button>
+                    <!-- 3. SATIR: ÇİZİM ARAÇLARI -->
+                    <div class="toolbar-row tools-row">
+                        <button id="fillBtn" class="btn tool-btn active" title="Fill Color">🪣 Fill</button>
 
-                    <div class="magic-tools">
-                        <button class="btn magic-btn" id="starWand">⭐ Star Wand</button>
-                        <button class="btn magic-btn" id="flowerWand">🌸 Flower
-                            Wand</button>
-                        <button class="btn magic-btn" id="animateBtn">✨ Animate!</button>
+                        <div class="custom-dropdown">
+                            <button class="btn tool-btn dropdown-toggle">
+                                🖌️ Brushes ▼
+                            </button>
+                            <div class="dropdown-menu">
+                                <button id="pencilBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">✏️
+                                    Pencil</button>
+                                <button id="brushBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">🖌️
+                                    Brush</button>
+                                <button id="markerBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">🖊️
+                                    Marker</button>
+                                <button id="watercolorBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">💧
+                                    Watercolor</button>
+                                <button id="pastelBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">🖍️
+                                    Pastel</button>
+                                <button id="sprayBtn" class="btn tool-btn" onclick="selectDropdownTool(this)">🎨
+                                    Spray</button>
+                            </div>
+                        </div>
+
+                        <button id="eraseBtn" class="btn tool-btn" title="Eraser">🧽 Erase</button>
+                        <button id="undoBtn" class="btn" title="Undo">↩️ Undo</button>
+                    </div>
+
+                    <!-- 4. SATIR: SİHİR, YAZI ve PREMIUM EFEKTLER -->
+                    <div class="toolbar-row magic-row">
+
+                        <div class="custom-dropdown">
+                            <button class="btn magic-btn dropdown-toggle">
+                                ✨ Magic Tools ▼
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="btn magic-btn" id="starWand">⭐ Star Wand</button>
+                                <button class="btn magic-btn" id="flowerWand">🌸 Flower Wand</button>
+                                <button class="btn magic-btn" id="animateBtn">🎬 Animate!</button>
+                            </div>
+                        </div>
+
+                        <div class="custom-dropdown">
+                            <button class="btn action-btn dropdown-toggle">
+                                💌 Text & Sign ▼
+                            </button>
+                            <div class="dropdown-menu">
+                                <button id="nameBtn" onclick="activateNameWriting()" class="btn">💌 Message</button>
+                                <button id="quickNameBtn" onclick="activateSignatureMode()" class="btn">✍️
+                                    Signature</button>
+                            </div>
+                        </div>
+
+                        <!-- DÜZELTME 2: İsimler eklendi -->
+                        <!-- PREMIUM EFEKTLER -->
+                        <div id="premiumTools" class="premium-tools-inline" style="display:none;">
+                            <button class="btn tool-btn premium-btn" id="glitterBtn" onclick="setTool('glitter')">✨
+                                Glitter</button>
+                            <button class="btn tool-btn premium-btn" id="rainbowBtn" onclick="setTool('rainbow')">🌈
+                                Rainbow</button>
+                            <button class="btn tool-btn premium-btn" id="glowBtn" onclick="setTool('glow')">💫
+                                Glow</button>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <!-- ================================================== -->
+                <!-- YENİ TOOLBAR BİTİŞİ -->
+                <!-- ================================================== -->
 
-            <div class="name-tools">
-                <button id="nameBtn" onclick="activateNameWriting()">
-                    💌 Write Message
-                </button>
-                <button id="quickNameBtn" onclick="activateSignatureMode()">
-                    ✍️ Signature
-                </button>
-            </div>
-
-            <!-- Premium Tools (Sadece premium kullanıcılar görecek) -->
-            <div class="premium-tools" id="premiumTools" style="display: none;">
-                <button class="btn tool-btn premium-btn" id="glitterBtn" onclick="setTool('glitter')">
-                    ✨ Glitter
-                </button>
-                <button class="btn tool-btn premium-btn" id="rainbowBtn" onclick="setTool('rainbow')">
-                    🌈 Rainbow
-                </button>
-                <button class="btn tool-btn premium-btn" id="glowBtn" onclick="setTool('glow')">
-                    💫 Glow
-                </button>
-            </div>
-
-            <div class="tool-size-control">
-                <input type="range" id="toolSize" min="1" max="250" value="10" onchange="updateSize(this.value)"
-                    oninput="updateSize(this.value)">
-                <span id="sizeValue">10</span>
-            </div>
-
-            <div class="canvas-and-palette">
-                <canvas id="coloringCanvas" width="800" height="600"></canvas>
-                <div id="colorPalette" class="color-palette" aria-label="Color Palette"></div>
-            </div>
-            <!-- Canvas Altı Butonlar -->
-            <div class="bottom-buttons">
-                <button id="saveBtn" class="btn" aria-label="Save">💾 Save & Download</button>
-                <button id="printBtn" onclick="printCanvas()" class="btn" aria-label="Print">🖨️ Print</button>
-            </div>
-        </div>
-
-        <div class="coloring-page-options">
-            <h3>Choose Your Free Coloring Page</h3>
-
-            <!-- Category Tabs -->
-            <div class="category-tabs">
-                <button class="tab-btn active" data-category="magical">🦄 Magical</button>
-                <button class="tab-btn" data-category="flowers">🌸 Flowers</button>
-                <button class="tab-btn" data-category="animals">🐱 Animals</button>
-                <button class="tab-btn" data-category="mandalas">✨ Mandalas</button>
-                <button class="tab-btn" data-category="various">🌟 Various</button>
-            </div>
-
-            <!-- Düzeltilmiş Thumbnail Container -->
-            <div class="thumbnails-container">
-                <!-- Magical Category -->
-                <div class="page-thumbnails magical active">
-                    <img src="thumbnails-png/unicorn.png" alt="unicorn" data-page="unicorn" class="page-thumbnail">
-                    <img src="thumbnails-png/dragon.png" alt="dragon" data-page="dragon" class="page-thumbnail">
-                    <img src="thumbnails-png/fairy.png" alt="fairy" data-page="fairy" class="page-thumbnail">
-                    <img src="thumbnails-png/wizard.png" alt="wizard" data-page="wizard" class="page-thumbnail">
-                    <img src="thumbnails-png/magic_wand.png" alt="Magic Wand" data-page="magic_wand"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/fantasy_castle.png" alt="Fantasy Castle" data-page="fantasy_castle"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/fantasy_unicorn.png" alt="Fantasy Unicorn" data-page="fantasy_unicorn"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/fairytale_castle.png" alt="Fairytale Castle" data-page="fairytale_castle"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/fairy_flying.png" alt="Flying Fairy" data-page="fairy_flying"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/magical_book.png" alt="Magical Book" data-page="magical_book"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/wizards_reading.png" alt="Wizards Reading" data-page="wizards_reading"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/cute_bunny_fairy.png" alt="Bunny Fairy" data-page="cute_bunny_fairy"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/ornate_owl.png" alt="Ornate Owl" data-page="ornate_owl"
-                        class="page-thumbnail">
+                <div class="tool-size-control">
+                    <input type="range" id="toolSize" min="1" max="250" value="10" onchange="updateSize(this.value)"
+                        oninput="updateSize(this.value)">
+                    <span id="sizeValue">10</span>
                 </div>
 
-                <!-- Flowers Category -->
-                <div class="page-thumbnails flowers">
-                    <img src="thumbnails-png/narcissus.png" alt="narcissus" data-page="narcissus"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/poppies.png" alt="poppies" data-page="poppies" class="page-thumbnail">
-                    <img src="thumbnails-png/daisies.png" alt="daisies" data-page="daisies" class="page-thumbnail">
-                    <img src="thumbnails-png/carnation.png" alt="carnation" data-page="carnation"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/floral_frame.png" alt="Floral Frame" data-page="floral_frame"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/doodle_flowers.png" alt="Doodle Flowers" data-page="doodle_flowers"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/heart_flowers.png" alt="Heart Flowers" data-page="heart_flowers"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/detailed_flowers.png" alt="Detailed Flowers" data-page="detailed_flowers"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/big_flower.png" alt="Big Flower" data-page="big_flower"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/simple_flower.png" alt="Simple Flower" data-page="simple_flower"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/lotus_flowers.png" alt="Lotus Flowers" data-page="lotus_flowers"
-                        class="page-thumbnail">
+                <div class="canvas-and-palette">
+                    <canvas id="coloringCanvas" width="800" height="600"></canvas>
+                    <div id="colorPalette" class="color-palette" aria-label="Color Palette"></div>
                 </div>
-
-                <!-- Animals Category -->
-                <div class="page-thumbnails animals">
-                    <img src="thumbnails-png/cat_and_dog.png" alt="Cat and Dog" data-page="cat_and_dog"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/flapping_bird.png" alt="Flapping Bird" data-page="flapping_bird"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/iconic_birds.png" alt="Iconic Birds" data-page="iconic_birds"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/smiling_fish.png" alt="Smiling Fish" data-page="smiling_fish"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/cute_elephant.png" alt="Cute Elephant" data-page="cute_elephant"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/birds_on_branch.png" alt="Birds on Branch" data-page="birds_on_branch"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/happy_kangaroo.png" alt="Happy Kangaroo" data-page="happy_kangaroo"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/bear_in_forest.png" alt="Bear in Forest" data-page="bear_in_forest"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/funny_monkey.png" alt="Funny Monkey" data-page="funny_monkey"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/cute_bunny.png" alt="Cute Bunny" data-page="cute_bunny"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/kitten_in_garden.png" alt="Kitten in Garden" data-page="kitten_in_garden"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/happy_whale.png" alt="Happy Whale" data-page="happy_whale"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/squirrel_with_acorn.png" alt="Squirrel with Acorn"
-                        data-page="squirrel_with_acorn" class="page-thumbnail">
-                    <img src="thumbnails-png/butterflies.png" alt="Butterflies" data-page="butterflies"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/bulldog_portrait.png" alt="Bulldog Portrait" data-page="bulldog_portrait"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/frog_on_grass.png" alt="Frog on Grass" data-page="frog_on_grass"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/cute_lamb.png" alt="Cute Lamb" data-page="cute_lamb"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/kawaii_bunny_face.png" alt="Kawaii Bunny" data-page="kawaii_bunny_face"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/cat_on_crocodile.png" alt="Cat on Crocodile" data-page="cat_on_crocodile"
-                        class="page-thumbnail">
-                </div>
-
-                <!-- Mandalas Category -->
-                <div class="page-thumbnails mandalas">
-                    <img src="thumbnails-png/sun_mandala.png" alt="Sun Mandala" data-page="sun_mandala"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/modern_mandala.png" alt="Modern Mandala" data-page="modern_mandala"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/tree_of_life.png" alt="Tree of Life" data-page="tree_of_life"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/oriental_mandala.png" alt="Oriental Mandala" data-page="oriental_mandala"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/mandala_pattern.png" alt="Mandala Pattern" data-page="mandala_pattern"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/mandala_horse.png" alt="Mandala Horse" data-page="mandala_horse"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/mandala_bird.png" alt="Mandala Bird" data-page="mandala_bird"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/panda_mandala.png" alt="Panda Mandala" data-page="panda_mandala"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/detailed_lotus_mandala.png" alt="Detailed Lotus Mandala"
-                        data-page="detailed_lotus_mandala" class="page-thumbnail">
-                    <img src="thumbnails-png/mandala_flower.png" alt="Mandala Flower" data-page="mandala_flower"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/circle_mandala.png" alt="Circle Mandala" data-page="circle_mandala"
-                        class="page-thumbnail">
-                </div>
-                <!-- Various Category -->
-                <div class="page-thumbnails various">
-                    <img src="thumbnails-png/boho_style.png" alt="Boho Style" data-page="boho_style"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/boat.png" alt="Boat" data-page="boat" class="page-thumbnail">
-                    <img src="thumbnails-png/k-pop.png" alt="K-Pop" data-page="k-pop" class="page-thumbnail">
-                    <img src="thumbnails-png/cute_cat.png" alt="Cute Cat" data-page="cute_cat" class="page-thumbnail">
-                    <img src="thumbnails-png/shapes.png" alt="Shapes" data-page="shapes" class="page-thumbnail">
-                    <img src="thumbnails-png/girl_on_swing.png" alt="Girl on Swing" data-page="girl_on_swing"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/beach_cleanup_boy.png" alt="Beach Cleanup Boy"
-                        data-page="beach_cleanup_boy" class="page-thumbnail">
-                    <img src="thumbnails-png/boy_on_swing.png" alt="Boy on Swing" data-page="boy_on_swing"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/craft_girl.png" alt="Craft Girl" data-page="craft_girl"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/boy_with_glasses.png" alt="Boy with Glasses" data-page="boy_with_glasses"
-                        class="page-thumbnail">
-                    <img src="thumbnails-png/kawaii_twin_girls.png" alt="Kawaii Twin Girls"
-                        data-page="kawaii_twin_girls" class="page-thumbnail">
-                    <img src="thumbnails-png/dancing_bean_character.png" alt="Dancing Bean"
-                        data-page="dancing_bean_character" class="page-thumbnail">
+                <!-- Canvas Altı Butonlar -->
+                <div class="bottom-buttons">
+                    <button id="saveBtn" class="btn" aria-label="Save">💾 Save & Download</button>
+                    <button id="printBtn" onclick="printCanvas()" class="btn" aria-label="Print">🖨️ Print</button>
                 </div>
             </div>
-            <!-- ================================================== -->
-            <!--    ANA SAYFA GİRİŞ BÖLÜMÜ - NİHAİ VE TAM VERSİYON    -->
-            <!-- ================================================== -->
-            <div class="game-introduction">
-                <h2>Welcome to Your Magical Coloring Adventure!</h2>
-                <p>Unleash your creativity and bring worlds to life with a splash of color! Our enchanting coloring
-                    experience is designed for artists of all ages.</p>
 
-                <h3>🌟 Explore a Universe of Tools:</h3>
-                <ul>
-                    <li><strong>Download & Play Offline Pro:</strong> Take the entire game with you! Color on planes, in
-                        cars, or anywhere your adventure leads, no internet needed.</li>
-                    <li><strong>Vast Library of Pages:</strong> Discover 50+ beautiful coloring pages across 5 magical
-                        categories. Free users enjoy 3 pages per category, while Premium unlocks the entire universe!
-                    </li>
-                    <li><strong>Professional Drawing Tools:</strong>
-                        <ul>
-                            <li><strong>Standard Tools:</strong> Master your art with the classic Pencil, smooth Brush,
-                                delicate Watercolor, and fun Spray paint.</li>
-                            <li><strong>NEW Unique Brushes:</strong> Create bold strokes with the vibrant
-                                <strong>Marker</strong> and achieve beautiful, textured effects with the realistic
-                                <strong>Pastel</strong> brush.
-                            </li>
-                            <li><strong>Premium Magic Tools:</strong> Go Premium to dazzle your creations with sparkling
-                                <strong>Glitter</strong>, flowing <strong>Rainbow</strong> colors, and radiant
-                                <strong>Glow</strong> effects!
-                            </li>
-                        </ul>
-                    </li>
-                    <li><strong>Magic Wands & More:</strong> Instantly add flair with the Star and Flower Wands, or
-                        color huge areas in a second with the Magic Fill tool.</li>
-                    <li><strong>NEW! Magic Photos:</strong> Become part of the art! Place your photo into fun templates
-                        like a heroic firefighter, a magical princess, or a space explorer!</li>
-                    <li><strong>Upload Your Own Pages:</strong> Bring your own drawings or AI-generated art to
-                        life with our professional tools.</li>
-                    <li><strong>Save in High Definition (Premium):</strong> Free users get 3 daily saves, while Premium
-                        users get unlimited saves in stunning High Definition!</li>
-                    <li><strong>Worry-Free Creating:</strong> Easily Undo and Redo any stroke.</li>
-                    <li><strong>✨ NEW! Animate Your Art:</strong> Bring your drawings to life! Use the new "Make it
-                        Alive" tools to make characters <strong>Dance</strong>, breathe, float, or go wild with the
-                        <strong>Rainbow Party</strong> mode!
-                    </li>
-                    <li><strong>Print & Color:</strong> Download and print any page for a classic, hands-on coloring
-                        experience.</li>
-                </ul>
+            <div class="coloring-page-options">
+                <h3>Choose Your Free Coloring Page</h3>
+
+                <!-- Category Tabs -->
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="magical">🦄 Magical</button>
+                    <button class="tab-btn" data-category="flowers">🌸 Flowers</button>
+                    <button class="tab-btn" data-category="animals">🐱 Animals</button>
+                    <button class="tab-btn" data-category="mandalas">✨ Mandalas</button>
+                    <button class="tab-btn" data-category="various">🌟 Various</button>
+                </div>
+
+                <!-- Düzeltilmiş Thumbnail Container -->
+                <div class="thumbnails-container">
+                    <!-- Magical Category -->
+                    <div class="page-thumbnails magical active">
+                        <img src="thumbnails-png/unicorn.png" alt="unicorn" data-page="unicorn" class="page-thumbnail">
+                        <img src="thumbnails-png/dragon.png" alt="dragon" data-page="dragon" class="page-thumbnail">
+                        <img src="thumbnails-png/fairy.png" alt="fairy" data-page="fairy" class="page-thumbnail">
+                        <img src="thumbnails-png/wizard.png" alt="wizard" data-page="wizard" class="page-thumbnail">
+                        <img src="thumbnails-png/magic_wand.png" alt="Magic Wand" data-page="magic_wand"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fantasy_castle.png" alt="Fantasy Castle" data-page="fantasy_castle"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fantasy_unicorn.png" alt="Fantasy Unicorn" data-page="fantasy_unicorn"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/fairytale_castle.png" alt="Fairytale Castle"
+                            data-page="fairytale_castle" class="page-thumbnail">
+                        <img src="thumbnails-png/fairy_flying.png" alt="Flying Fairy" data-page="fairy_flying"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/magical_book.png" alt="Magical Book" data-page="magical_book"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/wizards_reading.png" alt="Wizards Reading" data-page="wizards_reading"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_bunny_fairy.png" alt="Bunny Fairy" data-page="cute_bunny_fairy"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/ornate_owl.png" alt="Ornate Owl" data-page="ornate_owl"
+                            class="page-thumbnail">
+                    </div>
+
+                    <!-- Flowers Category -->
+                    <div class="page-thumbnails flowers">
+                        <img src="thumbnails-png/narcissus.png" alt="narcissus" data-page="narcissus"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/poppies.png" alt="poppies" data-page="poppies" class="page-thumbnail">
+                        <img src="thumbnails-png/daisies.png" alt="daisies" data-page="daisies" class="page-thumbnail">
+                        <img src="thumbnails-png/carnation.png" alt="carnation" data-page="carnation"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/floral_frame.png" alt="Floral Frame" data-page="floral_frame"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/doodle_flowers.png" alt="Doodle Flowers" data-page="doodle_flowers"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/heart_flowers.png" alt="Heart Flowers" data-page="heart_flowers"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/detailed_flowers.png" alt="Detailed Flowers"
+                            data-page="detailed_flowers" class="page-thumbnail">
+                        <img src="thumbnails-png/big_flower.png" alt="Big Flower" data-page="big_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/simple_flower.png" alt="Simple Flower" data-page="simple_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/lotus_flowers.png" alt="Lotus Flowers" data-page="lotus_flowers"
+                            class="page-thumbnail">
+                    </div>
+
+                    <!-- Animals Category -->
+                    <div class="page-thumbnails animals">
+                        <img src="thumbnails-png/cat_and_dog.png" alt="Cat and Dog" data-page="cat_and_dog"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/flapping_bird.png" alt="Flapping Bird" data-page="flapping_bird"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/iconic_birds.png" alt="Iconic Birds" data-page="iconic_birds"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/smiling_fish.png" alt="Smiling Fish" data-page="smiling_fish"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_elephant.png" alt="Cute Elephant" data-page="cute_elephant"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/birds_on_branch.png" alt="Birds on Branch" data-page="birds_on_branch"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/happy_kangaroo.png" alt="Happy Kangaroo" data-page="happy_kangaroo"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/bear_in_forest.png" alt="Bear in Forest" data-page="bear_in_forest"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/funny_monkey.png" alt="Funny Monkey" data-page="funny_monkey"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_bunny.png" alt="Cute Bunny" data-page="cute_bunny"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/kitten_in_garden.png" alt="Kitten in Garden"
+                            data-page="kitten_in_garden" class="page-thumbnail">
+                        <img src="thumbnails-png/happy_whale.png" alt="Happy Whale" data-page="happy_whale"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/squirrel_with_acorn.png" alt="Squirrel with Acorn"
+                            data-page="squirrel_with_acorn" class="page-thumbnail">
+                        <img src="thumbnails-png/butterflies.png" alt="Butterflies" data-page="butterflies"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/bulldog_portrait.png" alt="Bulldog Portrait"
+                            data-page="bulldog_portrait" class="page-thumbnail">
+                        <img src="thumbnails-png/frog_on_grass.png" alt="Frog on Grass" data-page="frog_on_grass"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cute_lamb.png" alt="Cute Lamb" data-page="cute_lamb"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/kawaii_bunny_face.png" alt="Kawaii Bunny" data-page="kawaii_bunny_face"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/cat_on_crocodile.png" alt="Cat on Crocodile"
+                            data-page="cat_on_crocodile" class="page-thumbnail">
+                    </div>
+
+                    <!-- Mandalas Category -->
+                    <div class="page-thumbnails mandalas">
+                        <img src="thumbnails-png/sun_mandala.png" alt="Sun Mandala" data-page="sun_mandala"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/modern_mandala.png" alt="Modern Mandala" data-page="modern_mandala"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/tree_of_life.png" alt="Tree of Life" data-page="tree_of_life"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/oriental_mandala.png" alt="Oriental Mandala"
+                            data-page="oriental_mandala" class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_pattern.png" alt="Mandala Pattern" data-page="mandala_pattern"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_horse.png" alt="Mandala Horse" data-page="mandala_horse"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_bird.png" alt="Mandala Bird" data-page="mandala_bird"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/panda_mandala.png" alt="Panda Mandala" data-page="panda_mandala"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/detailed_lotus_mandala.png" alt="Detailed Lotus Mandala"
+                            data-page="detailed_lotus_mandala" class="page-thumbnail">
+                        <img src="thumbnails-png/mandala_flower.png" alt="Mandala Flower" data-page="mandala_flower"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/circle_mandala.png" alt="Circle Mandala" data-page="circle_mandala"
+                            class="page-thumbnail">
+                    </div>
+                    <!-- Various Category -->
+                    <div class="page-thumbnails various">
+                        <img src="thumbnails-png/boho_style.png" alt="Boho Style" data-page="boho_style"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/boat.png" alt="Boat" data-page="boat" class="page-thumbnail">
+                        <img src="thumbnails-png/k-pop.png" alt="K-Pop" data-page="k-pop" class="page-thumbnail">
+                        <img src="thumbnails-png/cute_cat.png" alt="Cute Cat" data-page="cute_cat"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/shapes.png" alt="Shapes" data-page="shapes" class="page-thumbnail">
+                        <img src="thumbnails-png/girl_on_swing.png" alt="Girl on Swing" data-page="girl_on_swing"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/beach_cleanup_boy.png" alt="Beach Cleanup Boy"
+                            data-page="beach_cleanup_boy" class="page-thumbnail">
+                        <img src="thumbnails-png/boy_on_swing.png" alt="Boy on Swing" data-page="boy_on_swing"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/craft_girl.png" alt="Craft Girl" data-page="craft_girl"
+                            class="page-thumbnail">
+                        <img src="thumbnails-png/boy_with_glasses.png" alt="Boy with Glasses"
+                            data-page="boy_with_glasses" class="page-thumbnail">
+                        <img src="thumbnails-png/kawaii_twin_girls.png" alt="Kawaii Twin Girls"
+                            data-page="kawaii_twin_girls" class="page-thumbnail">
+                        <img src="thumbnails-png/dancing_bean_character.png" alt="Dancing Bean"
+                            data-page="dancing_bean_character" class="page-thumbnail">
+                    </div>
+                </div>
+                <!-- ================================================== -->
+                <!--    ANA SAYFA GİRİŞ BÖLÜMÜ - NİHAİ VE TAM VERSİYON    -->
+                <!-- ================================================== -->
+                <div class="game-introduction">
+                    <h2>Welcome to Your Magical Coloring Adventure!</h2>
+                    <!-- YOUTUBE VIDEO ALANI (YENİ) -->
+                    <!-- Videoyu YouTube'a yükledikten sonra 'src' kısmındaki ID'yi değiştir -->
+                    <div class="video-container"
+                        style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <iframe src="https://www.youtube.com/embed/f51VjdANOa4" title="Magical Coloring Game Trailer"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                        </iframe>
+                    </div>
+
+                    <p>Unleash your creativity and bring worlds to life with a splash of color! Our enchanting coloring
+                        experience is designed for artists of all ages.</p>
+
+                    <h3>🌟 Explore a Universe of Tools:</h3>
+                    <ul>
+                        <li><strong>Download & Play Offline Pro:</strong> Take the entire game with you! Color on
+                            planes, in
+                            cars, or anywhere your adventure leads, no internet needed.</li>
+                        <li><strong>Vast Library of Pages:</strong> Discover 50+ beautiful coloring pages across 5
+                            magical
+                            categories. Free users enjoy 3 pages per category, while Premium unlocks the entire
+                            universe!
+                        </li>
+                        <li><strong>Professional Drawing Tools:</strong>
+                            <ul>
+                                <li><strong>Standard Tools:</strong> Master your art with the classic Pencil, smooth
+                                    Brush,
+                                    delicate Watercolor, and fun Spray paint.</li>
+                                <li><strong>NEW Unique Brushes:</strong> Create bold strokes with the vibrant
+                                    <strong>Marker</strong> and achieve beautiful, textured effects with the realistic
+                                    <strong>Pastel</strong> brush.
+                                </li>
+                                <li><strong>Premium Magic Tools:</strong> Go Premium to dazzle your creations with
+                                    sparkling
+                                    <strong>Glitter</strong>, flowing <strong>Rainbow</strong> colors, and radiant
+                                    <strong>Glow</strong> effects!
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>Magic Wands & More:</strong> Instantly add flair with the Star and Flower Wands, or
+                            color huge areas in a second with the Magic Fill tool.</li>
+                        <li><strong>NEW! Magic Photos:</strong> Become part of the art! Place your photo into fun
+                            templates
+                            like a heroic firefighter, a magical princess, or a space explorer!</li>
+                        <li><strong>Upload Your Own Pages:</strong> Bring your own drawings or AI-generated art to
+                            life with our professional tools.</li>
+                        <li><strong>Save in High Definition (Premium):</strong> Free users get 3 daily saves, while
+                            Premium
+                            users get unlimited saves in stunning High Definition!</li>
+                        <li><strong>Worry-Free Creating:</strong> Easily Undo and Redo any stroke.</li>
+                        <li><strong>✨ NEW! Animate Your Art:</strong> Bring your drawings to life! Use the new "Make it
+                            Alive" tools to make characters <strong>Dance</strong>, breathe, float, or go wild with the
+                            <strong>Rainbow Party</strong> mode!
+                        </li>
+                        <li><strong>Print & Color:</strong> Download and print any page for a classic, hands-on coloring
+                            experience.</li>
+                    </ul>
+                </div>
+
+                <!-- ========================================================== -->
+                <!--    WHY GO PREMIUM? - KUTU İÇİNDE VE BUTONLU NİHAİ VERSİYON    -->
+                <!-- ========================================================== -->
+                <div class="why-premium-section">
+                    <h3>🌟 Why Go Premium?</h3>
+                    <div class="premium-benefits" id="premium-benefits-section">
+                        <h4>📱 Perfect for Travel & On-the-Go Fun:</h4>
+                        <p>The complete offline game is the ultimate travel companion for kids and adults alike. No more
+                            "are we there yet?" moments!</p>
+
+                        <h4>🎨 For the Creative Soul:</h4>
+                        <p>Unlock every page, every premium tool, and the ability to upload your own art. Your
+                            creativity
+                            will know no bounds!</p>
+
+                        <h4>👨‍👩‍👧‍👦 Incredible Family Value:</h4>
+                        <p>One single purchase unlocks unlimited, ad-free fun for the whole family. No subscriptions, no
+                            limits—just pure creative joy!</p>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 20px;">Ready to create your masterpiece? Grab your virtual
+                        paintbrush and let your imagination soar. Happy coloring! 🌈✨</p>
+
+                    <!-- İKNA EDİCİ SATIN ALMA BUTONU -->
+                    <div style="text-align: center; margin-top: 25px;">
+                        <button onclick="showPremiumModal()" class="buy-premium-btn"
+                            style="padding: 15px 30px; font-size: 1.2em;">⭐ Upgrade to Premium Now! ⭐</button>
+                    </div>
+                </div>
+                <!-- ================================================== -->
+                <!--          NİHAİ VE TAM KAPSAMLI FOOTER             -->
+                <!-- ================================================== -->
+                <footer
+                    style="text-align: center; padding: 30px 20px; background-color: #f0f0f0; font-size: 14px; color: #555; border-top: 1px solid #ddd;">
+
+                    <!-- 1. Satır: Sosyal Medya Butonları (Bu kısım sizde zaten vardı) -->
+                    <div class="social-buttons" style="margin-bottom: 20px;">
+                        <a href="mailto:hello@magicalcoloringgame.com" class="social-button email"
+                            aria-label="Send us an Email" title="hello@magicalcoloringgame.com">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="https://www.facebook.com/magicalcoloringgame" target="_blank" rel="noopener noreferrer"
+                            class="social-button facebook" aria-label="Visit our Facebook page">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.instagram.com/magicalcoloringgame" target="_blank"
+                            rel="noopener noreferrer" class="social-button instagram"
+                            aria-label="Visit our Instagram page">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@MagicalColoringGame" target="_blank" rel="noopener noreferrer"
+                            class="social-button youtube" aria-label="Visit our YouTube channel">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+
+                    <!-- 2. Satır: Yasal ve Bilgi Sayfaları -->
+                    <div class="footer-links" style="margin-bottom: 15px;">
+                        <a href="about.html" style="color: #555; text-decoration: none; margin: 0 10px;">About Us</a> |
+                        <a href="privacy.html" style="color: #555; text-decoration: none; margin: 0 10px;">Privacy
+                            Policy</a> |
+                        <a href="terms.html" style="color: #555; text-decoration: none; margin: 0 10px;">Terms of
+                            Service</a> |
+                        <a href="refund.html" style="color: #555; text-decoration: none; margin: 0 10px;">Refund
+                            Policy</a>
+                        |
+                        <a href="contact.html" style="color: #555; text-decoration: none; margin: 0 10px;">Contact
+                            Us</a>
+                    </div>
+
+                    <!-- 3. Satır: İletişim Bilgileri (E-posta ve Adres) -->
+                    <div class="contact-info" style="margin-bottom: 15px; line-height: 1.5;">
+                        <span>hello@magicalcoloringgame.com</span><br>
+                        <span>PK 1, 16860 İznik/Bursa, Türkiye</span>
+                    </div>
+
+                    <!-- 4. Satır: Telif Hakkı -->
+                    <div class="copyright-info">
+                        &copy; 2025 Labour Things. All rights reserved. | Magical Coloring Game
+                    </div>
+
+                </footer>
             </div>
 
-            <!-- ========================================================== -->
-            <!--    WHY GO PREMIUM? - KUTU İÇİNDE VE BUTONLU NİHAİ VERSİYON    -->
-            <!-- ========================================================== -->
-            <div class="why-premium-section">
-                <h3>🌟 Why Go Premium?</h3>
-                <div class="premium-benefits" id="premium-benefits-section">
-                    <h4>📱 Perfect for Travel & On-the-Go Fun:</h4>
-                    <p>The complete offline game is the ultimate travel companion for kids and adults alike. No more
-                        "are we there yet?" moments!</p>
+            <script>
+                // PREMIUM KONTROL - TEMİZ VERSİYON
+                window.addEventListener('load', function () {
+                    console.log('Premium kontrol başlatılıyor...');
 
-                    <h4>🎨 For the Creative Soul:</h4>
-                    <p>Unlock every page, every premium tool, and the ability to upload your own art. Your creativity
-                        will know no bounds!</p>
+                    // Premium durumunu kontrol et
+                    var isPremiumUser = localStorage.getItem('isPremium') === 'true';
+                    console.log('Premium kullanıcı:', isPremiumUser);
 
-                    <h4>👨‍👩‍👧‍👦 Incredible Family Value:</h4>
-                    <p>One single purchase unlocks unlimited, ad-free fun for the whole family. No subscriptions, no
-                        limits—just pure creative joy!</p>
-                </div>
+                    // Eski premium etiketlerini temizle
+                    var existingElements = document.querySelectorAll('.premium-badge, .premium-tooltip, .premium-overlay, .lock-overlay, .single-pro-badge');
+                    existingElements.forEach(function (el) {
+                        if (el && el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    });
 
-                <p style="text-align: center; margin-top: 20px;">Ready to create your masterpiece? Grab your virtual
-                    paintbrush and let your imagination soar. Happy coloring! 🌈✨</p>
-
-                <!-- İKNA EDİCİ SATIN ALMA BUTONU -->
-                <div style="text-align: center; margin-top: 25px;">
-                    <button onclick="showPremiumModal()" class="buy-premium-btn"
-                        style="padding: 15px 30px; font-size: 1.2em;">⭐ Upgrade to Premium Now! ⭐</button>
-                </div>
-            </div>
-            <!-- ================================================== -->
-            <!--          NİHAİ VE TAM KAPSAMLI FOOTER             -->
-            <!-- ================================================== -->
-            <footer
-                style="text-align: center; padding: 30px 20px; background-color: #f0f0f0; font-size: 14px; color: #555; border-top: 1px solid #ddd;">
-
-                <!-- 1. Satır: Sosyal Medya Butonları (Bu kısım sizde zaten vardı) -->
-                <div class="social-buttons" style="margin-bottom: 20px;">
-                    <a href="mailto:hello@magicalcoloringgame.com" class="social-button email"
-                        aria-label="Send us an Email" title="hello@magicalcoloringgame.com">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                    <a href="https://www.facebook.com/magicalcoloringgame" target="_blank" rel="noopener noreferrer"
-                        class="social-button facebook" aria-label="Visit our Facebook page">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="https://www.instagram.com/magicalcoloringgame" target="_blank" rel="noopener noreferrer"
-                        class="social-button instagram" aria-label="Visit our Instagram page">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@MagicalColoringGame" target="_blank" rel="noopener noreferrer"
-                        class="social-button youtube" aria-label="Visit our YouTube channel">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                </div>
-
-                <!-- 2. Satır: Yasal ve Bilgi Sayfaları -->
-                <div class="footer-links" style="margin-bottom: 15px;">
-                    <a href="about.html" style="color: #555; text-decoration: none; margin: 0 10px;">About Us</a> |
-                    <a href="privacy.html" style="color: #555; text-decoration: none; margin: 0 10px;">Privacy
-                        Policy</a> |
-                    <a href="terms.html" style="color: #555; text-decoration: none; margin: 0 10px;">Terms of
-                        Service</a> |
-                    <a href="refund.html" style="color: #555; text-decoration: none; margin: 0 10px;">Refund Policy</a>
-                    |
-                    <a href="contact.html" style="color: #555; text-decoration: none; margin: 0 10px;">Contact Us</a>
-                </div>
-
-                <!-- 3. Satır: İletişim Bilgileri (E-posta ve Adres) -->
-                <div class="contact-info" style="margin-bottom: 15px; line-height: 1.5;">
-                    <span>hello@magicalcoloringgame.com</span><br>
-                    <span>PK 1, 16860 İznik/Bursa, Türkiye</span>
-                </div>
-
-                <!-- 4. Satır: Telif Hakkı -->
-                <div class="copyright-info">
-                    &copy; 2025 Labour Things. All rights reserved. | Magical Coloring Game
-                </div>
-
-            </footer>
-        </div>
-
-        <script>
-            // PREMIUM KONTROL - TEMİZ VERSİYON
-            window.addEventListener('load', function () {
-                console.log('Premium kontrol başlatılıyor...');
-
-                // Premium durumunu kontrol et
-                var isPremiumUser = localStorage.getItem('isPremium') === 'true';
-                console.log('Premium kullanıcı:', isPremiumUser);
-
-                // Eski premium etiketlerini temizle
-                var existingElements = document.querySelectorAll('.premium-badge, .premium-tooltip, .premium-overlay, .lock-overlay, .single-pro-badge');
-                existingElements.forEach(function (el) {
-                    if (el && el.parentNode) {
-                        el.parentNode.removeChild(el);
-                    }
-                });
-
-                // Bulanıklığı kaldır
-                var style = document.createElement('style');
-                style.textContent = `
+                    // Bulanıklığı kaldır
+                    var style = document.createElement('style');
+                    style.textContent = `
         .page-thumbnail.locked {
           filter: none !important;
           opacity: 1 !important;
@@ -524,195 +603,279 @@
           display: block;
         }
       `;
-                document.head.appendChild(style);
+                    document.head.appendChild(style);
 
-                // Premium modunda kontroller
-                if (isPremiumUser) {
-                    // Premium araçlarını göster
-                    var premiumTools = document.getElementById('premiumTools');
-                    if (premiumTools) {
-                        premiumTools.style.display = 'flex';
+                    // Premium modunda kontroller
+                    if (isPremiumUser) {
+                        // Premium araçlarını göster
+                        var premiumTools = document.getElementById('premiumTools');
+                        if (premiumTools) {
+                            premiumTools.style.display = 'flex';
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                // Her kategori için işlem yap
-                var categories = ['magical', 'flowers', 'animals', 'mandalas', 'various'];
+                    // Her kategori için işlem yap
+                    var categories = ['magical', 'flowers', 'animals', 'mandalas', 'various'];
 
-                categories.forEach(function (category) {
-                    var container = document.querySelector('.page-thumbnails.' + category);
-                    if (!container) return;
+                    categories.forEach(function (category) {
+                        var container = document.querySelector('.page-thumbnails.' + category);
+                        if (!container) return;
 
-                    var thumbnails = container.querySelectorAll('img.page-thumbnail');
+                        var thumbnails = container.querySelectorAll('img.page-thumbnail');
 
-                    // Her kategoride ilk 3 thumbnail dışındakilere Pro işareti ekle
-                    thumbnails.forEach(function (thumbnail, index) {
-                        if (index >= 3) {
-                            // Bulanıklığı kaldır
-                            thumbnail.style.filter = 'none';
-                            thumbnail.style.opacity = '1';
+                        // Her kategoride ilk 3 thumbnail dışındakilere Pro işareti ekle
+                        thumbnails.forEach(function (thumbnail, index) {
+                            if (index >= 3) {
+                                // Bulanıklığı kaldır
+                                thumbnail.style.filter = 'none';
+                                thumbnail.style.opacity = '1';
 
-                            // Container oluştur
-                            var container = document.createElement('div');
-                            container.className = 'thumbnail-container';
-                            container.style.position = 'relative';
-                            container.style.display = 'inline-block';
+                                // Container oluştur
+                                var container = document.createElement('div');
+                                container.className = 'thumbnail-container';
+                                container.style.position = 'relative';
+                                container.style.display = 'inline-block';
 
-                            // Thumbnail'i container'a taşı
-                            var parent = thumbnail.parentNode;
-                            parent.insertBefore(container, thumbnail);
-                            container.appendChild(thumbnail);
+                                // Thumbnail'i container'a taşı
+                                var parent = thumbnail.parentNode;
+                                parent.insertBefore(container, thumbnail);
+                                container.appendChild(thumbnail);
 
-                            // Pro rozeti ekle
-                            var badge = document.createElement('div');
-                            badge.className = 'pro-badge';
-                            badge.textContent = 'Pro';
-                            container.appendChild(badge);
+                                // Pro rozeti ekle
+                                var badge = document.createElement('div');
+                                badge.className = 'pro-badge';
+                                badge.textContent = 'Pro';
+                                container.appendChild(badge);
 
-                            // Tooltip ekle
-                            var tooltip = document.createElement('div');
-                            tooltip.className = 'pro-tooltip';
-                            tooltip.textContent = 'For Premium users!';
-                            container.appendChild(tooltip);
+                                // Tooltip ekle
+                                var tooltip = document.createElement('div');
+                                tooltip.className = 'pro-tooltip';
+                                tooltip.textContent = 'For Premium users!';
+                                container.appendChild(tooltip);
 
-                            // Overlay ekle
-                            var overlay = document.createElement('div');
-                            overlay.style.position = 'absolute';
-                            overlay.style.top = '0';
-                            overlay.style.left = '0';
-                            overlay.style.width = '100%';
-                            overlay.style.height = '100%';
-                            overlay.style.cursor = 'pointer';
-                            overlay.style.zIndex = '1500';
-                            container.appendChild(overlay);
+                                // Overlay ekle
+                                var overlay = document.createElement('div');
+                                overlay.style.position = 'absolute';
+                                overlay.style.top = '0';
+                                overlay.style.left = '0';
+                                overlay.style.width = '100%';
+                                overlay.style.height = '100%';
+                                overlay.style.cursor = 'pointer';
+                                overlay.style.zIndex = '1500';
+                                container.appendChild(overlay);
 
-                            // Tıklama olayı
-                            overlay.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                e.stopPropagation();
+                                // Tıklama olayı
+                                overlay.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
 
-                                if (typeof showPremiumModal === 'function') {
-                                    showPremiumModal();
-                                } else {
-                                    alert('This feature is only available for Premium users!');
-                                }
+                                    if (typeof showPremiumModal === 'function') {
+                                        showPremiumModal();
+                                    } else {
+                                        alert('This feature is only available for Premium users!');
+                                    }
 
-                                return false;
-                            });
+                                    return false;
+                                });
 
-                            // Thumbnail tıklama olayını devre dışı bırak
-                            thumbnail.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                return false;
-                            }, true);
-                        }
-                    });
-                });
-
-                console.log('Premium kontrol tamamlandı');
-            });
-        </script>
-        <script>
-            // MOBİL CİHAZLAR İÇİN FILL ARACI DÜZELTME
-            (function () {
-                // Mobil cihaz kontrolü
-                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-                // Sayfa yüklendiğinde çalış
-                window.addEventListener('load', function () {
-                    // Fill butonunu bul
-                    var fillButton = document.getElementById('fillBtn');
-                    if (!fillButton) return;
-
-                    // Orijinal işlevi koru
-                    var originalSetTool = window.setTool;
-
-                    // Fill için özel işlev
-                    fillButton.addEventListener('click', function () {
-                        // Canvas ve context'i bul
-                        var canvas = document.getElementById('coloringCanvas');
-                        var ctx = canvas.getContext('2d');
-
-                        // Canvas ayarlarını yenile
-                        ctx.globalAlpha = 1.0;
-                        ctx.globalCompositeOperation = 'source-over';
-
-                        console.log('Fill aracı seçildi, ayarlar sıfırlandı:',
-                            'Alpha:', ctx.globalAlpha,
-                            'Composite:', ctx.globalCompositeOperation);
-
-                        // Orijinal setTool'u çağır
-                        if (typeof originalSetTool === 'function') {
-                            originalSetTool('fill');
-                        } else {
-                            window.currentTool = 'fill';
-                        }
+                                // Thumbnail tıklama olayını devre dışı bırak
+                                thumbnail.addEventListener('click', function (e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return false;
+                                }, true);
+                            }
+                        });
                     });
 
-                    if (isMobile) {
-                        console.log('Mobil cihaz - fill enhancement atlandı');
-                    }
+                    console.log('Premium kontrol tamamlandı');
                 });
-            })();
-        </script>
+            </script>
+            <script>
+                // MOBİL CİHAZLAR İÇİN FILL ARACI DÜZELTME
+                (function () {
+                    // Mobil cihaz kontrolü
+                    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        <!-- ============================================= -->
-        <!-- NİHAİ ve CSP UYUMLU NEWSLETTER MODAL YAPISI -->
-        <!-- ============================================= -->
-        <div id="newsletterModal" class="newsletter-modal" style="display: none;">
-            <div class="newsletter-content">
-                <span id="newsletterCloseBtn" class="newsletter-close">&times;</span>
+                    // Sayfa yüklendiğinde çalış
+                    window.addEventListener('load', function () {
+                        // Fill butonunu bul
+                        var fillButton = document.getElementById('fillBtn');
+                        if (!fillButton) return;
 
-                <form id="sib-form" method="POST"
-                    action="https://e048313f.sibforms.com/serve/MUIFAPsWQh9qvMBNG3VCG9m6IPNb-TCwIi47Jvqxc0pMh3Ns1_rJPuCfb5Zh8h2vVCZDDcihyHiABn2C0gunbXzy30qDNJFis7dG0PGwlbW-cXWtbDS7XyDSVvZZIsF6GM1uIq9KSQlP2YiZKoNb09gEkB_cT3ng-N6jpvdB-JZ9C9FmaxtI_xPSBz4oDbLltE-5_v68sRs9ZHcT"
-                    data-type="subscription" class="brevo-form">
-                    <h2>Get Updates!</h2>
-                    <p>Subscribe to our newsletter for new pages and features.</p>
+                        // Orijinal işlevi koru
+                        var originalSetTool = window.setTool;
 
-                    <div class="sib-input">
-                        <!-- DEĞİŞİKLİK: ID ve NAME özellikleri eklendi -->
-                        <input class="brevo-input" type="email" id="EMAIL" name="EMAIL" placeholder="your@email.com"
-                            data-required="true" required autocomplete="email">
-                    </div>
+                        // Fill için özel işlev
+                        fillButton.addEventListener('click', function () {
+                            // Canvas ve context'i bul
+                            var canvas = document.getElementById('coloringCanvas');
+                            var ctx = canvas.getContext('2d');
 
-                    <!-- Cloudflare Turnstile CAPTCHA -->
-                    <div class="sib-captcha">
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAB0VZe67kYxh88x-"
-                            data-callback="handleCaptchaResponse"></div>
-                    </div>
+                            // Canvas ayarlarını yenile
+                            ctx.globalAlpha = 1.0;
+                            ctx.globalCompositeOperation = 'source-over';
 
-                    <button class="brevo-button" type="submit">SUBSCRIBE</button>
+                            console.log('Fill aracı seçildi, ayarlar sıfırlandı:',
+                                'Alpha:', ctx.globalAlpha,
+                                'Composite:', ctx.globalCompositeOperation);
 
-                    <input type="text" name="email_address_check" value="" class="input--hidden" style="display:none;">
-                    <input type="hidden" name="locale" value="en">
-                </form>
+                            // Orijinal setTool'u çağır
+                            if (typeof originalSetTool === 'function') {
+                                originalSetTool('fill');
+                            } else {
+                                window.currentTool = 'fill';
+                            }
+                        });
+
+                        if (isMobile) {
+                            console.log('Mobil cihaz - fill enhancement atlandı');
+                        }
+                    });
+                })();
+            </script>
+
+            <!-- ============================================= -->
+            <!-- NİHAİ ve CSP UYUMLU NEWSLETTER MODAL YAPISI -->
+            <!-- ============================================= -->
+            <div id="newsletterModal" class="newsletter-modal" style="display: none;">
+                <div class="newsletter-content">
+                    <span id="newsletterCloseBtn" class="newsletter-close">&times;</span>
+
+                    <form id="sib-form" method="POST"
+                        action="https://e048313f.sibforms.com/serve/MUIFAPsWQh9qvMBNG3VCG9m6IPNb-TCwIi47Jvqxc0pMh3Ns1_rJPuCfb5Zh8h2vVCZDDcihyHiABn2C0gunbXzy30qDNJFis7dG0PGwlbW-cXWtbDS7XyDSVvZZIsF6GM1uIq9KSQlP2YiZKoNb09gEkB_cT3ng-N6jpvdB-JZ9C9FmaxtI_xPSBz4oDbLltE-5_v68sRs9ZHcT"
+                        data-type="subscription" class="brevo-form">
+                        <h2>Get Updates!</h2>
+                        <p>Subscribe to our newsletter for new pages and features.</p>
+
+                        <div class="sib-input">
+                            <!-- DEĞİŞİKLİK: ID ve NAME özellikleri eklendi -->
+                            <input class="brevo-input" type="email" id="EMAIL" name="EMAIL" placeholder="your@email.com"
+                                data-required="true" required autocomplete="email">
+                        </div>
+
+                        <!-- Cloudflare Turnstile CAPTCHA -->
+                        <div class="sib-captcha">
+                            <div class="cf-turnstile" data-sitekey="0x4AAAAAAB0VZe67kYxh88x-"
+                                data-callback="handleCaptchaResponse"></div>
+                        </div>
+
+                        <button class="brevo-button" type="submit">SUBSCRIBE</button>
+
+                        <input type="text" name="email_address_check" value="" class="input--hidden"
+                            style="display:none;">
+                        <input type="hidden" name="locale" value="en">
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
+            <button id="newsletterTrigger" class="newsletter-trigger">📧 Get Updates</button>
 
-        <!-- Cloudflare Script'i -->
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            <!-- Cloudflare Script'i -->
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-        <!-- YARDIMCI FONKSİYON -->
-        <script>
-            function handleCaptchaResponse() {
-                var event = new Event('captchaChange');
-                var captchaContainer = document.querySelector('.sib-captcha');
-                if (captchaContainer) captchaContainer.dispatchEvent(event);
-            }
-        </script>
+            <!-- YARDIMCI FONKSİYON -->
+            <script>
+                function handleCaptchaResponse() {
+                    var event = new Event('captchaChange');
+                    var captchaContainer = document.querySelector('.sib-captcha');
+                    if (captchaContainer) captchaContainer.dispatchEvent(event);
+                }
+            </script>
 
-        <!-- NİHAİ ÇÖZÜM v10: Merkezi ve her zaman var olan dosya input'u -->
-        <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
+            <!-- NİHAİ ÇÖZÜM v10: Merkezi ve her zaman var olan dosya input'u -->
+            <input type="file" id="globalFileInput" accept="image/*" style="display: none;">
 
-        <script src="script.js"></script>
+            <script src="script.js"></script>
 
+            <!-- ========================================== -->
+            <!-- SCRATCH CITY MODAL (KAZI KAZAN PENCERESİ) -->
+            <!-- ========================================== -->
+            <div id="scratchModal" class="scratch-modal">
+                <div class="scratch-content-wrapper">
+                    <span class="scratch-close-btn" onclick="closeScratchModal()">×</span>
 
-</body>
+                    <!-- 1. GÖRÜNÜM: ŞEHİR SEÇİM GALERİSİ -->
+                    <div id="scratchGalleryView">
+                        <h2 class="scratch-title">🌃 Choose a Magic City</h2>
+                        <div class="scratch-grid">
 
-</html>
+                            <!-- 1. PARIS (FREE / ÜCRETSİZ) -->
+                            <!-- onclick="startScratchGame('paris')" kodu JS'deki 'paris' anahtarını tetikler -->
+                            <div class="city-card is-free" onclick="startScratchGame('paris')">
+                                <span class="card-badge free">✨ FREE TRY</span>
+                                <img src="assets/scratch/paris_back.jpg" alt="Paris"
+                                    onerror="this.style.display='none'">
+                                <div class="city-name">Magical Paris</div>
+                            </div>
+
+                            <!-- 2. ISTANBUL (LOCKED / KİLİTLİ) -->
+                            <div class="city-card is-locked" onclick="startScratchGame('istanbul')">
+                                <span class="card-badge pro">🔒 PRO</span>
+                                <!-- DİKKAT: Dosya ismi istanbul_galata_back.jpg olmalı -->
+                                <img src="assets/scratch/istanbul_galata_back.jpg" alt="Istanbul"
+                                    onerror="this.style.display='none'">
+                                <div class="city-name">Golden Istanbul</div>
+                            </div>
+
+                            <!-- 3. NEW YORK (LOCKED) -->
+                            <div class="city-card is-locked" onclick="startScratchGame('ny')">
+                                <span class="card-badge pro">🔒 PRO</span>
+                                <img src="assets/scratch/ny_back.jpg" alt="New York"
+                                    onerror="this.style.display='none'">
+                                <div class="city-name">New York Night</div>
+                            </div>
+
+                            <!-- 4. ROME (LOCKED) -->
+                            <div class="city-card is-locked" onclick="startScratchGame('rome')">
+                                <span class="card-badge pro">🔒 PRO</span>
+                                <img src="assets/scratch/rome_back.jpg" alt="Rome" onerror="this.style.display='none'">
+                                <div class="city-name">Eternal Rome</div>
+                            </div>
+
+                            <!-- 5. VENICE (LOCKED) -->
+                            <div class="city-card is-locked" onclick="startScratchGame('venice')">
+                                <span class="card-badge pro">🔒 PRO</span>
+                                <img src="assets/scratch/venice_back.jpg" alt="Venice"
+                                    onerror="this.style.display='none'">
+                                <div class="city-name">Venice Dream</div>
+                            </div>
+
+                            <!-- 6. TOKYO (LOCKED) -->
+                            <div class="city-card is-locked" onclick="startScratchGame('tokyo')">
+                                <span class="card-badge pro">🔒 PRO</span>
+                                <img src="assets/scratch/tokyo_back.jpg" alt="Tokyo"
+                                    onerror="this.style.display='none'">
+                                <div class="city-name">Neon Tokyo</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 2. GÖRÜNÜM: OYUN ALANI (Başlangıçta Gizli) -->
+                    <div id="scratchGameView" style="display:none;">
+                        <!-- index.html içinde scratchGameView altındaki header kısmını değiştir -->
+                        <div class="scratch-header">
+                            <button class="back-to-gallery-btn" onclick="backToGallery()">⬅ Back</button>
+                            <span id="cityNameDisplay" style="flex-grow:1; text-align:center;">City Name</span>
+                            <!-- YENİ İNDİRME BUTONU -->
+                            <button id="downloadScratchBtn" class="back-to-gallery-btn" onclick="downloadRevealedArt()"
+                                style="background:#28a745;">
+                                💾 Download Art
+                            </button>
+                        </div>
+
+                        <div id="scratch-canvas-container">
+                            <!-- Canvas JS ile buraya yüklenecek -->
+                        </div>
+
+                        <div class="scratch-hint-overlay" id="scratchHintText">
+                            ✨ Scratch to Reveal Magic! ✨
+                        </div>
+                    </div>
+                </div>
+            </div>
 </body>
 
 </html>
