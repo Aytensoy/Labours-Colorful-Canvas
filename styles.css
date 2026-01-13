@@ -2893,8 +2893,8 @@ canvas.editing-mode:active {
 }
 
 /* ==================================================
-   SCRATCH CITY (KAZI KAZAN) - NİHAİ CSS v3
-   (Mobil ve Masaüstü için Özel Oran Kilidi)
+   SCRATCH CITY (KAZI KAZAN) - SCROLL GARANTİLİ FİNAL CSS
+   (Strateji Değişikliği: Container Scroll)
    ================================================== */
 
 /* 1. Arka Plan Perdesi */
@@ -2911,35 +2911,65 @@ canvas.editing-mode:active {
     align-items: center;
     padding: 10px;
     box-sizing: border-box;
+    /* Arka plandaki canvas'ın oynamaması için */
+    touch-action: none;
 }
 
 /* 2. İçerik Kutusu (Dış Çerçeve) */
 .scratch-content-wrapper {
     width: 100%;
     max-width: 900px;
-    height: auto;
-    max-height: 98vh;
-    /* Ekran dışına taşmasın */
+
+    /* Mobil için sabit yükseklik veriyoruz ki scroll alanı oluşsun */
+    height: 85vh;
+    max-height: 900px;
+
     background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
     border: 2px solid #FFD700;
     border-radius: 20px;
     position: relative;
     padding: 20px;
     box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+
     display: flex;
     flex-direction: column;
 }
 
-/* 3. GALERİ GÖRÜNÜMÜ */
+/* 3. GALERİ GÖRÜNÜMÜ - SCROLL BURADA OLACAK (DEĞİŞİKLİK) */
 #scratchGalleryView {
-    height: 80vh;
-    display: block;
-    overflow: hidden;
+    flex: 1;
+    /* Kalan tüm alanı kapla */
     display: flex;
     flex-direction: column;
+
+    /* --- YENİ KAYDIRMA AYARLARI BURAYA TAŞINDI --- */
+    overflow-y: auto !important;
+    /* Kaydırmayı zorla aç */
+
+    touch-action: pan-y !important;
+    /* Dikey parmak hareketine izin ver */
+
+    /* İçerik taşarsa maskeleme yapma, kaydırmaya izin ver */
+    min-height: 0;
 }
 
-/* 4. OYUN GÖRÜNÜMÜ (Flex ile tam ortalama) */
+/* 4. GALERİ IZGARASI (Sadece Dizilim Yapar, Kaydırmaz) */
+.scratch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 10px;
+
+    /* Grid'in kendi yüksekliği içeriği kadar olsun */
+    height: auto;
+    overflow: visible;
+    /* Scroll'u üst elemente devrettik */
+
+    /* En alttaki kartlar için ekstra boşluk */
+    padding-bottom: 80px;
+}
+
+/* 5. OYUN GÖRÜNÜMÜ */
 #scratchGameView {
     width: 100%;
     height: 100%;
@@ -2949,26 +2979,17 @@ canvas.editing-mode:active {
     justify-content: center;
 }
 
-/* 5. OYUN ALANI (CANVAS) - YAYVANLAŞMAYI ÖNLEYEN KOD */
+/* 6. OYUN ALANI (CANVAS) - MASAÜSTÜ VE MOBİL ORAN AYARLARI */
 #scratch-canvas-container {
     position: relative;
 
-    /* A. ORAN KİLİDİ: Kutu ne olursa olsun 4:3 oranında kalır */
+    /* 4:3 Oran Kilidi */
     aspect-ratio: 4 / 3;
 
-    /* B. MASAÜSTÜ STRATEJİSİ (Yükseklik Odaklı):
-       Geniş ekranlarda genişliği %100 YAPMIYORUZ.
-       Yüksekliği veriyoruz, genişlik ona göre otomatik ayarlanıyor. */
-    /* --- DEĞİŞİKLİK BURADA --- */
-    /* Eskiden 65vh (ekranın %65'i) idi, şimdi %82 yapıyoruz */
+    /* Masaüstü: Yükseklik odaklı */
     height: 82vh;
-
-    /* Eskiden max-width 800px idi. Resim büyüyünce genişlik de artacağı için
-       bu sınırı da artırıyoruz ki resim büyüyebilsin */
-    max-width: 1100px;
-
     width: auto;
-    /* ------------------------- */
+    max-width: 1100px;
 
     background: #000;
     border-radius: 10px;
@@ -2978,37 +2999,47 @@ canvas.editing-mode:active {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     margin: 0 auto;
     flex-grow: 0;
+
+    /* Kazıma yaparken sayfanın kaymasını engelle */
+    touch-action: none !important;
 }
 
 /* --- MOBİL CİHAZ AYARLARI (1024px ve Altı) --- */
 @media (max-width: 1024px) {
 
-    /* Mobilde durum tam tersidir, genişlik sınırlıdır. */
+    /* Galeri görünümü mobilde tam yükseklik alsın */
+    #scratchGalleryView {
+        height: 100%;
+        overflow-y: scroll;
+        /* Mobilde scroll'u zorla */
+    }
+
     #scratch-canvas-container {
+        /* Oyun alanında genişlik odaklı */
         width: 100%;
-        /* Genişlik ekranı doldursun */
         height: auto;
-        /* Yükseklik orana göre otomatik gelsin */
         max-height: 60vh;
-        /* Çok uzun telefonlarda boyu sınırlayalım */
     }
 
     .scratch-content-wrapper {
-        padding: 10px;
+        padding: 15px;
+        /* Mobilde padding'i biraz artır */
         width: 95%;
+        height: 90vh;
+        /* Ekranın %90'ını kapla */
     }
 
     .scratch-grid {
         grid-template-columns: repeat(2, 1fr);
-        /* Galeri 2 sütun */
+        /* 2 Sütun */
+        gap: 10px;
     }
 }
 
-/* --- YATAY MOBİL (Landscape) AYARLARI --- */
+/* --- YATAY MOBİL (Landscape) --- */
 @media (max-height: 500px) and (orientation: landscape) {
     .scratch-content-wrapper {
         flex-direction: row;
-        /* Yan yana diz */
         align-items: center;
         max-height: 98vh;
         padding: 5px;
@@ -3021,28 +3052,17 @@ canvas.editing-mode:active {
 
     #scratch-canvas-container {
         height: 85vh;
-        /* Ekranı tam kullan */
         width: auto;
         max-height: none;
     }
 
-    .scratch-header {
-        width: 200px;
-        /* Başlığı sola al */
-        flex-direction: column;
+    /* Yatayda galeri scroll ayarı */
+    #scratchGalleryView {
+        height: 85vh;
     }
 }
 
-/* --- DİĞER STANDART AYARLAR (Başlık, Butonlar vb.) --- */
-.scratch-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    padding: 10px;
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
+/* --- DİĞER STANDART BİLEŞENLER --- */
 .scratch-close-btn {
     position: absolute;
     top: 10px;
@@ -3062,8 +3082,9 @@ canvas.editing-mode:active {
     color: #FFD700;
     text-align: center;
     font-family: 'Poppins', sans-serif;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-shadow: 0 0 10px #FFD700;
+    flex-shrink: 0;
 }
 
 .city-card {
@@ -3072,8 +3093,8 @@ canvas.editing-mode:active {
     overflow: hidden;
     cursor: pointer;
     border: 1px solid #444;
-    transition: transform 0.3s, border-color 0.3s;
     position: relative;
+    transition: transform 0.3s, border-color 0.3s;
 }
 
 .city-card:hover {
@@ -3146,7 +3167,6 @@ canvas.editing-mode:active {
     }
 }
 
-/* --- KORUNAN ETİKETLER --- */
 .card-badge {
     position: absolute;
     top: 10px;
