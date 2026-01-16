@@ -48,21 +48,6 @@
         }
     </script>
 
-    <script>
-        // Splash screen'i gizle ve ana içeriği göster
-        document.addEventListener('DOMContentLoaded', function () {
-            // Sayfanın temel yapısı hazır olduğunda, 2 saniye sonra splash'ı kaldır
-            setTimeout(function () {
-                const splashScreen = document.querySelector('.splash-screen');
-                const mainContent = document.getElementById('mainContent');
-
-                if (splashScreen && mainContent) {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'block';
-                }
-            }, 2000); // Süreyi 2 saniyeye sabitledik
-        });
-    </script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SYKV47JJ61"></script>
     <script>
@@ -94,12 +79,8 @@
 </head>
 
 <body>
-    <div class="splash-screen">
-        <img src="icons/splash-logo.png" alt="Magical Coloring Game">
-        <h2>Magical Coloring Game</h2>
-    </div>
 
-    <div id="mainContent" style="display: block;">
+    <div id="mainContent">
         <div class="container">
             <h1>Magical Coloring Game</h1>
             <div class="coloring-area">

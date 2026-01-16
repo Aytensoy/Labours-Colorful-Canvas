@@ -2367,14 +2367,30 @@ function backToGallery() {
   if (container) container.innerHTML = '';
   currentScratchGame = null;
 }
-// 5. İNDİRME FONKSİYONU (YENİ)
+// GÜNCELLENMİŞ İNDİRME FONKSİYONU
 function downloadRevealedArt() {
   if (!currentScratchGame) return;
 
-  // Alttaki gizli (renkli) resmin linkini al
+  // 1. Geçici Canvas Oluştur
+  const tempCanvas = document.createElement('canvas');
+  const w = currentScratchGame.canvas.width;
+  const h = currentScratchGame.canvas.height;
+
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+  const ctx = tempCanvas.getContext('2d');
+
+  // 2. Alt Katmanı (Renkli) Çiz
+  ctx.drawImage(currentScratchGame.backImg, 0, 0, w, h);
+
+  // 3. Üst Katmanı (Siyah Maske) Çiz
+  // (Kazınan yerler şeffaf olduğu için alttaki renkli resim görünür kalır)
+  ctx.drawImage(currentScratchGame.canvas, 0, 0, w, h);
+
+  // 4. İndir
   const link = document.createElement('a');
-  link.href = currentScratchGame.backImg.src;
-  link.download = `magical-scratch-art.jpg`; // İndirilen dosya adı
+  link.href = tempCanvas.toDataURL('image/jpeg', 0.9);
+  link.download = `magical-scratch-art.jpg`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
