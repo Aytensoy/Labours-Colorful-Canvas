@@ -3228,34 +3228,3 @@ canvas.editing-mode:active {
 #scratch-canvas-container img {
     pointer-events: none;
 }
-
-/* --- PREMIUM TOOLS GÖRÜNÜRLÜK AYARLARI --- */
-
-/* Butonları saran kapsayıcı */
-.premium-tools-inline {
-    display: flex;
-    gap: 5px;
-    margin-left: 10px;
-    padding-left: 10px;
-    border-left: 2px solid rgba(0, 0, 0, 0.1);
-    /* Diğer araçlardan ayıran çizgi */
-}
-
-/* Mobilde hizalama düzeltmesi */
-@media (max-width: 768px) {
-    .premium-tools-inline {
-        margin-left: 0;
-        padding-left: 0;
-        border-left: none;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        padding-top: 5px;
-        width: 100%;
-        justify-content: center;
-        margin-top: 5px;
-    }
-}
-
-/* Premium butonların üzerindeki kilit simgesi efekti */
-/* Kullanıcı Premium DEĞİLSE butonun üzerine küçük bir kilit ekleyebiliriz */
-/* Not: Bunu JS kontrolü olmadan CSS ile yapmak zordur, 
-   o yüzden şimdilik butonların üzerindeki "Yıldız" simgesi (zaten var) yeterlidir. */

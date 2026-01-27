@@ -1924,17 +1924,12 @@ function showPremiumModal() {
               <!--   YENİ VE DOĞRU FİYATLANDIRMA BÖLÜMÜ      -->
               <!-- ========================================== -->
               <div class="launch-pricing">
-    <!-- Regular fiyatı 19.99 yaptık ki indirim mantıklı dursun -->
-    <p class="regular-price">Regular Price: <span class="crossed">$19.99</span></p> 
-    
-    <!-- YENİ FİYAT -->
-    <p class="sale-price">🚀 Launch Price: $9.99</p>
-    
-    <!-- İndirim mesajı (19.99 - 9.99 = 10$ Kazanç) -->
-    <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1.1em; margin-top: 5px;">
-        🔥 50% OFF! You Save $10
-    </p>
-</div>
+                  <p class="regular-price">Regular Price: <span class="crossed">$24.99</span></p>
+                  <p class="sale-price">🚀 Launch Price: $14.99</p>
+                  <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1em; margin-top: 5px;">
+                      You Save $10 • Limited Time Offer!
+                  </p>
+              </div>
 
               <button class="buy-premium-btn">🎨 Get Premium Now</button>
           </div>
