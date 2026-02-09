@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unlock My Heart</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #111;
+            /* Resim yoksa siyah görünür */
+            font-family: 'Poppins', sans-serif;
+            position: fixed;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #game {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Call to Action Button */
+        .cta-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #FFD700, #FDB931);
+            border: 2px solid #fff;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            z-index: 100;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.05);
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        #canvas-wrap {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            z-index: 2;
+        }
+
+        /* Arka plandaki gizli görsel */
+        .back-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Resmi ekrana tam sığdırır */
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Parmak İkonu ve Yönerge */
+        .hand-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .hand-icon {
+            font-size: 60px;
+            animation: swipeHand 2s infinite;
+        }
+
+        .guide-text {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
+        }
+
+        @keyframes swipeHand {
+            0% {
+                transform: rotate(0deg) translateX(0);
+            }
+
+            50% {
+                transform: rotate(-20deg) translateX(-30px);
+            }
+
+            100% {
+                transform: rotate(0deg) translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game">
+        <div class="hand-guide" id="handGuide">
+            <div class="hand-icon">👆</div>
+            <div class="guide-text">Scratch to Unlock</div>
+        </div>
+
+        <button class="cta-btn" id="ctaBtn" onclick="ctaClick()">🎁 GET YOUR GIFT</button>
+
+        <div id="canvas-wrap">
+            <!-- İŞTE BURASI: Resmi direkt HTML içine koyduk -->
+            <img src="gift.jpg" class="back-img" alt="Surprise">
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const etsyLink = "https://labourthings.etsy.com/listing/4452499235";
+
+        // ========== GAME LOGIC ==========
+        let gameStarted = false;
+        let scratchStartTime = 0;
+        let scratchedPixels = 0;
+
+        function ctaClick() {
+            window.open(etsyLink, '_blank');
+        }
+
+        function loadCard() {
+            const wrap = document.getElementById('canvas-wrap');
+
+            // Canvas Oluştur (Kazınacak Katman)
+            const cvs = document.createElement('canvas');
+            const ctx = cvs.getContext('2d');
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            cvs.width = width;
+            cvs.height = height;
+            wrap.appendChild(cvs);
+
+            // Üst katmanı boya
+            const grad = ctx.createLinearGradient(0, 0, width, height);
+            grad.addColorStop(0, '#D4145A');
+            grad.addColorStop(1, '#FBB03B');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // "Scratch Here" Yazısı
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 30px Poppins, Arial';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 4;
+            ctx.fillText("💕 A Surprise for You 💕", width / 2, height / 2 - 50);
+
+            // Kazıma Modu (Silgi)
+            ctx.globalCompositeOperation = 'destination-out';
+
+            let isDrawing = false;
+
+            function getPos(e) {
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const r = cvs.getBoundingClientRect();
+                return { x: clientX - r.left, y: clientY - r.top };
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+
+                if (!gameStarted) {
+                    gameStarted = true;
+                    document.getElementById('handGuide').style.display = 'none';
+                }
+
+                const p = getPos(e);
+                const radius = width / 10;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                scratchedPixels++;
+                // Biraz kazıyınca butonu göster
+                if (scratchedPixels > 50 && document.getElementById('ctaBtn').style.display === 'none') {
+                    document.getElementById('ctaBtn').style.display = 'block';
+                }
+            }
+
+            cvs.addEventListener('mousedown', function (e) { isDrawing = true; draw(e); });
+            cvs.addEventListener('mousemove', function (e) { draw(e); });
+            cvs.addEventListener('mouseup', function () { isDrawing = false; });
+
+            cvs.addEventListener('touchstart', function (e) { isDrawing = true; draw(e); e.preventDefault(); }, { passive: false });
+            cvs.addEventListener('touchmove', function (e) { draw(e); e.preventDefault(); }, { passive: false });
+            cvs.addEventListener('touchend', function () { isDrawing = false; });
+        }
+
+        window.onload = loadCard;
+    </script>
+</body>
+
+</html>
