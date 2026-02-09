@@ -1,8 +1,8 @@
 // =================================================================
-// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A35 - Scratch Update)
+// SERVICE WORKER - NİHAİ, GÜVENLİ VE TAM KAPSAMLI SÜRÜM (A36- Scratch Update)
 // =================================================================
 
-const CACHE_NAME = 'magical-coloring-A35';
+const CACHE_NAME = 'magical-coloring-A36';
 
 const FILES_TO_CACHE = [
     // Çekirdek Dosyalar
