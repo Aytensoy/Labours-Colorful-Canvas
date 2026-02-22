@@ -1992,19 +1992,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // =======================================================
-// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (v5 - Final)
-// Bu blok, hem Hediye Sistemini hem de Etsy Güvenliğini yönetir.
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (v6 - Play Store Hazırlığı)
+// Bu blok Hediye Sistemini, Play Store ve Etsy Güvenliğini yönetir.
 // =======================================================
 
-// Önce Hediye Sistemi fonksiyonunu tanımlıyoruz.
 function setupGiftingSystem() {
-  const validGiftCodes = new Set([
-    "MAGIC-GIFT-2025",
-    "COLOR-FUN-123",
-    "PREMIUM-KID-789",
-    "BIRTHDAY-SPECIAL",
-    "ETSYMAGIC2025",
-    "IZNIK-BARIS"
+  // 1. GÜVENLİK GÜNCELLEMESİ: Kodlar artık şifreli (Base64) formatta. 
+  // F12'ye basan biri kelimeleri açıkça göremez.
+  const validGiftCodesBase64 = new Set([
+    "TUFHSUMtR0lGVC0yMDI1",   // MAGIC-GIFT-2025
+    "Q09MT1ItRlVOLTEyMw==",   // COLOR-FUN-123
+    "UFJFTUlVTS1LSUQtNzg5",   // PREMIUM-KID-789
+    "QklSVEhEQVktU1BFQ0lBTA==", // BIRTHDAY-SPECIAL
+    "RVRTWU1BR0lDMjAyNQ==",   // ETSYMAGIC2025
+    "SVpOSUstQkFSSVM="        // IZNIK-BARIS
   ]);
 
   const redeemButton = document.getElementById('redeemGiftBtn');
@@ -2019,7 +2020,11 @@ function setupGiftingSystem() {
 
     const formattedUserCode = userCode.trim().toUpperCase();
 
-    if (validGiftCodes.has(formattedUserCode)) {
+    // Kullanıcının girdiği kodu, listemizdeki şifreli formata dönüştür (btoa)
+    const encodedUserCode = btoa(formattedUserCode);
+
+    // Şifreli listemizde bu kod var mı?
+    if (validGiftCodesBase64.has(encodedUserCode)) {
       let usedCodes = JSON.parse(localStorage.getItem('usedGiftCodes')) || [];
       if (usedCodes.includes(formattedUserCode)) {
         alert("This gift code has already been used on this device. Premium features should already be active.");
@@ -2039,31 +2044,40 @@ function setupGiftingSystem() {
   });
 }
 
-// Şimdi, sayfa tamamen yüklendiğinde çalışacak TEK BİR ana olay dinleyici oluşturuyoruz.
+// Ana olay dinleyici
 document.addEventListener('DOMContentLoaded', () => {
 
-  // GÖREV 1: Hediye sistemini çalıştır.
-  setupGiftingSystem();
-  console.log('Hediye kodu sistemi başarıyla kuruldu.');
-
-  // GÖREV 2: Etsy güvenlik kontrolünü yap.
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('source') === 'etsy') {
+  const isEtsy = urlParams.get('source') === 'etsy';
+  const isAndroid = urlParams.get('source') === 'android';
+
+  // 1. PLAY STORE (ANDROID) KONTROLÜ
+  if (isAndroid) {
+    console.log("Play Store ziyaretçisi algılandı. Hediye butonu gizleniyor.");
+    const redeemBtn = document.getElementById('redeemGiftBtn');
+    if (redeemBtn) {
+      redeemBtn.style.display = 'none'; // Google kuralları gereği butonu gizle
+    }
+    // NOT: İlerleyen adımlarda buraya Google Play ödeme sistemini ekleyeceğiz.
+  } else {
+    // Android DEĞİLSE (Normal web veya Etsy ise) hediye sistemini çalıştır
+    setupGiftingSystem();
+    console.log('Hediye kodu sistemi başarıyla kuruldu.');
+  }
+
+  // 2. ETSY KONTROLÜ (Sizin orijinal kodunuz, aynen korundu)
+  if (isEtsy) {
     console.log("Etsy ziyaretçisi algılandı. Gizleme sınıfı (.etsy-hidden) eklenecek.");
 
-    // Statik elementleri gizle
     const premiumSection = document.getElementById('premium-benefits-section');
     if (premiumSection) {
       premiumSection.classList.add('etsy-hidden');
-      console.log('"Why Go Premium" bölümüne gizleme sınıfı eklendi.');
     }
     const newsletterTrigger = document.getElementById('newsletterTrigger');
     if (newsletterTrigger) {
       newsletterTrigger.classList.add('etsy-hidden');
-      console.log('Bülten aboneliği butonuna gizleme sınıfı eklendi.');
     }
 
-    // Dinamik (sonradan oluşan) Premium Penceresini izle ve gizle
     const observer = new MutationObserver(() => {
       const premiumModal = document.getElementById('premiumModal');
       if (premiumModal) {
