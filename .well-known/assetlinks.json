@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.magicalcoloringgame.www.twa",
+            "sha256_cert_fingerprints": [
+                "CA:9D:6C:B8:29:AC:76:5E:46:17:F3:D1:DD:59:18:AF:DC:61:B1:CE:3E:F7:81:D1:05:2E:0A:A2:75:ED:32:17"
+            ]
+        }
+    }
+]
