@@ -2000,12 +2000,12 @@ function setupGiftingSystem() {
   // 1. GÜVENLİK GÜNCELLEMESİ: Kodlar artık şifreli (Base64) formatta. 
   // F12'ye basan biri kelimeleri açıkça göremez.
   const validGiftCodesBase64 = new Set([
-    "TUFHSUMtR0lGVC0yMDI1",   // MAGIC-GIFT-2025
-    "Q09MT1ItRlVOLTEyMw==",   // COLOR-FUN-123
-    "UFJFTUlVTS1LSUQtNzg5",   // PREMIUM-KID-789
-    "QklSVEhEQVktU1BFQ0lBTA==", // BIRTHDAY-SPECIAL
-    "RVRTWU1BR0lDMjAyNQ==",   // ETSYMAGIC2025
-    "SVpOSUstQkFSSVM="        // IZNIK-BARIS
+    "TUFHSUMtR0lGVC0yMDI1",
+    "Q09MT1ItRlVOLTEyMw==",
+    "UFJFTUlVTS1LSUQtNzg5",
+    "QklSVEhEQVktU1BFQ0lBTA==",
+    "RVRTWU1BR0lDMjAyNQ==",
+    "SVpOSUstQkFSSVM="
   ]);
 
   const redeemButton = document.getElementById('redeemGiftBtn');
