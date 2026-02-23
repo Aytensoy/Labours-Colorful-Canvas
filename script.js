@@ -2044,51 +2044,73 @@ function setupGiftingSystem() {
   });
 }
 
-// Ana olay dinleyici
+// =======================================================
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (UX MÜKEMMELİYETİ)
+// Premium Kullanıcı, Play Store ve Etsy Güvenliğini yönetir.
+// =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const isEtsy = urlParams.get('source') === 'etsy';
   const isAndroid = urlParams.get('source') === 'android';
 
-  // 1. PLAY STORE (ANDROID) KONTROLÜ
+  // Kullanıcı zaten premium mu? (localStorage'a bakıyoruz)
+  const isPremium = localStorage.getItem('isPremium') === 'true';
+
+  // 1. SADECE ANDROID İÇİN (Premium olsun veya olmasın) GİZLENECEKLER
+  // Play Store'dan indiren birine "Uygulamayı İndir" demek mantıksızdır.
   if (isAndroid) {
-    console.log("Play Store ziyaretçisi algılandı. Hediye butonu gizleniyor.");
-    const redeemBtn = document.getElementById('redeemGiftBtn');
-    if (redeemBtn) {
-      redeemBtn.style.display = 'none'; // Google kuralları gereği butonu gizle
+    const downloadAppBtn = document.getElementById('downloadAppBtn');
+    if (downloadAppBtn && downloadAppBtn.parentElement) {
+      downloadAppBtn.parentElement.style.display = 'none';
     }
-    // NOT: İlerleyen adımlarda buraya Google Play ödeme sistemini ekleyeceğiz.
-  } else {
-    // Android DEĞİLSE (Normal web veya Etsy ise) hediye sistemini çalıştır
-    setupGiftingSystem();
-    console.log('Hediye kodu sistemi başarıyla kuruldu.');
+    // Hediye kodunu Android'de Google yasakladığı için gizliyoruz
+    const redeemBtn = document.getElementById('redeemGiftBtn');
+    if (redeemBtn) redeemBtn.style.display = 'none';
   }
 
-  // 2. ETSY KONTROLÜ (Sizin orijinal kodunuz, aynen korundu)
-  if (isEtsy) {
-    console.log("Etsy ziyaretçisi algılandı. Gizleme sınıfı (.etsy-hidden) eklenecek.");
+  // 2. KULLANICI ZATEN PREMIUM İSE
+  if (isPremium) {
+    console.log("Premium kullanıcı algılandı.");
 
-    const premiumSection = document.getElementById('premium-benefits-section');
-    if (premiumSection) {
-      premiumSection.classList.add('etsy-hidden');
+    // SADECE "Why Go Premium" bölümünü gizle (Çünkü zaten satın aldı, reklam görmesin)
+    const whyPremiumSection = document.querySelector('.why-premium-section');
+    if (whyPremiumSection) whyPremiumSection.style.display = 'none';
+
+    // Normal web sitesindeyse hediye kodu butonunu gizle (Çünkü kodunu zaten kullandı)
+    const redeemBtn = document.getElementById('redeemGiftBtn');
+    if (redeemBtn) redeemBtn.style.display = 'none';
+
+    // DİKKAT: 'downloadAppBtn' burada GİZLENMİYOR! 
+    // Yani Etsy'den premium olan kişi web sitesinde "Offline App" butonunu görecek ve indirebilecek!
+
+  } else {
+    // 3. KULLANICI PREMIUM DEĞİLSE
+
+    // Normal web tarayıcısındaysa hediye sistemini kur (Android'de zaten yukarıda gizledik)
+    if (!isAndroid) {
+      setupGiftingSystem();
     }
-    const newsletterTrigger = document.getElementById('newsletterTrigger');
-    if (newsletterTrigger) {
-      newsletterTrigger.classList.add('etsy-hidden');
+
+    // ANDROID VEYA ETSY İSE: "Why Go Premium" DURSUN, ama içindeki yasaklı şeyleri gizle!
+    if (isEtsy || isAndroid) {
+
+      // Sizin harika fikriniz: Yazılar dursun, sadece Popup (Modal) açıldığındaki Gumroad butonunu ve Fiyatı gizle!
+      const observer = new MutationObserver(() => {
+        const premiumModal = document.getElementById('premiumModal');
+        if (premiumModal) {
+          // Modal içindeki Gumroad satın al butonu
+          const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
+          // Modal içindeki 9.99$ yazan fiyat bölümü
+          const pricingSection = premiumModal.querySelector('.launch-pricing');
+
+          // Sadece bu ikisini yok ediyoruz, özellikler listesi (Magic Photos vs.) kalıyor!
+          if (premiumBuyButton) premiumBuyButton.style.display = 'none';
+          if (pricingSection) pricingSection.style.display = 'none';
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
     }
-
-    const observer = new MutationObserver(() => {
-      const premiumModal = document.getElementById('premiumModal');
-      if (premiumModal) {
-        const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
-        const pricingSection = premiumModal.querySelector('.launch-pricing');
-
-        if (premiumBuyButton) premiumBuyButton.classList.add('etsy-hidden');
-        if (pricingSection) pricingSection.classList.add('etsy-hidden');
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
   }
 });
 // =======================================================
