@@ -7,7 +7,8 @@
             "namespace": "android_app",
             "package_name": "com.magicalcoloringgame.www.twa",
             "sha256_cert_fingerprints": [
-                "CA:9D:6C:B8:29:AC:76:5E:46:17:F3:D1:DD:59:18:AF:DC:61:B1:CE:3E:F7:81:D1:05:2E:0A:A2:75:ED:32:17"
+                "CA:9D:6C:B8:29:AC:76:5E:46:17:F3:D1:DD:59:18:AF:DC:61:B1:CE:3E:F7:81:D1:05:2E:0A:A2:75:ED:32:17",
+                "8B:65:E5:2E:92:2E:2D:95:70:88:5D:DA:DD:C9:03:3A:7F:CD:57:BE:EB:96:41:37:39:66:55:4D:C6:05:13:92"
             ]
         }
     }
