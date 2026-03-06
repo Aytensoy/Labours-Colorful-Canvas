@@ -1924,12 +1924,17 @@ function showPremiumModal() {
               <!--   YENİ VE DOĞRU FİYATLANDIRMA BÖLÜMÜ      -->
               <!-- ========================================== -->
               <div class="launch-pricing">
-                  <p class="regular-price">Regular Price: <span class="crossed">$24.99</span></p>
-                  <p class="sale-price">🚀 Launch Price: $14.99</p>
-                  <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1em; margin-top: 5px;">
-                      You Save $10 • Limited Time Offer!
-                  </p>
-              </div>
+    <!-- Regular fiyatı 19.99 yaptık ki indirim mantıklı dursun -->
+    <p class="regular-price">Regular Price: <span class="crossed">$19.99</span></p> 
+    
+    <!-- YENİ FİYAT -->
+    <p class="sale-price">🚀 Launch Price: $9.99</p>
+    
+    <!-- İndirim mesajı (19.99 - 9.99 = 10$ Kazanç) -->
+    <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1.1em; margin-top: 5px;">
+        🔥 50% OFF! You Save $10
+    </p>
+</div>
 
               <button class="buy-premium-btn">🎨 Get Premium Now</button>
           </div>
@@ -1987,19 +1992,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // =======================================================
-// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (v5 - Final)
-// Bu blok, hem Hediye Sistemini hem de Etsy Güvenliğini yönetir.
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (v6 - Play Store Hazırlığı)
+// Bu blok Hediye Sistemini, Play Store ve Etsy Güvenliğini yönetir.
 // =======================================================
 
-// Önce Hediye Sistemi fonksiyonunu tanımlıyoruz.
 function setupGiftingSystem() {
-  const validGiftCodes = new Set([
-    "MAGIC-GIFT-2025",
-    "COLOR-FUN-123",
-    "PREMIUM-KID-789",
-    "BIRTHDAY-SPECIAL",
-    "ETSYMAGIC2025",
-    "IZNIK-BARIS"
+  // 1. GÜVENLİK GÜNCELLEMESİ: Kodlar artık şifreli (Base64) formatta. 
+  // F12'ye basan biri kelimeleri açıkça göremez.
+  const validGiftCodesBase64 = new Set([
+    "TUFHSUMtR0lGVC0yMDI1",
+    "Q09MT1ItRlVOLTEyMw==",
+    "UFJFTUlVTS1LSUQtNzg5",
+    "QklSVEhEQVktU1BFQ0lBTA==",
+    "RVRTWU1BR0lDMjAyNQ==",
+    "SVpOSUstQkFSSVM="
   ]);
 
   const redeemButton = document.getElementById('redeemGiftBtn');
@@ -2014,7 +2020,11 @@ function setupGiftingSystem() {
 
     const formattedUserCode = userCode.trim().toUpperCase();
 
-    if (validGiftCodes.has(formattedUserCode)) {
+    // Kullanıcının girdiği kodu, listemizdeki şifreli formata dönüştür (btoa)
+    const encodedUserCode = btoa(formattedUserCode);
+
+    // Şifreli listemizde bu kod var mı?
+    if (validGiftCodesBase64.has(encodedUserCode)) {
       let usedCodes = JSON.parse(localStorage.getItem('usedGiftCodes')) || [];
       if (usedCodes.includes(formattedUserCode)) {
         alert("This gift code has already been used on this device. Premium features should already be active.");
@@ -2034,42 +2044,73 @@ function setupGiftingSystem() {
   });
 }
 
-// Şimdi, sayfa tamamen yüklendiğinde çalışacak TEK BİR ana olay dinleyici oluşturuyoruz.
+// =======================================================
+// SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (UX MÜKEMMELİYETİ)
+// Premium Kullanıcı, Play Store ve Etsy Güvenliğini yönetir.
+// =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-  // GÖREV 1: Hediye sistemini çalıştır.
-  setupGiftingSystem();
-  console.log('Hediye kodu sistemi başarıyla kuruldu.');
-
-  // GÖREV 2: Etsy güvenlik kontrolünü yap.
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('source') === 'etsy') {
-    console.log("Etsy ziyaretçisi algılandı. Gizleme sınıfı (.etsy-hidden) eklenecek.");
+  const isEtsy = urlParams.get('source') === 'etsy';
+  const isAndroid = urlParams.get('source') === 'android';
 
-    // Statik elementleri gizle
-    const premiumSection = document.getElementById('premium-benefits-section');
-    if (premiumSection) {
-      premiumSection.classList.add('etsy-hidden');
-      console.log('"Why Go Premium" bölümüne gizleme sınıfı eklendi.');
+  // Kullanıcı zaten premium mu? (localStorage'a bakıyoruz)
+  const isPremium = localStorage.getItem('isPremium') === 'true';
+
+  // 1. SADECE ANDROID İÇİN (Premium olsun veya olmasın) GİZLENECEKLER
+  // Play Store'dan indiren birine "Uygulamayı İndir" demek mantıksızdır.
+  if (isAndroid) {
+    const downloadAppBtn = document.getElementById('downloadAppBtn');
+    if (downloadAppBtn && downloadAppBtn.parentElement) {
+      downloadAppBtn.parentElement.style.display = 'none';
     }
-    const newsletterTrigger = document.getElementById('newsletterTrigger');
-    if (newsletterTrigger) {
-      newsletterTrigger.classList.add('etsy-hidden');
-      console.log('Bülten aboneliği butonuna gizleme sınıfı eklendi.');
+    // Hediye kodunu Android'de Google yasakladığı için gizliyoruz
+    const redeemBtn = document.getElementById('redeemGiftBtn');
+    if (redeemBtn) redeemBtn.style.display = 'none';
+  }
+
+  // 2. KULLANICI ZATEN PREMIUM İSE
+  if (isPremium) {
+    console.log("Premium kullanıcı algılandı.");
+
+    // SADECE "Why Go Premium" bölümünü gizle (Çünkü zaten satın aldı, reklam görmesin)
+    const whyPremiumSection = document.querySelector('.why-premium-section');
+    if (whyPremiumSection) whyPremiumSection.style.display = 'none';
+
+    // Normal web sitesindeyse hediye kodu butonunu gizle (Çünkü kodunu zaten kullandı)
+    const redeemBtn = document.getElementById('redeemGiftBtn');
+    if (redeemBtn) redeemBtn.style.display = 'none';
+
+    // DİKKAT: 'downloadAppBtn' burada GİZLENMİYOR! 
+    // Yani Etsy'den premium olan kişi web sitesinde "Offline App" butonunu görecek ve indirebilecek!
+
+  } else {
+    // 3. KULLANICI PREMIUM DEĞİLSE
+
+    // Normal web tarayıcısındaysa hediye sistemini kur (Android'de zaten yukarıda gizledik)
+    if (!isAndroid) {
+      setupGiftingSystem();
     }
 
-    // Dinamik (sonradan oluşan) Premium Penceresini izle ve gizle
-    const observer = new MutationObserver(() => {
-      const premiumModal = document.getElementById('premiumModal');
-      if (premiumModal) {
-        const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
-        const pricingSection = premiumModal.querySelector('.launch-pricing');
+    // ANDROID VEYA ETSY İSE: "Why Go Premium" DURSUN, ama içindeki yasaklı şeyleri gizle!
+    if (isEtsy || isAndroid) {
 
-        if (premiumBuyButton) premiumBuyButton.classList.add('etsy-hidden');
-        if (pricingSection) pricingSection.classList.add('etsy-hidden');
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+      // Sizin harika fikriniz: Yazılar dursun, sadece Popup (Modal) açıldığındaki Gumroad butonunu ve Fiyatı gizle!
+      const observer = new MutationObserver(() => {
+        const premiumModal = document.getElementById('premiumModal');
+        if (premiumModal) {
+          // Modal içindeki Gumroad satın al butonu
+          const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
+          // Modal içindeki 9.99$ yazan fiyat bölümü
+          const pricingSection = premiumModal.querySelector('.launch-pricing');
+
+          // Sadece bu ikisini yok ediyoruz, özellikler listesi (Magic Photos vs.) kalıyor!
+          if (premiumBuyButton) premiumBuyButton.style.display = 'none';
+          if (pricingSection) pricingSection.style.display = 'none';
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 });
 // =======================================================

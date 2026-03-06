@@ -1866,7 +1866,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const showScrollHint = () => {
     // Eğer kullanıcı ipucunu daha önce görmüşse, olay dinleyiciyi kaldır ve çık.
-    if (localStorage.getItem(scrollHintKey)) {
+    const hintCount = parseInt(localStorage.getItem(scrollHintKey) || '0');
+    if (hintCount >= 3) {
       canvasForHint.removeEventListener('touchstart', showScrollHint);
       return;
     }
@@ -1874,7 +1875,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // İpucu kutusunu oluştur
     const hintBox = document.createElement('div');
     hintBox.id = 'scrollHint';
-    hintBox.innerHTML = '✨ <strong>İpucu:</strong> Please use areas outside the canvas to scroll the page.';
+    hintBox.innerHTML = '✨ <strong>Tip:</strong> Scroll the page from outside the canvas area.';
     document.body.appendChild(hintBox);
 
     // 4 saniye sonra ipucunu yavaşça kaldır
@@ -1887,7 +1888,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
 
     // Kullanıcının ipucunu gördüğünü kaydet.
-    localStorage.setItem(scrollHintKey, 'true');
+    localStorage.setItem(scrollHintKey, hintCount + 1);
 
     // Olay dinleyiciyi artık gereksiz olduğu için kaldır.
     canvasForHint.removeEventListener('touchstart', showScrollHint);
