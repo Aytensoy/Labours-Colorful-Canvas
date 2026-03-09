@@ -3,7 +3,7 @@
   "name": "Magical Coloring Adventure",
   "short_name": "Magic Coloring",
   "description": "Creative coloring experience with Magic Photos - Transform into characters and color your world!",
-  "start_url": "./index.html",
+  "start_url": "./index.html?source=android",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
