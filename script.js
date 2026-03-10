@@ -2045,6 +2045,7 @@ function setupGiftingSystem() {
   });
 }
 
+// --- KOD BAŞLANGICI ---
 // =======================================================
 // SAYFA YÜKLENDİĞİNDE ÇALIŞACAK SON KONTROLLER (UX MÜKEMMELİYETİ)
 // Premium Kullanıcı, Play Store ve Etsy Güvenliğini yönetir.
@@ -2059,13 +2060,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const isPremium = localStorage.getItem('isPremium') === 'true';
 
   // 1. SADECE ANDROID İÇİN (Premium olsun veya olmasın) GİZLENECEKLER
-  // Play Store'dan indiren birine "Uygulamayı İndir" demek mantıksızdır.
   if (isAndroid) {
     const downloadAppBtn = document.getElementById('downloadAppBtn');
     if (downloadAppBtn && downloadAppBtn.parentElement) {
       downloadAppBtn.parentElement.style.display = 'none';
     }
-    // Hediye kodunu Android'de Google yasakladığı için gizliyoruz
     const redeemBtn = document.getElementById('redeemGiftBtn');
     if (redeemBtn) redeemBtn.style.display = 'none';
   }
@@ -2074,46 +2073,81 @@ document.addEventListener('DOMContentLoaded', () => {
   if (isPremium) {
     console.log("Premium kullanıcı algılandı.");
 
-    // SADECE "Why Go Premium" bölümünü gizle (Çünkü zaten satın aldı, reklam görmesin)
     const whyPremiumSection = document.querySelector('.why-premium-section');
     if (whyPremiumSection) whyPremiumSection.style.display = 'none';
 
-    // Normal web sitesindeyse hediye kodu butonunu gizle (Çünkü kodunu zaten kullandı)
     const redeemBtn = document.getElementById('redeemGiftBtn');
     if (redeemBtn) redeemBtn.style.display = 'none';
 
-    // DİKKAT: 'downloadAppBtn' burada GİZLENMİYOR! 
-    // Yani Etsy'den premium olan kişi web sitesinde "Offline App" butonunu görecek ve indirebilecek!
+    const googleBuyBtn = document.getElementById('googlePlayBuyBtn');
+    if (googleBuyBtn) googleBuyBtn.style.display = 'none';
 
   } else {
     // 3. KULLANICI PREMIUM DEĞİLSE
 
-    // Normal web tarayıcısındaysa hediye sistemini kur (Android'de zaten yukarıda gizledik)
     if (!isAndroid) {
       setupGiftingSystem();
     }
 
-    // ANDROID VEYA ETSY İSE: "Why Go Premium" DURSUN, ama içindeki yasaklı şeyleri gizle!
     if (isEtsy || isAndroid) {
-
-      // Sizin harika fikriniz: Yazılar dursun, sadece Popup (Modal) açıldığındaki Gumroad butonunu ve Fiyatı gizle!
       const observer = new MutationObserver(() => {
         const premiumModal = document.getElementById('premiumModal');
         if (premiumModal) {
-          // Modal içindeki Gumroad satın al butonu
           const premiumBuyButton = premiumModal.querySelector('.buy-premium-btn');
-          // Modal içindeki 9.99$ yazan fiyat bölümü
           const pricingSection = premiumModal.querySelector('.launch-pricing');
 
-          // Sadece bu ikisini yok ediyoruz, özellikler listesi (Magic Photos vs.) kalıyor!
           if (premiumBuyButton) premiumBuyButton.style.display = 'none';
           if (pricingSection) pricingSection.style.display = 'none';
         }
       });
       observer.observe(document.body, { childList: true, subtree: true });
     }
+
+    // 4. EĞER ANDROID İSE GOOGLE PLAY SATIN ALMA SİSTEMİNİ ÇALIŞTIR!
+    if (isAndroid) {
+      const googleBuyBtn = document.getElementById('googlePlayBuyBtn');
+      if (googleBuyBtn) {
+        googleBuyBtn.style.display = 'inline-block';
+
+        if ('getDigitalGoodsService' in window) {
+          googleBuyBtn.addEventListener('click', async () => {
+            try {
+              const service = await window.getDigitalGoodsService('https://play.google.com/billing');
+
+              const paymentMethods = [{
+                supportedMethods: "https://play.google.com/billing",
+                data: { sku: "premium_unlock" }
+              }];
+
+              const paymentDetails = {
+                total: { label: "Magical Premium", amount: { currency: "USD", value: "2.99" } }
+              };
+
+              const request = new PaymentRequest(paymentMethods, paymentDetails);
+
+              const paymentResponse = await request.show();
+              const { purchaseToken } = paymentResponse.details;
+
+              localStorage.setItem('isPremium', 'true');
+              alert("Congratulations! 🎉 Premium features have been unlocked.");
+
+              await service.acknowledge(purchaseToken, 'onetime');
+              await paymentResponse.complete('success');
+
+              location.reload();
+
+            } catch (error) {
+              console.error("Ödeme işlemi iptal edildi veya hata oluştu:", error);
+            }
+          });
+        } else {
+          console.log("Google Play Ödeme sistemi bu cihazda hazır değil.");
+        }
+      }
+    }
   }
 });
+// --- KOD BİTİŞİ ---
 // =======================================================
 // ADIM 2: GELİŞMİŞ ORGANİK ANİMASYON MOTORU
 // =======================================================
