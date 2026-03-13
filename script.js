@@ -1931,9 +1931,9 @@ function showPremiumModal() {
     <!-- YENİ FİYAT -->
     <p class="sale-price">🚀 Launch Price: $2.99</p>
     
-    <!-- İndirim mesajı (19.99 - 9.99 = 10$ Kazanç) -->
+    <!-- İndirim mesajı (5.99 - 2.99 = 3$ Kazanç) -->
     <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1.1em; margin-top: 5px;">
-        🔥 50% OFF! You Save $10
+        🔥 50% OFF! You Save $3
     </p>
 </div>
 
