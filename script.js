@@ -1929,7 +1929,7 @@ function showPremiumModal() {
     <p class="regular-price">Regular Price: <span class="crossed">$19.99</span></p> 
     
     <!-- YENİ FİYAT -->
-    <p class="sale-price">🚀 Launch Price: $9.99</p>
+    <p class="sale-price">🚀 Launch Price: $2.99</p>
     
     <!-- İndirim mesajı (19.99 - 9.99 = 10$ Kazanç) -->
     <p class="savings" style="color: #FF6B6B; font-weight: bold; font-size: 1.1em; margin-top: 5px;">
