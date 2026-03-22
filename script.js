@@ -1,3 +1,12 @@
+// =======================================================
+// MOBİL EKRAN TİTREMESİNİ VE KAYMASINI ENGELLEME SİSTEMİ
+// =======================================================
+document.addEventListener('touchmove', function (e) {
+  // Eğer kullanıcının parmağı CANVAS (Boyama alanı) üzerindeyse...
+  if (e.target.tagName === 'CANVAS') {
+    e.preventDefault(); // Ekranın kaymasını ve titremesini GÜÇLÜ BİR ŞEKİLDE durdur!
+  }
+}, { passive: false });
 // =========================================================================
 // MAGICAL COLORING GAME - KONSOLİDE VE ONARILMIŞ SCRIPT (v.FINAL)
 // Bu dosya, tüm oyun fonksiyonlarını, hata düzeltmelerini ve 

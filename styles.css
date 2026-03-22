@@ -3259,3 +3259,26 @@ canvas.editing-mode:active {
 /* Kullanıcı Premium DEĞİLSE butonun üzerine küçük bir kilit ekleyebiliriz */
 /* Not: Bunu JS kontrolü olmadan CSS ile yapmak zordur, 
    o yüzden şimdilik butonların üzerindeki "Yıldız" simgesi (zaten var) yeterlidir. */
+/* ======================================================= */
+/* MOBİL TİTREME VE KAYDIRMA ENGELLEYİCİ (AKILLI VERSİYON) */
+/* ======================================================= */
+
+/* Claude'un harika önerisi: Butonlara tıklayınca çıkan mavi parlaklığı gizler */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Sayfanın sekmelesini (pull-to-refresh) engeller */
+html,
+body {
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+}
+
+/* SADECE boyama alanında (canvas) ekran kaydırmayı KESİNLİKLE YASAKLA */
+canvas {
+    touch-action: none !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
