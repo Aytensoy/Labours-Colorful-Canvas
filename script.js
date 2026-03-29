@@ -1934,8 +1934,8 @@ function showPremiumModal() {
               <!--   YENİ VE DOĞRU FİYATLANDIRMA BÖLÜMÜ      -->
               <!-- ========================================== -->
               <div class="launch-pricing">
-    <!-- Regular fiyatı 19.99 yaptık ki indirim mantıklı dursun -->
-    <p class="regular-price">Regular Price: <span class="crossed">$19.99</span></p> 
+    <!-- Regular fiyatı 5.99 yaptık ki indirim mantıklı dursun -->
+    <p class="regular-price">Regular Price: <span class="crossed">$5.99</span></p> 
     
     <!-- YENİ FİYAT -->
     <p class="sale-price">🚀 Launch Price: $2.99</p>
